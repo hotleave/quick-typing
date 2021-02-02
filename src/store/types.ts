@@ -1,3 +1,6 @@
+import { ShortestPath } from './util/Graph'
+import { TrieNode } from './util/TrieTree'
+
 /**
  * 提示文字
  */
@@ -5,6 +8,14 @@ export interface Word {
   id: number;
   text: string;
   type: string;
+  select?: string;
+  code?: string;
+}
+
+export interface Phrase {
+  text: string;
+  code: string;
+  select: string;
 }
 
 export interface ArticleState {
@@ -20,6 +31,10 @@ export interface ArticleState {
    * 文章内容
    */
   content: string;
+  /**
+   * 最短路径
+   */
+  shortest: ShortestPath<Phrase> | null;
 }
 
 export interface RacingState {
@@ -76,4 +91,8 @@ export interface RacingState {
 export interface QuickTypingState {
   article: ArticleState;
   racing: RacingState;
+  /**
+   * 编码
+   */
+  codings: TrieNode;
 }

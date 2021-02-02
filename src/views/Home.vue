@@ -8,7 +8,9 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import Article from '@/components/Article.vue' // @ is an alias to /src
-import { namespace } from 'vuex-class'
+import { Action, namespace } from 'vuex-class'
+import db from '../store/util/Database'
+import { TrieNode } from '@/store/util/TrieTree'
 
 const article = namespace('article')
 const racing = namespace('racing')
@@ -44,6 +46,9 @@ export default class Home extends Vue {
   @racing.Getter('result')
   private result!: string
 
+  @Action('codings')
+  private codings!: Function
+
   // 输入的内容
   private input = ''
 
@@ -66,6 +71,13 @@ export default class Home extends Vue {
   created () {
     document.addEventListener('keydown', this.handleShortCut)
     document.addEventListener('paste', this.paste)
+    db.codings.get('main').then((root: TrieNode | undefined) => {
+      if (root) {
+        root = TrieNode.convert(root)
+        this.codings(root)
+        console.log('Loaded')
+      }
+    })
   }
 
   destroyed () {
@@ -106,14 +118,17 @@ export default class Home extends Vue {
   handleShortCut (e: KeyboardEvent) {
     switch (e.key) {
       case 'F3':
+        // 重打
         this.retry()
         this.input = ''
         this.accept('')
         break
       case 'Escape':
+        // 暂停
         this.pause()
         break
       case 'Enter':
+        // 恢复
         this.resume()
         setTimeout(this.focusInput, 50)
         break

@@ -1,5 +1,42 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { ArticleState, QuickTypingState, Word } from './types'
+import { ArticleState, Phrase, QuickTypingState, Word } from './types'
+import { Graph, Edge } from './util/Graph'
+import { TrieNode } from './util/TrieTree'
+
+const parse = (input: string, codings: TrieNode) => {
+  const graph = new Graph<Phrase>()
+  const length = input.length
+  let node: TrieNode
+  for (let i = 0; i < length; i++) {
+    node = codings
+    for (let j = i; j < length; j++) {
+      const sub = node.get(input[j])
+      if (!sub) {
+        break
+      } else if (sub.value) {
+        const { text, code, select } = sub.value
+        // console.log('find', node.phrase, node.value, j + 1, i)
+        const edge: Edge<Phrase> = { from: j + 1, to: i, length: code.length, value: { text, code, select } }
+        graph.addEdge(edge)
+
+        node = sub
+      }
+    }
+  }
+
+  // 补全缺失的边
+  const vertices = graph.vertices
+  for (let i = 1; i <= length; i++) {
+    const vertex = vertices[i]
+    if (vertex && vertex.size > 0) {
+      continue
+    }
+
+    const edge: Edge<Phrase> = { from: i, to: i - 1, length: 1, value: { text: input[i - 1], code: input[i - 1], select: '_' } }
+    graph.addEdge(edge)
+  }
+  return graph.shortestPath()
+}
 
 const parseIdentity = (input: string): string => {
   return input.replace(/-+第(\d+)段.*/, '$1')
@@ -26,25 +63,27 @@ const parseArticle = (content: string): ArticleState => {
     identity = lines.pop() || ''
   }
 
-  return { title, content, identity }
+  return { title, content, identity, shortest: null }
 }
 
 const state: ArticleState = {
   title: '',
   identity: '',
-  content: ''
+  content: '',
+  shortest: null
 }
 
 const getters: GetterTree<ArticleState, QuickTypingState> = {
-  words ({ content }, getters, { racing }): Array<Word> {
+  words ({ content, shortest }, getters, { racing }): Array<Word> {
     const input = racing.input
     if (content.length === 0) {
       return []
-    } else if (input.length === 0) {
-      return [{ id: 0, text: state.content, type: 'normal' }]
-    } else if (content === input) {
-      return [{ id: 0, text: state.content, type: 'correct' }]
     }
+    // else if (input.length === 0) {
+    //   return [{ id: 0, text: state.content, type: 'normal' }]
+    // } else if (content === input) {
+    //   return [{ id: 0, text: state.content, type: 'correct' }]
+    // }
 
     const targetWords = content.split('')
     const inputWords = input.split('')
@@ -67,10 +106,25 @@ const getters: GetterTree<ArticleState, QuickTypingState> = {
       }
       text = text.concat(target)
     })
+    words.push({ id: input.length - text.length + 1, text, type: lastCorrect ? 'correct' : 'error' })
 
-    words.push({ id: input.length - text.length, text, type: lastCorrect ? 'correct' : 'error' })
+    // 待输入的内容
     if (input.length < length) {
-      words.push({ id: input.length, text: content.substring(input.length), type: 'normal' })
+      if (shortest == null) {
+        const pending = content.substring(input.length)
+        words.push({ id: input.length, text: pending, type: 'normal' })
+      } else {
+        const { path, vertices } = shortest
+        for (let i = input.length; i < length;) {
+          const edge = vertices[path[i]].get(i)
+          if (!edge) {
+            continue
+          }
+          const { text, code, select } = edge.value
+          words.push({ id: i, text, type: 'normal', code, select })
+          i = path[i]
+        }
+      }
     }
 
     return words
@@ -80,13 +134,23 @@ const getters: GetterTree<ArticleState, QuickTypingState> = {
 const mutations: MutationTree<ArticleState> = {
   load (state, article: ArticleState) {
     Object.assign(state, article)
+  },
+
+  shortest (state, shortest) {
+    state.shortest = shortest
   }
 }
 
 const actions: ActionTree<ArticleState, QuickTypingState> = {
-  loadArticle ({ commit }, content: string): void {
+  loadArticle ({ commit, rootState }, content: string): void {
     const article = parseArticle(content)
     commit('load', article)
+
+    setTimeout(() => {
+      const { codings } = rootState
+      const shortest = parse(article.content, codings)
+      commit('shortest', shortest)
+    })
 
     // 初始化
     this.dispatch('racing/init', null, { root: true })
