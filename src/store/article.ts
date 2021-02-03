@@ -1,9 +1,13 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
 import { ArticleState, Phrase, QuickTypingState, Word } from './types'
-import { Graph, Edge } from './util/Graph'
+import { Graph, Edge, ShortestPath } from './util/Graph'
 import { TrieNode } from './util/TrieTree'
 
-const parse = (input: string, codings: TrieNode) => {
+const parse = (input: string, codings: TrieNode): ShortestPath<Phrase> | null => {
+  if (!codings) {
+    return null
+  }
+
   const graph = new Graph<Phrase>()
   const length = input.length
   let node: TrieNode
@@ -15,12 +19,11 @@ const parse = (input: string, codings: TrieNode) => {
         break
       } else if (sub.value) {
         const { text, code, select } = sub.value
-        // console.log('find', node.phrase, node.value, j + 1, i)
+        // console.log('find', text, code, j + 1, i)
         const edge: Edge<Phrase> = { from: j + 1, to: i, length: code.length, value: { text, code, select } }
         graph.addEdge(edge)
-
-        node = sub
       }
+      node = sub
     }
   }
 
@@ -78,12 +81,9 @@ const getters: GetterTree<ArticleState, QuickTypingState> = {
     const input = racing.input
     if (content.length === 0) {
       return []
+    } else if (content === input) {
+      return [{ id: 0, text: state.content, type: 'correct' }]
     }
-    // else if (input.length === 0) {
-    //   return [{ id: 0, text: state.content, type: 'normal' }]
-    // } else if (content === input) {
-    //   return [{ id: 0, text: state.content, type: 'correct' }]
-    // }
 
     const targetWords = content.split('')
     const inputWords = input.split('')
@@ -100,19 +100,23 @@ const getters: GetterTree<ArticleState, QuickTypingState> = {
       const target = targetWords[i]
       const correct = v === target
       if (correct !== lastCorrect) {
-        words.push({ id: i, text, type: lastCorrect ? 'correct' : 'error' })
+        words.push({ id: i - text.length, text, type: lastCorrect ? 'correct' : 'error' })
         text = ''
         lastCorrect = correct
       }
       text = text.concat(target)
     })
-    words.push({ id: input.length - text.length + 1, text, type: lastCorrect ? 'correct' : 'error' })
+
+    if (text.length > 0) {
+      words.push({ id: input.length - text.length, text, type: lastCorrect ? 'correct' : 'error' })
+    }
 
     // 待输入的内容
     if (input.length < length) {
       if (shortest == null) {
+        // 未计算最短路径，直接显示
         const pending = content.substring(input.length)
-        words.push({ id: input.length, text: pending, type: 'normal' })
+        words.push({ id: input.length, text: pending, type: 'pending' })
       } else {
         const { path, vertices } = shortest
         for (let i = input.length; i < length;) {
@@ -121,7 +125,7 @@ const getters: GetterTree<ArticleState, QuickTypingState> = {
             continue
           }
           const { text, code, select } = edge.value
-          words.push({ id: i, text, type: 'normal', code, select })
+          words.push({ id: i, text, type: `pending${code.replace(select, '').length}`, code, select })
           i = path[i]
         }
       }

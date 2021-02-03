@@ -19,9 +19,9 @@ export class TrieNode {
     const node = new TrieNode()
     node.id = from.id
     node.value = from.value
-    node.children = new Map<string, TrieNode>()
 
     if (from.children) {
+      node.children = new Map<string, TrieNode>()
       for (const entry of from.children.entries()) {
         node.children.set(entry[0], this.convert(entry[1]))
       }

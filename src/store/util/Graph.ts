@@ -39,6 +39,18 @@ export interface ShortestPath<v> {
   vertices: Array<Map<number, Edge<v>>>;
 }
 
+// const getMinIndex = (input: Array<number>): number => {
+//   let min = Infinity
+//   let index = 0
+//   for (let i = 0; i < input.length; i++) {
+//     if (input[i] < min) {
+//       min = input[i]
+//       index = i
+//     }
+//   }
+//   return index
+// }
+
 /**
  * 有向无环图
  */

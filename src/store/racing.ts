@@ -10,10 +10,10 @@ const state: RacingState = {
   backspace: 0,
   enter: 0,
   replace: 0,
-  error: 0,
   selective: 0,
   phrase: 0,
-  retry: 1
+  retry: 1,
+  timer: 0
 }
 
 const getters: GetterTree<RacingState, QuickTypingState> = {
@@ -28,18 +28,23 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   },
 
   // 打字速度
-  typeSpeed (state, getters, { article }): string {
+  typeSpeed (state, getters): string {
     const used = getters.usedTime
     if (used === 0) {
       return (0).toFixed(2)
     }
 
-    return (article.content.length / used * 1000 * 60).toFixed(2)
+    return (state.input.length / used * 1000 * 60).toFixed(2)
   },
 
   // 码长
-  codeLength ({ keys }, getters, { article }): string {
-    return (keys.length / article.content.length).toFixed(2)
+  codeLength ({ keys, input }): string {
+    return input.length > 0 ? (keys.length / input.length).toFixed(2) : '0.00'
+  },
+
+  // 理论码长
+  idealCodeLength (state, getters, { article }): string {
+    return article.shortest ? (article.shortest.distance / article.content.length).toFixed(2) : '0.00'
   },
 
   // 打词率
@@ -47,9 +52,36 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
     return (phrase / article.content.length * 100).toFixed(2)
   },
 
+  // 键准
+  accuracy ({ keys, backspace, replace }, getters): string {
+    // 总键数
+    const total = keys.length
+    // 有效键数 = 总数 - 退格数 - (回改数 * 码长)
+    const correct = total - backspace - (replace * parseFloat(getters.codeLength))
+    return (correct / total * 100).toFixed(2)
+  },
+
   // 比赛结果
   result (state, getters, { article }): string {
-    return `第${article.identity}段 速度${getters.typeSpeed} 击键${getters.hitSpeed} 键数${state.keys.length} 码长${getters.codeLength} 字数${article.content.length} 错字${state.error} 退格${state.backspace} 回改${state.replace} 打词${state.phrase} 打词率${getters.phraseRate}% 重打${state.retry}`
+    const statistics = [
+      `第${article.identity}段`,
+      `速度${getters.typeSpeed}`,
+      `击键${getters.hitSpeed}`,
+      `键准${getters.accuracy}%`,
+      `码长${getters.codeLength}`,
+      `理想码长${getters.idealCodeLength}`,
+      `字数${article.content.length}`,
+      `打词${state.phrase}`,
+      `打词率${getters.phraseRate}%`,
+      `选重${state.selective}`,
+      `回改${state.replace}`,
+      `键数${state.keys.length}`,
+      `退格${state.backspace}`,
+      `回车${state.enter}`,
+      `重打${state.retry}`
+    ]
+
+    return statistics.join(' ')
   },
 
   // 已用时间
@@ -81,8 +113,8 @@ const mutations: MutationTree<RacingState> = {
 
   start (state): void {
     state.status = 'typing'
-    state.time = 0
     state.start = new Date().getTime()
+    state.time = 0
   },
 
   pause (state): void {
@@ -91,8 +123,10 @@ const mutations: MutationTree<RacingState> = {
   },
 
   resume (state): void {
-    state.status = 'typing'
-    state.start = new Date().getTime()
+    if (state.status === 'pause') {
+      state.status = 'typing'
+      state.start = new Date().getTime()
+    }
   },
 
   finish (state): void {
@@ -117,9 +151,9 @@ const mutations: MutationTree<RacingState> = {
     })
   },
 
-  typing (state, key): void {
-    let typed = key
-    switch (key) {
+  typing (state, e): void {
+    let typed = e.key
+    switch (typed) {
       case 'Shift':
         typed = '⇧'
         break
@@ -162,6 +196,11 @@ const mutations: MutationTree<RacingState> = {
     }
 
     state.keys += typed
+
+    // 判断选重
+    if (e.isComposing && ';\'23456789'.indexOf(e.key) >= 0) {
+      state.selective++
+    }
   },
 
   accept (state, input: string): void {
@@ -174,17 +213,37 @@ const mutations: MutationTree<RacingState> = {
 
   phrase (state, count: number): void {
     state.phrase += count
+  },
+
+  elapse (state, time): void {
+    state.time += time
+    state.start += time
+  },
+
+  timer (state, id): void {
+    state.timer = id
   }
 }
 
 const actions: ActionTree<RacingState, QuickTypingState> = {
-  init ({ commit }): void {
+  init ({ commit, state }): void {
     commit('init')
+
+    if (state.status === 'typing') {
+      clearInterval(state.timer)
+    }
   },
 
   accept ({ commit, state, rootState }, content: string): void {
     if (state.status === 'init') {
       commit('start')
+      const interval = 1000
+      const id = setInterval(() => {
+        if (state.status === 'typing') {
+          commit('elapse', interval)
+        }
+      }, interval)
+      commit('timer', id)
     }
 
     const { article } = rootState
@@ -201,7 +260,8 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
 
     commit('accept', content)
 
-    if (content.length === article.content.length) {
+    if (content === article.content) {
+      clearInterval(state.timer)
       commit('finish')
     }
   }

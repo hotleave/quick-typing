@@ -1,8 +1,8 @@
 <template>
   <div class="article">
-    <div v-for="word in words" :key="word.id" :class="[word.type, 'key' + (word.code ? word.code.length - 1 : '')]">
+    <div v-for="word in words" :key="word.id" :class="word.type">
       <span>{{ word.text }}</span>
-      <label>{{ word.code }}</label>
+      <label v-if="word.code">{{ word.code }}</label>
     </div>
   </div>
 </template>
@@ -23,49 +23,55 @@ export default class Article extends Vue {
 
 <style lang="scss" scoped>
 .article {
-  font-size: 3em;
+  font-size: 3rem;
   width: 80%;
-  height: 400px;
+  min-width: 10rem;
+  height: 24rem;
   margin: 0 auto;
-  border: 1px solid #cccccc;
-  border-radius: 4px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
   overflow: auto;
+  letter-spacing: 3px;
 
   div {
     display: inline-grid;
-    text-align: center;
-    margin-right: 5px;
-  }
 
-  label {
-    margin-top: -0.5em;
-    font-size: 0.5em;
-  }
-
-  .normal {
-    background-color: transparent;
-
-    span {
-      text-decoration: underline;
+    label {
+      display: inline-block;
+      width: 80%;
+      margin: 0 auto;
+      font-size: 0.3rem;
+      color: #aaa;
+      letter-spacing: 1px;
+      border-top: 1px solid #aaa;
+      text-align: center;
     }
   }
-  .normal.key1 {
-    color: red;
+
+  // 待打
+  .pending1 {
+    color: #f66;
   }
-  .normal.key2 {
-    color: rgb(255, 217, 0);
+  .pending2 {
+    color: #cc0;
   }
-  .normal.key3 {
-    color: blue;
+  .pending3 {
+    color: #39C;
   }
-  .normal.key4 {
-    color: #333
+  .pending, .pending4 {
+    color: #999;
+  }
+
+  // 已打
+  .correct, .error {
+    display: inline;
+    line-height: 1.3rem;
   }
   .correct {
-    background-color: #cccccc;
+    background-color: #ccc;
   }
   .error {
-    background-color: red;
+    background-color: #f66;
   }
 }
 </style>

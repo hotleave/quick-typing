@@ -1,6 +1,12 @@
 <template>
   <div class="home">
-    <Article/>
+    <div class="info">
+      <label>速度：<span>{{ typeSpeed }}</span></label>
+      <label>击键：<span>{{ hitSpeed }}</span></label>
+      <label>码长：<span>{{ codeLength }}</span></label>
+      <label>理论码长：<span>{{ idealCodeLength }}</span></label>
+    </div>
+    <Article ref="article"/>
     <textarea id="typing" @keydown="keydown" @input="accept(input)" :disabled="status !== 'typing' && status !== 'init'" v-model="input" autofocus="true"></textarea>
   </div>
 </template>
@@ -25,6 +31,9 @@ export default class Home extends Vue {
   @article.Action('loadArticle')
   private loadArticle!: Function
 
+  @article.State('content')
+  private content!: string
+
   @racing.State('status')
   private status!: string
 
@@ -45,6 +54,18 @@ export default class Home extends Vue {
 
   @racing.Getter('result')
   private result!: string
+
+  @racing.Getter('typeSpeed')
+  private typeSpeed!: string
+
+  @racing.Getter('hitSpeed')
+  private hitSpeed!: string
+
+  @racing.Getter('codeLength')
+  private codeLength!: string
+
+  @racing.Getter('idealCodeLength')
+  private idealCodeLength!: string
 
   @Action('codings')
   private codings!: Function
@@ -68,6 +89,18 @@ export default class Home extends Vue {
     }
   }
 
+  @Watch('input')
+  inputUpdate () {
+    const el = (this.$refs.article as Vue).$el
+    const scrollLength = el.scrollHeight - el.clientHeight
+    if (scrollLength > 0) {
+      const progress = this.input.length / this.content.length
+      const scrollTop = progress * scrollLength
+
+      el.scrollTop = Math.max(scrollTop - 50 * (1 - progress), 0)
+    }
+  }
+
   created () {
     document.addEventListener('keydown', this.handleShortCut)
     document.addEventListener('paste', this.paste)
@@ -75,7 +108,7 @@ export default class Home extends Vue {
       if (root) {
         root = TrieNode.convert(root)
         this.codings(root)
-        console.log('Loaded')
+        console.log('Trie tree loaded')
       }
     })
   }
@@ -89,12 +122,12 @@ export default class Home extends Vue {
    * Textarea 按键监听
    */
   keydown (e: KeyboardEvent) {
-    // console.log(e)
+    // console.log(e, e.isComposing && ';\'23456789'.indexOf(e.key) >= 0)
     // if (!e.metaKey && !e.ctrlKey) {
     //   e.stopPropagation()
     // }
 
-    this.typing(e.key)
+    this.typing(e)
   }
 
   /**
@@ -144,12 +177,13 @@ export default class Home extends Vue {
 
 <style lang="scss" scoped>
 #typing {
-  font-size: 3em;
+  font-size: 3rem;
   width: 80%;
-  height: 400px;
+  height: 24rem;
   display: block;
-  margin: .5em auto;
+  margin: .5rem auto;
   border: 1px solid #cccccc;
-  border-radius: 4px;
+  border-radius: 5px;
+  letter-spacing: 3px;
 }
 </style>

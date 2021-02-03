@@ -71,10 +71,6 @@ export interface RacingState {
    */
   replace: number;
   /**
-   * 错字
-   */
-  error: number;
-  /**
    * 选重
    */
   selective: number;
@@ -86,6 +82,10 @@ export interface RacingState {
    * 重打
    */
   retry: number;
+  /**
+   * 计时器
+   */
+  timer: number;
 }
 
 export interface QuickTypingState {
