@@ -69,6 +69,51 @@ const parseArticle = (content: string): ArticleState => {
   return { title, content, identity, shortest: null }
 }
 
+const check = (input: string, target: string, words: Array<Word>): void => {
+  const length = target.length
+  const targetWords = target.split('')
+  const inputWords = input.split('')
+  let lastCorrect = targetWords[0] === inputWords[0]
+  let text = ''
+
+  inputWords.forEach((v, i) => {
+    if (i >= length) {
+      return
+    }
+
+    const target = targetWords[i]
+    const correct = v === target
+
+    if (correct !== lastCorrect) {
+      words.push({ id: i - text.length, text, type: lastCorrect ? 'correct' : 'error', code: ' ' })
+      text = ''
+      lastCorrect = correct
+    }
+    text = text.concat(target)
+  })
+
+  if (text.length > 0) {
+    words.push({ id: input.length - text.length, text, type: lastCorrect ? 'correct' : 'error', code: ' ' })
+  }
+}
+
+const addWord = (input: string, edge: Edge<Phrase>, words: Array<Word>): number => {
+  const { from, to, value } = edge
+  const { text, code, select } = value
+
+  if (input.length <= to) {
+    // 输入长度小于当前词首，未打
+    const type = `pending${code.replace(select, '').length}`
+    words.push({ id: to, text, type, code, select })
+    return -1
+  } else {
+    // 输入长度大于当前词尾，已打, 否则部分已打
+    const source = input.length >= from ? text : input.substring(to)
+    check(source, text, words)
+    return input.length
+  }
+}
+
 const state: ArticleState = {
   title: '',
   identity: '',
@@ -77,57 +122,33 @@ const state: ArticleState = {
 }
 
 const getters: GetterTree<ArticleState, QuickTypingState> = {
+  // 长度
+  length ({ content }): number {
+    return content.length
+  },
+
+  // 拆分开的字词
   words ({ content, shortest }, getters, { racing }): Array<Word> {
     const input = racing.input
     if (content.length === 0) {
       return []
-    } else if (content === input) {
-      return [{ id: 0, text: state.content, type: 'correct' }]
     }
 
-    const targetWords = content.split('')
-    const inputWords = input.split('')
-    const length = targetWords.length
-    let lastCorrect = targetWords[0] === inputWords[0]
-    let text = ''
+    const length = content.length
     const words: Array<Word> = []
 
-    inputWords.forEach((v, i) => {
-      if (i >= length) {
-        return
-      }
-
-      const target = targetWords[i]
-      const correct = v === target
-      if (correct !== lastCorrect) {
-        words.push({ id: i - text.length, text, type: lastCorrect ? 'correct' : 'error' })
-        text = ''
-        lastCorrect = correct
-      }
-      text = text.concat(target)
-    })
-
-    if (text.length > 0) {
-      words.push({ id: input.length - text.length, text, type: lastCorrect ? 'correct' : 'error' })
-    }
-
-    // 待输入的内容
-    if (input.length < length) {
-      if (shortest == null) {
-        // 未计算最短路径，直接显示
-        const pending = content.substring(input.length)
-        words.push({ id: input.length, text: pending, type: 'pending' })
-      } else {
-        const { path, vertices } = shortest
-        for (let i = input.length; i < length;) {
-          const edge = vertices[path[i]].get(i)
-          if (!edge) {
-            continue
-          }
-          const { text, code, select } = edge.value
-          words.push({ id: i, text, type: `pending${code.replace(select, '').length}`, code, select })
-          i = path[i]
+    if (shortest === null) {
+      const pending = content.substring(input.length)
+      words.push({ id: input.length, text: pending, type: 'pending' })
+    } else {
+      const { path, vertices } = shortest
+      for (let i = 0; i < length;) {
+        const edge = vertices[path[i]].get(i)
+        if (!edge) {
+          break
         }
+        const next = addWord(input, edge, words)
+        i = next === -1 ? path[i] : next
       }
     }
 

@@ -9,29 +9,47 @@
 
 <script lang="ts">
 import { Word } from '@/store/types'
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const article = namespace('article')
+const racing = namespace('racing')
 
 @Component
 export default class Article extends Vue {
-    @article.Getter('words')
-    private words!: [Word]
+  @article.Getter('words')
+  private words!: Array<Word>
+
+  @racing.Getter('progress')
+  private progress!: number
+
+  /**
+   * 自动调整滚动条位置
+   */
+  @Watch('progress')
+  autoScroll () {
+    const el = this.$el
+    const scrollLength = el.scrollHeight - el.clientHeight
+    if (scrollLength > 0) {
+      const scrollTop = this.progress * scrollLength
+
+      el.scrollTop = Math.max(scrollTop - 192 * (1 - this.progress), 0)
+    }
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 .article {
   font-size: 3rem;
-  width: 80%;
-  min-width: 10rem;
   height: 24rem;
-  margin: 0 auto;
+  width: 100%;
+  padding: .5rem .5rem 3.5rem .5rem;
   border: 1px solid #ccc;
   border-radius: 5px;
   overflow: auto;
   letter-spacing: 3px;
+  margin-bottom: .5rem;
 
   div {
     display: inline-grid;
@@ -63,10 +81,10 @@ export default class Article extends Vue {
   }
 
   // 已打
-  .correct, .error {
-    display: inline;
-    line-height: 1.3rem;
-  }
+  // .correct, .error {
+  //   display: inline;
+  //   line-height: 5.1rem;
+  // }
   .correct {
     background-color: #ccc;
   }

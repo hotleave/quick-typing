@@ -86,6 +86,14 @@ export interface RacingState {
    * 计时器
    */
   timer: number;
+  /**
+   * 左手
+   */
+  leftHand: number;
+  /**
+   * 右手
+   */
+  rightHand: number;
 }
 
 export interface QuickTypingState {

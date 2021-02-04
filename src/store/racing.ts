@@ -1,13 +1,34 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
 import { QuickTypingState, RacingState } from './types'
 
-const state: RacingState = {
+const leftHandKeys = '`12345~!@#$%⇆qwertasdfgzxcvb'
+
+const formatTime = (time: number): string => {
+  let total = time
+  if (total < 60) {
+    return `${time.toFixed(3)}″`
+  }
+
+  const seconds = total % 60
+  total = (total - seconds) / 60
+  if (total < 60) {
+    return `${total.toFixed(0)}′${seconds.toFixed(3)}″`
+  }
+
+  const minutes = total % 60
+  total = (total - minutes) / 60
+  return `${total.toFixed(0)}:${minutes.toFixed(0)}′${seconds.toFixed(3)}″`
+}
+
+const init = {
   status: 'wait',
   input: '',
-  time: 0,
   keys: '',
+  time: 0,
   start: 0,
   backspace: 0,
+  leftHand: 0,
+  rightHand: 0,
   enter: 0,
   replace: 0,
   selective: 0,
@@ -15,6 +36,8 @@ const state: RacingState = {
   retry: 1,
   timer: 0
 }
+
+const state: RacingState = Object.assign({}, init)
 
 const getters: GetterTree<RacingState, QuickTypingState> = {
   // 击键速度
@@ -24,7 +47,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       return (0).toFixed(2)
     }
 
-    return (keys.length / used * 1000).toFixed(2)
+    return (keys.length / used).toFixed(2)
   },
 
   // 打字速度
@@ -34,7 +57,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       return (0).toFixed(2)
     }
 
-    return (state.input.length / used * 1000 * 60).toFixed(2)
+    return (state.input.length / used * 60).toFixed(2)
   },
 
   // 码长
@@ -61,13 +84,39 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
     return (correct / total * 100).toFixed(2)
   },
 
+  // 键法
+  balance ({ leftHand, rightHand }): string {
+    const total = leftHand + rightHand
+    const delta = Math.abs(leftHand - rightHand)
+
+    return (100 - delta / total * 100).toFixed(2)
+  },
+
+  // 已用时间
+  usedTime ({ status, time, start }): number {
+    if (status !== 'typing') {
+      return time / 1000
+    } else {
+      return (time + new Date().getTime() - start) / 1000
+    }
+  },
+
+  // 进度
+  progress ({ input }, getters, { article }): number {
+    return input.length / article.content.length
+  },
+
   // 比赛结果
   result (state, getters, { article }): string {
     const statistics = [
       `第${article.identity}段`,
       `速度${getters.typeSpeed}`,
       `击键${getters.hitSpeed}`,
+      `用时${formatTime(getters.usedTime)}`,
       `键准${getters.accuracy}%`,
+      `键法${getters.balance}%`,
+      `左${state.leftHand}`,
+      `右${state.rightHand}`,
       `码长${getters.codeLength}`,
       `理想码长${getters.idealCodeLength}`,
       `字数${article.content.length}`,
@@ -78,43 +127,29 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       `键数${state.keys.length}`,
       `退格${state.backspace}`,
       `回车${state.enter}`,
-      `重打${state.retry}`
+      `重打${state.retry}`,
+      'QuickTyping-0.1.0-alpha'
     ]
 
     return statistics.join(' ')
-  },
-
-  // 已用时间
-  usedTime ({ status, time, start }): number {
-    if (status !== 'typing') {
-      return time
-    } else {
-      return time + (new Date().getTime() - start)
-    }
   }
 }
 
 const mutations: MutationTree<RacingState> = {
   init (state): void {
-    Object.assign(state, {
-      status: 'init',
-      time: 0,
-      keys: '',
-      start: 0,
-      backspace: 0,
-      enter: 0,
-      replace: 0,
-      error: 0,
-      selective: 0,
-      phrase: 0,
-      retry: 1
-    })
+    Object.assign(state, init)
+    state.status = 'init'
   },
 
   start (state): void {
     state.status = 'typing'
-    state.start = new Date().getTime()
+    state.start = Date.now()
     state.time = 0
+  },
+
+  finish (state): void {
+    state.status = 'finished'
+    state.time += Date.now() - state.start
   },
 
   pause (state): void {
@@ -123,32 +158,16 @@ const mutations: MutationTree<RacingState> = {
   },
 
   resume (state): void {
-    if (state.status === 'pause') {
-      state.status = 'typing'
-      state.start = new Date().getTime()
-    }
-  },
-
-  finish (state): void {
-    state.status = 'finished'
-    state.time += new Date().getTime() - state.start
+    state.status = 'typing'
+    state.start = Date.now()
   },
 
   // 重打
   retry (state): void {
-    Object.assign(state, {
-      status: 'init',
-      time: 0,
-      keys: '',
-      start: 0,
-      backspace: 0,
-      enter: 0,
-      replace: 0,
-      error: 0,
-      selective: 0,
-      phrase: 0,
-      retry: state.retry + 1
-    })
+    const retry = state.retry + 1
+    Object.assign(state, init)
+    state.status = 'init'
+    state.retry = retry
   },
 
   typing (state, e): void {
@@ -197,6 +216,12 @@ const mutations: MutationTree<RacingState> = {
 
     state.keys += typed
 
+    if (leftHandKeys.indexOf(typed) >= 0) {
+      state.leftHand++
+    } else {
+      state.rightHand++
+    }
+
     // 判断选重
     if (e.isComposing && ';\'23456789'.indexOf(e.key) >= 0) {
       state.selective++
@@ -227,10 +252,22 @@ const mutations: MutationTree<RacingState> = {
 
 const actions: ActionTree<RacingState, QuickTypingState> = {
   init ({ commit, state }): void {
-    commit('init')
-
     if (state.status === 'typing') {
       clearInterval(state.timer)
+    }
+
+    commit('init')
+  },
+
+  retry ({ commit, state }) {
+    if (state.status !== 'init') {
+      commit('retry')
+    }
+  },
+
+  resume ({ commit, state }) {
+    if (state.status === 'pause') {
+      commit('resume')
     }
   },
 
