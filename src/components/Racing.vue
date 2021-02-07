@@ -88,8 +88,8 @@ export default class Racing extends Vue {
 }
 
 textarea {
-  font-size: 3rem;
-  height: 24rem;
+  font-size: 2rem;
+  height: 16rem;
   width: 100%;
   padding: .5rem;
   border: 1px solid #cccccc;

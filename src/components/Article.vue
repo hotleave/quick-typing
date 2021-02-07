@@ -2,7 +2,7 @@
   <div class="article">
     <div v-for="word in words" :key="word.id" :class="word.type">
       <span>{{ word.text }}</span>
-      <label v-if="word.code">{{ word.code }}</label>
+      <label v-if="word.select && word.select !== '_'">{{ word.select }}</label>
     </div>
   </div>
 </template>
@@ -27,13 +27,21 @@ export default class Article extends Vue {
    * 自动调整滚动条位置
    */
   @Watch('progress')
-  autoScroll () {
+  autoScroll (progress: number) {
     const el = this.$el
-    const scrollLength = el.scrollHeight - el.clientHeight
-    if (scrollLength > 0) {
-      const scrollTop = this.progress * scrollLength
+    const { scrollHeight, clientHeight } = el
+    const fixed = 150
+    if (scrollHeight > clientHeight) {
+      let scrollTop = scrollHeight * progress
+      if (scrollTop <= fixed) {
+        scrollTop = 0
+      } else if (scrollHeight - scrollTop > clientHeight) {
+        scrollTop -= fixed
+      } else {
+        scrollTop -= fixed * progress
+      }
 
-      el.scrollTop = Math.max(scrollTop - 192 * (1 - this.progress), 0)
+      el.scrollTop = scrollTop
     }
   }
 }
@@ -41,15 +49,16 @@ export default class Article extends Vue {
 
 <style lang="scss" scoped>
 .article {
-  font-size: 3rem;
-  height: 24rem;
+  font-size: 2rem;
+  height: 16rem;
   width: 100%;
-  padding: .5rem .5rem 3.5rem .5rem;
+  padding: .5rem;
   border: 1px solid #ccc;
   border-radius: 5px;
   overflow: auto;
   letter-spacing: 3px;
   margin-bottom: .5rem;
+  color: #999;
 
   div {
     display: inline-grid;
@@ -58,7 +67,7 @@ export default class Article extends Vue {
       display: inline-block;
       width: 80%;
       margin: 0 auto;
-      font-size: 0.3rem;
+      font-size: 0.6rem;
       color: #aaa;
       letter-spacing: 1px;
       border-top: 1px solid #aaa;
@@ -67,24 +76,31 @@ export default class Article extends Vue {
   }
 
   // 待打
-  .pending1 {
+  .code1 {
     color: #f66;
   }
-  .pending2 {
+  .code2 {
     color: #cc0;
   }
-  .pending3 {
+  .code3 {
     color: #39C;
   }
-  .pending, .pending4 {
-    color: #999;
+  .code4 {
+    color: #ccc;
+  }
+  :nth-child(2n) {
+    font-weight: bold;
+  }
+
+  .correct>span, .code1>span:last-child, .code2>span:last-child, .code3>span:last-child, .code4>span:last-child {
+    height: 4rem;
   }
 
   // 已打
-  // .correct, .error {
-  //   display: inline;
-  //   line-height: 5.1rem;
-  // }
+  .correct, .error {
+    color: #fff;
+    font-weight: normal;
+  }
   .correct {
     background-color: #ccc;
   }

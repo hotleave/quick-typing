@@ -58,7 +58,7 @@ const parseArticle = (content: string): ArticleState => {
     }
   }
 
-  if (lines.length >= 3) {
+  if (identity && lines.length >= 3) {
     title = lines[0]
     content = lines[1]
   } else if (lines.length === 2) {
@@ -69,7 +69,7 @@ const parseArticle = (content: string): ArticleState => {
   return { title, content, identity, shortest: null }
 }
 
-const check = (input: string, target: string, words: Array<Word>): void => {
+const check = (index: number, input: string, target: string, words: Array<Word>): void => {
   const length = target.length
   const targetWords = target.split('')
   const inputWords = input.split('')
@@ -85,7 +85,7 @@ const check = (input: string, target: string, words: Array<Word>): void => {
     const correct = v === target
 
     if (correct !== lastCorrect) {
-      words.push({ id: i - text.length, text, type: lastCorrect ? 'correct' : 'error', code: ' ' })
+      words.push({ id: index + i - text.length, text, type: lastCorrect ? 'correct' : 'error' })
       text = ''
       lastCorrect = correct
     }
@@ -93,7 +93,7 @@ const check = (input: string, target: string, words: Array<Word>): void => {
   })
 
   if (text.length > 0) {
-    words.push({ id: input.length - text.length, text, type: lastCorrect ? 'correct' : 'error', code: ' ' })
+    words.push({ id: index + input.length - text.length, text, type: lastCorrect ? 'correct' : 'error' })
   }
 }
 
@@ -103,14 +103,15 @@ const addWord = (input: string, edge: Edge<Phrase>, words: Array<Word>): number 
 
   if (input.length <= to) {
     // 输入长度小于当前词首，未打
-    const type = `pending${code.replace(select, '').length}`
+    const type = `code${code.replace(select, '').length}`
     words.push({ id: to, text, type, code, select })
-    return -1
+    return 0
   } else {
     // 输入长度大于当前词尾，已打, 否则部分已打
-    const source = input.length >= from ? text : input.substring(to)
-    check(source, text, words)
-    return input.length
+    const length = input.length
+    const source = input.substring(to, Math.min(from, length))
+    check(to, source, text, words)
+    return length > from ? 0 : length
   }
 }
 
@@ -148,7 +149,7 @@ const getters: GetterTree<ArticleState, QuickTypingState> = {
           break
         }
         const next = addWord(input, edge, words)
-        i = next === -1 ? path[i] : next
+        i = next === 0 ? path[i] : next
       }
     }
 
@@ -169,6 +170,7 @@ const mutations: MutationTree<ArticleState> = {
 const actions: ActionTree<ArticleState, QuickTypingState> = {
   loadArticle ({ commit, rootState }, content: string): void {
     const article = parseArticle(content)
+    console.log(article)
     commit('load', article)
 
     setTimeout(() => {
