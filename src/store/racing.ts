@@ -1,5 +1,6 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { QuickTypingState, RacingState } from './types'
+import { Phrase, QuickTypingState, RacingState } from './types'
+import { Edge } from './util/Graph'
 
 const leftHandKeys = '`12345~!@#$%⇆qwertasdfgzxcvb'
 
@@ -18,6 +19,11 @@ const formatTime = (time: number): string => {
   const minutes = total % 60
   total = (total - minutes) / 60
   return `${total.toFixed(0)}:${minutes.toFixed(0)}′${seconds.toFixed(3)}″`
+}
+
+const codeHint = (edge: Edge<Phrase>): string => {
+  const { code, text, select } = edge.value
+  return `${text}: ${code}${select}`
 }
 
 const init = {
@@ -106,6 +112,28 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
     return input.length / article.content.length
   },
 
+  // 编码提示
+  hint ({ input }, getters, { article }): string {
+    const { shortest } = article
+    const length = input.length
+    if (!shortest || length === shortest.path.length) {
+      return '-'
+    }
+
+    const { path, vertices } = shortest
+    const edge = vertices[path[length]].get(length)
+    if (!edge) {
+      return '-'
+    }
+
+    const single = vertices[length + 1].get(length)
+    if (!single || edge.value.text.length === 1) {
+      return codeHint(edge)
+    }
+
+    return `${codeHint(edge)} ${codeHint(single)}`
+  },
+
   // 比赛结果
   result (state, getters, { article }): string {
     const statistics = [
@@ -118,7 +146,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       `左${state.leftHand}`,
       `右${state.rightHand}`,
       `码长${getters.codeLength}`,
-      `理想码长${getters.idealCodeLength}`,
+      `理论码长${getters.idealCodeLength}`,
       `字数${article.content.length}`,
       `打词${state.phrase}`,
       `打词率${getters.phraseRate}%`,

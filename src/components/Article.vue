@@ -2,7 +2,7 @@
   <div class="article">
     <div v-for="word in words" :key="word.id" :class="word.type">
       <span>{{ word.text }}</span>
-      <label v-if="word.select && word.select !== '_'">{{ word.select }}</label>
+      <label v-if="word.select">{{ word.select }}</label>
     </div>
   </div>
 </template>

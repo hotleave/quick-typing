@@ -2,6 +2,7 @@ import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
 import { ArticleState, Phrase, QuickTypingState, Word } from './types'
 import { Graph, Edge, ShortestPath } from './util/Graph'
 import { TrieNode } from './util/TrieTree'
+import { punctuation } from './util/punctuation'
 
 const parse = (input: string, codings: TrieNode): ShortestPath<Phrase> | null => {
   if (!codings) {
@@ -9,18 +10,28 @@ const parse = (input: string, codings: TrieNode): ShortestPath<Phrase> | null =>
   }
 
   const graph = new Graph<Phrase>()
-  const length = input.length
+  const inputLength = input.length
   let node: TrieNode
-  for (let i = 0; i < length; i++) {
+  for (let i = 0; i < inputLength; i++) {
     node = codings
-    for (let j = i; j < length; j++) {
+    for (let j = i; j < inputLength; j++) {
       const sub = node.get(input[j])
       if (!sub) {
         break
       } else if (sub.value) {
-        const { text, code, select } = sub.value
-        // console.log('find', text, code, j + 1, i)
-        const edge: Edge<Phrase> = { from: j + 1, to: i, length: code.length, value: { text, code, select } }
+        const { text, code, auto } = sub.value
+        let { select, length } = sub.value
+        if (auto && length < 4 && j + 1 < inputLength && punctuation.has(input[j + 1])) {
+          // 该字/词码长小于4的首选，且后面的字符是标点，可自动顶屏，无须再用空格上屏
+          length -= select.length
+          select = ''
+          // console.log('found', text, code, select, j + 1, i)
+        } else if (auto && length === 4 && j + 1 === inputLength) {
+          // 该字/词为4码首选，且为最后一个，需要补充空格
+          length += 1
+          select = '_'
+        }
+        const edge: Edge<Phrase> = { from: j + 1, to: i, length, value: { text, code, select } }
         graph.addEdge(edge)
       }
       node = sub
@@ -29,13 +40,15 @@ const parse = (input: string, codings: TrieNode): ShortestPath<Phrase> | null =>
 
   // 补全缺失的边
   const vertices = graph.vertices
-  for (let i = 1; i <= length; i++) {
+  for (let i = 1; i <= inputLength; i++) {
     const vertex = vertices[i]
     if (vertex && vertex.size > 0) {
       continue
     }
 
-    const edge: Edge<Phrase> = { from: i, to: i - 1, length: 1, value: { text: input[i - 1], code: input[i - 1], select: '_' } }
+    const text = input[i - 1]
+    const value = { text, code: text, select: '_' }
+    const edge: Edge<Phrase> = { from: i, to: i - 1, length: 1, value }
     graph.addEdge(edge)
   }
   return graph.shortestPath()
@@ -103,7 +116,7 @@ const addWord = (input: string, edge: Edge<Phrase>, words: Array<Word>): number 
 
   if (input.length <= to) {
     // 输入长度小于当前词首，未打
-    const type = `code${code.replace(select, '').length}`
+    const type = `code${code.length}`
     words.push({ id: to, text, type, code, select })
     return 0
   } else {
@@ -164,13 +177,27 @@ const mutations: MutationTree<ArticleState> = {
 
   shortest (state, shortest) {
     state.shortest = shortest
+
+    const { path, vertices } = shortest
+    const length = path.length
+    let codes = ''
+    for (let i = 0; i < length;) {
+      const edge = vertices[path[i]].get(i)
+      if (!edge) {
+        break
+      }
+      const { code, select } = edge.value
+      codes += code + select
+      i = path[i]
+    }
+
+    console.log('Shortest codes: ', codes)
   }
 }
 
 const actions: ActionTree<ArticleState, QuickTypingState> = {
   loadArticle ({ commit, rootState }, content: string): void {
     const article = parseArticle(content)
-    console.log(article)
     commit('load', article)
 
     setTimeout(() => {

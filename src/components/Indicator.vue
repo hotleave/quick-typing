@@ -4,6 +4,7 @@
     <label>击键：<span>{{ hitSpeed }}</span></label>
     <label>码长：<span>{{ codeLength }}</span></label>
     <label>理论码长：<span>{{ idealCodeLength }}</span></label>
+    <label>编码提示：<span> {{ hint }}</span></label>
   </div>
 </template>
 
@@ -26,6 +27,9 @@ export default class Indicator extends Vue {
 
   @racing.Getter('idealCodeLength')
   private idealCodeLength!: string
+
+  @racing.Getter('hint')
+  private hint!: string
 }
 </script>
 

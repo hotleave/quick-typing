@@ -2,6 +2,8 @@ export interface NodeValue {
   text: string;
   code: string;
   select: string;
+  length: number;
+  auto: boolean;
 }
 
 export class TrieNode {
@@ -62,8 +64,9 @@ export class TrieTree {
    * @param text 短语
    * @param code 编码
    * @param select 选重键
+   * @param auto 是否可以利用标点或第5码顶屏
    */
-  put (text: string, code: string, select: string): void {
+  put (text: string, code: string, select: string, auto: boolean): void {
     let node = this.root
     for (const word of text) {
       let sub = node.get(word)
@@ -73,7 +76,8 @@ export class TrieTree {
       node = sub
     }
 
-    node.value = { text, code, select }
+    const length = code.length + select.length
+    node.value = { text, code, select, length, auto }
   }
 
   /**

@@ -9,8 +9,9 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { TrieTree } from '../store/util/TrieTree'
 import db from '../store/util/Database'
+import punctuation from '../store/util/punctuation'
 
-const alternatives = '_23456789'
+const alternatives = '_;\'456789'
 
 interface HtmlInputEvent extends Event {
   target: HTMLInputElement;
@@ -36,14 +37,15 @@ export default class Article extends Vue {
         .forEach(line => {
           const text = line[0]
           const exist = trie.get(text)
-          let code = line[1]
+          const code = line[1]
+          let select = ''
           let index
 
           if (code === lastCode) {
             index = ++count
 
             while (index >= altCount) {
-              code += '+'
+              select += '+'
               index -= altCount
             }
           } else {
@@ -51,16 +53,19 @@ export default class Article extends Vue {
             lastCode = code
           }
 
-          if (line[1].length < 4 || index > 0) {
-            code += alternatives[index]
+          if (code.length < 4 || index > 0) {
+            select += alternatives[index]
           }
 
           if (!exist || exist.code.length > code.length) {
-            trie.put(text, code, alternatives[index])
+            trie.put(text, code, select, index === 0)
           }
         })
 
-      console.log(trie.root.id)
+      for (const entry of punctuation.entries()) {
+        trie.put(entry[0], entry[1], '', false)
+      }
+
       db.codings.put(trie.root).then(() => {
         console.log('Done.')
       })
