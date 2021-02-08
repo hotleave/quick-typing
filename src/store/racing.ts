@@ -128,7 +128,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       `退格${state.backspace}`,
       `回车${state.enter}`,
       `重打${state.retry}`,
-      'QuickTyping-0.1.0-alpha'
+      `QuickTyping-${process.env.VUE_APP_VERSION}`
     ]
 
     return statistics.join(' ')
