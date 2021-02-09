@@ -67,7 +67,7 @@ export default class Article extends Vue {
       }
 
       db.configs.put(trie.root).then(() => {
-        console.log('Done.')
+        this.$message({ message: '码表处理完成', type: 'success', showClose: true, duration: 5000 })
       })
     }
 

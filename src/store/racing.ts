@@ -3,6 +3,13 @@ import { Phrase, QuickTypingState, RacingState } from './types'
 import { Edge } from './util/Graph'
 
 const leftHandKeys = '`12345~!@#$%⇆qwertasdfgzxcvb'
+const statusMap = new Map<string, string>([
+  ['init', '初始化'],
+  ['wait', '等待开始'],
+  ['pause', '暂停'],
+  ['typing', '进行中'],
+  ['finished', '结束']
+])
 
 const formatTime = (time: number): string => {
   let total = time
@@ -46,6 +53,10 @@ const init = {
 const state: RacingState = Object.assign({}, init)
 
 const getters: GetterTree<RacingState, QuickTypingState> = {
+  statusText ({ status }): string {
+    return statusMap.get(status) || '未知'
+  },
+
   // 击键速度
   hitSpeed ({ keys }, getters): string {
     const used = getters.usedTime
@@ -213,7 +224,7 @@ const mutations: MutationTree<RacingState> = {
         state.backspace++
         break
       case ' ':
-        typed = '□'
+        typed = '_'
         break
       case 'Escape':
       case 'Meta':
@@ -299,7 +310,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     }
   },
 
-  accept ({ commit, state, rootState }, content: string): void {
+  typing ({ commit, state }, e) {
     if (state.status === 'init') {
       commit('start')
       const interval = 1000
@@ -311,6 +322,10 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
       commit('timer', id)
     }
 
+    commit('typing', e)
+  },
+
+  accept ({ commit, state, rootState }, content: string): void {
     const { article } = rootState
     if (state.input !== content) {
       const delta = content.length - state.input.length

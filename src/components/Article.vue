@@ -1,10 +1,10 @@
 <template>
-  <el-card class="box-card article">
+  <div class="article" :style="{}">
     <div v-for="word in words" :key="word.id" :class="word.type">
       <span>{{ word.text }}</span>
       <label v-if="word.select">{{ word.select }}</label>
     </div>
-  </el-card>
+  </div>
 </template>
 
 <script lang="ts">
@@ -49,62 +49,71 @@ export default class Article extends Vue {
 
 <style lang="scss" scoped>
 .article {
+  padding: 5px 15px;
+  border: 1px solid #EBEEF5;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   font-size: 2rem;
-  height: 16rem;
+  height: 15rem;
   overflow: auto;
-  // padding: .5rem;
-  // border: 1px solid #ccc;
-  // border-radius: 5px;
-  // letter-spacing: 3px;
-  // margin-bottom: .5rem;
-  // color: #999;
 
-  div {
+  .grid {
     display: inline-grid;
 
     label {
       display: inline-block;
-      width: 80%;
+      width: 90%;
       margin: 0 auto;
-      font-size: 0.6rem;
-      color: #aaa;
-      letter-spacing: 1px;
-      border-top: 1px solid #aaa;
       text-align: center;
+      font-size: 0.6rem;
+      font-weight: normal;
+      color: var(--hint, #C0C4CC);
+      letter-spacing: 1px;
+      border-top: 1px solid var(--hint, #C0C4CC);
+    }
+
+    :nth-child(2n) {
+      font-weight: bold;
+    }
+
+    span:last-child {
+      height: 4rem;
     }
   }
 
   // 待打
   .code1 {
-    color: #f66;
+    color: var(--code1, #F56C6C);
   }
   .code2 {
-    color: #cc0;
+    color: var(--code2, #E6A23C);
   }
   .code3 {
-    color: #39C;
+    color: var(--code3, #409EFF);
   }
   .code4 {
-    color: #ccc;
-  }
-  :nth-child(2n) {
-    font-weight: bold;
+    color: var(--code4, #C0C4CC);
   }
 
-  .correct>span, .code1>span:last-child, .code2>span:last-child, .code3>span:last-child, .code4>span:last-child {
-    height: 4rem;
+  .inline {
+    display: inline;
+  }
+
+  // 未打
+  .pending {
+    color: var(--pending, #C0C4CC);
   }
 
   // 已打
   .correct, .error {
-    color: #fff;
+    color: var(--typed, #fff);
     font-weight: normal;
   }
   .correct {
-    background-color: #ccc;
+    background-color: var(--correct, #C0C4CC);
   }
   .error {
-    background-color: #f66;
+    background-color: var(--error, #F56C6C);
   }
 }
 </style>

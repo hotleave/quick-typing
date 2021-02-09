@@ -82,7 +82,7 @@ const parseArticle = (content: string): ArticleState => {
   return { title, content, identity, shortest: null }
 }
 
-const check = (index: number, input: string, target: string, words: Array<Word>): void => {
+const check = (index: number, input: string, target: string, words: Array<Word>, style: string): void => {
   const length = target.length
   const targetWords = target.split('')
   const inputWords = input.split('')
@@ -98,7 +98,7 @@ const check = (index: number, input: string, target: string, words: Array<Word>)
     const correct = v === target
 
     if (correct !== lastCorrect) {
-      words.push({ id: index + i - text.length, text, type: lastCorrect ? 'correct' : 'error' })
+      words.push({ id: index + i - text.length, text, type: [lastCorrect ? 'correct' : 'error', style] })
       text = ''
       lastCorrect = correct
     }
@@ -106,7 +106,7 @@ const check = (index: number, input: string, target: string, words: Array<Word>)
   })
 
   if (text.length > 0) {
-    words.push({ id: index + input.length - text.length, text, type: lastCorrect ? 'correct' : 'error' })
+    words.push({ id: index + input.length - text.length, text, type: [lastCorrect ? 'correct' : 'error', style] })
   }
 }
 
@@ -116,14 +116,14 @@ const addWord = (content: string, edge: Edge<Phrase>, words: Array<Word>): numbe
 
   if (content.length <= to) {
     // 输入长度小于当前词首，未打
-    const type = `code${code.length}`
+    const type = ['grid', `code${code.length}`]
     words.push({ id: to, text, type, code, select })
     return 0
   } else {
     // 输入长度大于当前词尾，已打, 否则部分已打
     const length = content.length
     const source = content.substring(to, Math.min(from, length))
-    check(to, source, text, words)
+    check(to, source, text, words, 'grid')
     return length > from ? 0 : length
   }
 }
@@ -152,8 +152,10 @@ const getters: GetterTree<ArticleState, QuickTypingState> = {
     const words: Array<Word> = []
 
     if (shortest === null) {
+      const typed = content.substring(0, input.length)
+      check(0, input, typed, words, 'inline')
       const pending = content.substring(input.length)
-      words.push({ id: input.length, text: pending, type: 'pending' })
+      words.push({ id: input.length, text: pending, type: ['inline', 'pending'] })
     } else {
       const { path, vertices } = shortest
       for (let i = 0; i < length;) {
@@ -176,6 +178,9 @@ const mutations: MutationTree<ArticleState> = {
   },
 
   shortest (state, shortest) {
+    if (!shortest) {
+      return
+    }
     state.shortest = shortest
 
     const { path, vertices } = shortest

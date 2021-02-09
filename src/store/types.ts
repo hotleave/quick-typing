@@ -7,7 +7,7 @@ import { TrieNode } from './util/TrieTree'
 export interface Word {
   id: number;
   text: string;
-  type: string;
+  type: string | Array<string>;
   select?: string;
   code?: string;
 }

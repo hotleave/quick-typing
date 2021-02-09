@@ -22,7 +22,7 @@ export default class Racing extends Vue {
   @racing.Getter('result')
   private result!: string
 
-  @racing.Mutation('typing')
+  @racing.Action('typing')
   private typing!: Function
 
   @racing.Action('accept')
@@ -43,6 +43,7 @@ export default class Racing extends Vue {
       case 'finished':
         document.addEventListener('copy', this.copy, true)
         document.execCommand('copy')
+        this.$message({ message: this.result, type: 'success', showClose: true, duration: 5000 })
         break
     }
   }
@@ -69,5 +70,9 @@ export default class Racing extends Vue {
 <style lang="scss" scoped>
 .textarea {
   font-size: 2rem;
+  border: 1px solid #EBEEF5;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  margin-top: 1rem;
 }
 </style>
