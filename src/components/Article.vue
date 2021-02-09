@@ -1,10 +1,10 @@
 <template>
-  <div class="article">
+  <el-card class="box-card article">
     <div v-for="word in words" :key="word.id" :class="word.type">
       <span>{{ word.text }}</span>
       <label v-if="word.select">{{ word.select }}</label>
     </div>
-  </div>
+  </el-card>
 </template>
 
 <script lang="ts">
@@ -51,14 +51,13 @@ export default class Article extends Vue {
 .article {
   font-size: 2rem;
   height: 16rem;
-  width: 100%;
-  padding: .5rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
   overflow: auto;
-  letter-spacing: 3px;
-  margin-bottom: .5rem;
-  color: #999;
+  // padding: .5rem;
+  // border: 1px solid #ccc;
+  // border-radius: 5px;
+  // letter-spacing: 3px;
+  // margin-bottom: .5rem;
+  // color: #999;
 
   div {
     display: inline-grid;

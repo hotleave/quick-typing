@@ -1,11 +1,24 @@
 <template>
-  <div class="indicator">
-    <label>速度：<span>{{ typeSpeed }}</span></label>
-    <label>击键：<span>{{ hitSpeed }}</span></label>
-    <label>码长：<span>{{ codeLength }}</span></label>
-    <label>理论码长：<span>{{ idealCodeLength }}</span></label>
-    <label>编码提示：<span> {{ hint }}</span></label>
-  </div>
+  <el-form :inline="true">
+    <el-form-item label="状态">
+      <el-tag>{{ status }}</el-tag>
+    </el-form-item>
+    <el-form-item label="速度">
+      <el-tag>{{ typeSpeed }}</el-tag>
+    </el-form-item>
+    <el-form-item label="击键">
+      <el-tag>{{ hitSpeed }}</el-tag>
+    </el-form-item>
+    <el-form-item label="码长">
+      <el-tag>{{ codeLength }}</el-tag>
+    </el-form-item>
+    <el-form-item label="理论码长">
+      <el-tag>{{ idealCodeLength }}</el-tag>
+    </el-form-item>
+    <el-form-item label="编码提示">
+      <el-tag>{{ hint }}</el-tag>
+    </el-form-item>
+  </el-form>
 </template>
 
 <script lang="ts">
@@ -16,6 +29,9 @@ const racing = namespace('racing')
 
 @Component
 export default class Indicator extends Vue {
+  @racing.State('status')
+  private status!: string
+
   @racing.Getter('typeSpeed')
   private typeSpeed!: string
 
@@ -32,24 +48,3 @@ export default class Indicator extends Vue {
   private hint!: string
 }
 </script>
-
-<style lang="scss" scoped>
-.indicator {
-  width: 100%;
-  padding: .5rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-bottom: .5rem;
-  color: #999;
-
-  label {
-    font-size: 1.5rem;
-    margin-right: 1rem;
-    padding: .5rem;
-
-    span {
-      color: #f66;
-    }
-  }
-}
-</style>

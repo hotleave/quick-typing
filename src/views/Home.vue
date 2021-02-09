@@ -1,9 +1,11 @@
 <template>
-  <div class="home">
-    <Indicator/>
-    <Article ref="article"/>
-    <Racing ref="racing"/>
-  </div>
+  <el-row>
+    <el-col :span="24">
+      <Indicator/>
+      <Article ref="article"/>
+      <Racing ref="racing"/>
+    </el-col>
+  </el-row>
 </template>
 
 <script lang="ts">
@@ -97,12 +99,3 @@ export default class Home extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.home {
-  width: 80%;
-  min-width: 10rem;
-  display: block;
-  margin: .5rem auto;
-}
-</style>

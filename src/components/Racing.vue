@@ -1,11 +1,10 @@
 <template>
-  <div class="racing">
-    <textarea ref="textarea" @keydown="typing" @input="accept(input)" :disabled="status !== 'typing' && status !== 'init'" v-model="input" autofocus="true"></textarea>
-
-    <div class="info">
-      <label>状态：<span>{{ status }}</span></label>
-    </div>
-  </div>
+  <el-input class="textarea" type="textarea" rows="6" ref="textarea"
+    @keydown.native="typing"
+    @input="accept(input)"
+    :disabled="status !== 'typing' && status !== 'init'"
+    v-model="input">
+  </el-input>
 </template>
 
 <script lang="ts">
@@ -68,32 +67,7 @@ export default class Racing extends Vue {
 </script>
 
 <style lang="scss" scoped>
-.info {
-  width: 100%;
-  padding: .5rem;
-  margin-top: .5rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  color: #999;
-
-  label {
-    font-size: 1.5rem;
-    margin-right: 1rem;
-    padding: .5rem;
-
-    span {
-      color: #f66;
-    }
-  }
-}
-
-textarea {
+.textarea {
   font-size: 2rem;
-  height: 16rem;
-  width: 100%;
-  padding: .5rem;
-  border: 1px solid #cccccc;
-  border-radius: 5px;
-  letter-spacing: 3px;
 }
 </style>

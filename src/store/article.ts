@@ -4,35 +4,37 @@ import { Graph, Edge, ShortestPath } from './util/Graph'
 import { TrieNode } from './util/TrieTree'
 import { punctuation } from './util/punctuation'
 
-const parse = (input: string, codings: TrieNode): ShortestPath<Phrase> | null => {
+const parse = (content: string, codings: TrieNode): ShortestPath<Phrase> | null => {
   if (!codings) {
     return null
   }
 
   const graph = new Graph<Phrase>()
-  const inputLength = input.length
+  const contentLength = content.length
   let node: TrieNode
-  for (let i = 0; i < inputLength; i++) {
+  for (let i = 0; i < contentLength; i++) {
     node = codings
-    for (let j = i; j < inputLength; j++) {
-      const sub = node.get(input[j])
+    // 找出以当前字开始的所有词语
+    for (let j = i; j < contentLength; j++) {
+      const sub = node.get(content[j])
       if (!sub) {
         break
-      } else if (sub.value) {
-        const { text, code, auto } = sub.value
+      }
+
+      if (sub.value) {
+        const next = j + 1
+        const { text, code, first } = sub.value
         let { select, length } = sub.value
-        if (auto && length < 4 && j + 1 < inputLength && punctuation.has(input[j + 1])) {
+        if (first && length < 4 && next < contentLength && punctuation.has(content[next])) {
           // 该字/词码长小于4的首选，且后面的字符是标点，可自动顶屏，无须再用空格上屏
-          length -= select.length
           select = ''
-          // console.log('found', text, code, select, j + 1, i)
-        } else if (auto && length === 4 && j + 1 === inputLength) {
+          // console.log('found', text, code, select, next, i)
+        } else if (first && length === 4 && next === contentLength) {
           // 该字/词为4码首选，且为最后一个，需要补充空格
-          length += 1
           select = '_'
         }
-        const edge: Edge<Phrase> = { from: j + 1, to: i, length, value: { text, code, select } }
-        graph.addEdge(edge)
+        length += select.length
+        graph.addEdge({ from: next, to: i, length, value: { text, code, select } })
       }
       node = sub
     }
@@ -40,22 +42,21 @@ const parse = (input: string, codings: TrieNode): ShortestPath<Phrase> | null =>
 
   // 补全缺失的边
   const vertices = graph.vertices
-  for (let i = 1; i <= inputLength; i++) {
+  for (let i = 1; i <= contentLength; i++) {
     const vertex = vertices[i]
     if (vertex && vertex.size > 0) {
       continue
     }
 
-    const text = input[i - 1]
-    const value = { text, code: text, select: '_' }
-    const edge: Edge<Phrase> = { from: i, to: i - 1, length: 1, value }
-    graph.addEdge(edge)
+    const text = content[i - 1]
+    const value = { text, code: text, select: '' }
+    graph.addEdge({ from: i, to: i - 1, length: 1, value })
   }
   return graph.shortestPath()
 }
 
-const parseIdentity = (input: string): string => {
-  return input.replace(/-+第(\d+)段.*/, '$1')
+const parseIdentity = (content: string): string => {
+  return content.replace(/-+第(\d+)段.*/, '$1')
 }
 
 const parseArticle = (content: string): ArticleState => {
@@ -110,19 +111,19 @@ const check = (index: number, input: string, target: string, words: Array<Word>)
   }
 }
 
-const addWord = (input: string, edge: Edge<Phrase>, words: Array<Word>): number => {
+const addWord = (content: string, edge: Edge<Phrase>, words: Array<Word>): number => {
   const { from, to, value } = edge
   const { text, code, select } = value
 
-  if (input.length <= to) {
+  if (content.length <= to) {
     // 输入长度小于当前词首，未打
     const type = `code${code.length}`
     words.push({ id: to, text, type, code, select })
     return 0
   } else {
     // 输入长度大于当前词尾，已打, 否则部分已打
-    const length = input.length
-    const source = input.substring(to, Math.min(from, length))
+    const length = content.length
+    const source = content.substring(to, Math.min(from, length))
     check(to, source, text, words)
     return length > from ? 0 : length
   }
