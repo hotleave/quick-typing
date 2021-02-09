@@ -34,7 +34,7 @@ const parse = (content: string, codings: TrieNode): ShortestPath<Phrase> | null 
           select = '_'
         }
         length += select.length
-        graph.addEdge({ from: next, to: i, length, value: { text, code, select } })
+        graph.addEdge({ from: next, to: i, length, value: new Phrase(text, code, select) })
       }
       node = sub
     }
@@ -49,8 +49,7 @@ const parse = (content: string, codings: TrieNode): ShortestPath<Phrase> | null 
     }
 
     const text = content[i - 1]
-    const value = { text, code: text, select: '' }
-    graph.addEdge({ from: i, to: i - 1, length: 1, value })
+    graph.addEdge({ from: i, to: i - 1, length: 1, value: new Phrase(text, text) })
   }
   return graph.shortestPath()
 }

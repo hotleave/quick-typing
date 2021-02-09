@@ -1,5 +1,5 @@
 <template>
-  <el-form :inline="true">
+  <el-form :inline="true" label-suffix=":">
     <el-form-item label="状态">
       <el-tag>{{ status }}</el-tag>
     </el-form-item>

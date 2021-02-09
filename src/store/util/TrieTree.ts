@@ -1,25 +1,4 @@
-export interface NodeValue {
-  /**
-   * 文本
-   */
-  text: string;
-  /**
-   * 编码
-   */
-  code: string;
-  /**
-   * 选重
-   */
-  select: string;
-  /**
-   * 码长
-   */
-  length: number;
-  /**
-   * 是否为首选
-   */
-  first: boolean;
-}
+import { Phrase } from '../types'
 
 export class TrieNode {
   public id?: string
@@ -30,9 +9,9 @@ export class TrieNode {
   /**
    * 节点值
    */
-  public value?: NodeValue
+  public value?: Phrase
 
-  static convert (from: { id?: string; children?: Map<string, object>; value?: NodeValue}): TrieNode {
+  static convert (from: { id?: string; children?: Map<string, object>; value?: Phrase}): TrieNode {
     const node = new TrieNode()
     node.id = from.id
     node.value = from.value
@@ -71,7 +50,7 @@ export class TrieTree {
   public root: TrieNode = new TrieNode()
 
   constructor () {
-    this.root.id = 'main'
+    this.root.id = 'codings'
   }
 
   /**
@@ -99,7 +78,7 @@ export class TrieTree {
    * 查询短语
    * @param text 短语
    */
-  get (text: string): NodeValue | undefined {
+  get (text: string): Phrase | undefined {
     let node = this.root
     for (const word of text) {
       const sub = node.get(word)

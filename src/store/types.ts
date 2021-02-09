@@ -12,10 +12,36 @@ export interface Word {
   code?: string;
 }
 
-export interface Phrase {
+export class Phrase {
+  id?: number;
+  /**
+   * 文本
+   */
   text: string;
+  /**
+   * 编码
+   */
   code: string;
-  select: string;
+  /**
+   * 选重
+   */
+  select = '';
+  /**
+   * 码长
+   */
+  length = 0;
+  /**
+   * 是否为首选
+   */
+  first = false;
+
+  constructor (text: string, code: string, select?: string) {
+    this.text = text
+    this.code = code
+    if (select) {
+      this.select = select
+    }
+  }
 }
 
 export interface ArticleState {

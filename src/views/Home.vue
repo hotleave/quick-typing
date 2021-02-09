@@ -1,11 +1,21 @@
 <template>
-  <el-row>
-    <el-col :span="24">
-      <Indicator/>
-      <Article ref="article"/>
-      <Racing ref="racing"/>
-    </el-col>
-  </el-row>
+  <div>
+    <el-row :gutter="10" type="flex">
+      <el-col :span="24">
+        <Indicator/>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="24">
+        <Article ref="article"/>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="24">
+        <Racing ref="racing"/>
+      </el-col>
+    </el-row>
+  </div>
 </template>
 
 <script lang="ts">
@@ -52,7 +62,7 @@ export default class Home extends Vue {
     document.addEventListener('paste', this.paste)
 
     // 读取数据库中的码表
-    db.codings.get('main').then((root: TrieNode | undefined) => {
+    db.configs.get('codings').then((root: TrieNode | undefined) => {
       if (root) {
         const node = TrieNode.convert(root)
         this.codings(node)

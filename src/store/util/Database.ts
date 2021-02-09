@@ -2,13 +2,12 @@ import Dexie from 'dexie'
 import { TrieNode } from './TrieTree'
 
 class QuickTypingDatabase extends Dexie {
-  codings: Dexie.Table<TrieNode, string>
+  configs: Dexie.Table<TrieNode, string>
 
   constructor (databaseName: string) {
     super(databaseName)
-    this.version(1).stores({ codings: 'id' })
-    this.codings = this.table('codings')
-    this.codings.mapToClass(TrieNode)
+    this.version(1).stores({ configs: 'id' })
+    this.configs = this.table('configs')
   }
 }
 

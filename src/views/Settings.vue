@@ -66,7 +66,7 @@ export default class Article extends Vue {
         trie.put(entry[0], entry[1], '', false)
       }
 
-      db.codings.put(trie.root).then(() => {
+      db.configs.put(trie.root).then(() => {
         console.log('Done.')
       })
     }
