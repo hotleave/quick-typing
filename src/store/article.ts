@@ -142,7 +142,7 @@ const getters: GetterTree<ArticleState, QuickTypingState> = {
   },
 
   // 拆分开的字词
-  words ({ content, shortest }, getters, { racing }): Array<Word> {
+  words ({ content, shortest }, getters, { racing, setting }): Array<Word> {
     const input = racing.input
     if (content.length === 0) {
       return []
@@ -151,7 +151,7 @@ const getters: GetterTree<ArticleState, QuickTypingState> = {
     const length = content.length
     const words: Array<Word> = []
 
-    if (shortest === null) {
+    if (!setting.hint || shortest === null) {
       const typed = content.substring(0, input.length)
       check(0, input, typed, words, 'inline')
       const pending = content.substring(input.length)

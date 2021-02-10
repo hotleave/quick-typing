@@ -1,6 +1,6 @@
-import { Phrase } from '../types'
+import { Identity, Phrase } from '../types'
 
-export class TrieNode {
+export class TrieNode implements Identity {
   public id?: string
   /**
    * 子节点

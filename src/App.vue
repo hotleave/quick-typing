@@ -5,7 +5,7 @@
         <el-menu
           :router="true"
           :collapse="true"
-          default-active="/"
+          :default-active="pathname"
           background-color="#545c64"
           text-color="#fff"
           active-text-color="#ffd04b">
@@ -13,7 +13,7 @@
             <i class="el-icon-menu"></i>
             <span slot="title">主界面</span>
           </el-menu-item>
-          <el-menu-item index="/settings">
+          <el-menu-item index="/setting">
             <i class="el-icon-setting"></i>
             <span slot="title">设置</span>
           </el-menu-item>
@@ -23,6 +23,45 @@
     </el-container>
   </div>
 </template>
+
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import { TrieNode } from './store/util/TrieTree'
+import db from './store/util/Database'
+import { Identity } from './store/types'
+import { Action, namespace } from 'vuex-class'
+
+const setting = namespace('setting')
+
+@Component
+export default class Setting extends Vue {
+  @Action('codings')
+  private codings!: Function
+
+  @setting.Action('load')
+  private loadSetting!: Function
+
+  private pathname = location.pathname
+
+  created () {
+    // 读取配置
+    db.configs.get('setting').then(setting => {
+      if (setting) {
+        this.loadSetting(setting)
+        console.log('Settings loaded')
+      }
+    })
+    // 读取数据库中的码表
+    db.configs.get('codings').then((root: Identity | undefined) => {
+      if (root) {
+        const node = TrieNode.convert(root)
+        this.codings(node)
+        console.log('Trie tree loaded')
+      }
+    })
+  }
+}
+</script>
 
 <style lang="scss">
 :root {

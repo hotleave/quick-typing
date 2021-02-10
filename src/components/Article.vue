@@ -1,5 +1,5 @@
 <template>
-  <div class="article" :style="{}">
+  <div class="article" :style="styles">
     <div v-for="word in words" :key="word.id" :class="word.type">
       <span>{{ word.text }}</span>
       <label v-if="word.select">{{ word.select }}</label>
@@ -8,12 +8,13 @@
 </template>
 
 <script lang="ts">
-import { Word } from '@/store/types'
+import { InterfaceStyle, Word } from '@/store/types'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const article = namespace('article')
 const racing = namespace('racing')
+const setting = namespace('setting')
 
 @Component
 export default class Article extends Vue {
@@ -22,6 +23,9 @@ export default class Article extends Vue {
 
   @racing.Getter('progress')
   private progress!: number
+
+  @setting.Getter('styles')
+  private styles!: InterfaceStyle
 
   /**
    * 自动调整滚动条位置
@@ -43,6 +47,10 @@ export default class Article extends Vue {
 
       el.scrollTop = scrollTop
     }
+  }
+
+  created () {
+    console.log(this.styles)
   }
 }
 </script>
@@ -72,13 +80,13 @@ export default class Article extends Vue {
       border-top: 1px solid var(--hint, #C0C4CC);
     }
 
-    :nth-child(2n) {
-      font-weight: bold;
-    }
-
     span:last-child {
       height: 4rem;
     }
+  }
+
+  .grid:nth-child(2n) {
+    font-weight: bold;
   }
 
   // 待打

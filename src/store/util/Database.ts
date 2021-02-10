@@ -1,8 +1,8 @@
 import Dexie from 'dexie'
-import { TrieNode } from './TrieTree'
+import { Identity } from '../types'
 
 class QuickTypingDatabase extends Dexie {
-  configs: Dexie.Table<TrieNode, string>
+  configs: Dexie.Table<Identity, string>
 
   constructor (databaseName: string) {
     super(databaseName)

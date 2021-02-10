@@ -23,9 +23,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import Indicator from '@/components/Indicator.vue'
 import Article from '@/components/Article.vue'
 import Racing from '@/components/Racing.vue'
-import { Action, namespace } from 'vuex-class'
-import db from '../store/util/Database'
-import { TrieNode } from '@/store/util/TrieTree'
+import { namespace } from 'vuex-class'
 
 const article = namespace('article')
 const racing = namespace('racing')
@@ -51,24 +49,12 @@ export default class Home extends Vue {
   @article.Action('loadArticle')
   private loadArticle!: Function
 
-  @Action('codings')
-  private codings!: Function
-
   created () {
     // 监听快捷键
     document.addEventListener('keydown', this.handleShortCut)
 
     // 监听粘贴事件
     document.addEventListener('paste', this.paste)
-
-    // 读取数据库中的码表
-    db.configs.get('codings').then((root: TrieNode | undefined) => {
-      if (root) {
-        const node = TrieNode.convert(root)
-        this.codings(node)
-        console.log('Trie tree loaded')
-      }
-    })
   }
 
   destroyed () {
