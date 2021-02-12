@@ -5,17 +5,6 @@ export interface Identity {
   id?: string;
 }
 
-/**
- * 提示文字
- */
-export interface Word {
-  id: number;
-  text: string;
-  type: string | Array<string>;
-  select?: string;
-  code?: string;
-}
-
 export class Phrase {
   id?: number;
   /**
@@ -186,7 +175,7 @@ export class SettingState implements Identity {
   /**
    * 未打文字颜色
    */
-  pending = '#C0C4CC'
+  pending = '#606266'
   /**
    * 已打文字颜色
    */
@@ -224,7 +213,7 @@ export class SettingState implements Identity {
   /**
    * 全码颜色
    */
-  code4 = '#C0C4CC'
+  code4 = '#606266'
 
   /**
    * 替换空格

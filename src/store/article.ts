@@ -1,6 +1,6 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { ArticleState, Phrase, QuickTypingState, Word } from './types'
-import { Graph, Edge, ShortestPath } from './util/Graph'
+import { ArticleState, Phrase, QuickTypingState } from './types'
+import { Graph, ShortestPath } from './util/Graph'
 import { TrieNode } from './util/TrieTree'
 import { punctuation } from './util/punctuation'
 
@@ -82,52 +82,6 @@ const parseArticle = (content: string): ArticleState => {
   return { title, content, identity, shortest: null }
 }
 
-const check = (index: number, input: string, target: string, words: Array<Word>, style: string): void => {
-  const length = target.length
-  const targetWords = target.split('')
-  const inputWords = input.split('')
-  let lastCorrect = targetWords[0] === inputWords[0]
-  let text = ''
-
-  inputWords.forEach((v, i) => {
-    if (i >= length) {
-      return
-    }
-
-    const target = targetWords[i]
-    const correct = v === target
-
-    if (correct !== lastCorrect) {
-      words.push({ id: index + i - text.length, text, type: [lastCorrect ? 'correct' : 'error', style] })
-      text = ''
-      lastCorrect = correct
-    }
-    text = text.concat(target)
-  })
-
-  if (text.length > 0) {
-    words.push({ id: index + input.length - text.length, text, type: [lastCorrect ? 'correct' : 'error', style] })
-  }
-}
-
-const addWord = (content: string, edge: Edge<Phrase>, words: Array<Word>): number => {
-  const { from, to, value } = edge
-  const { text, code, select } = value
-
-  if (content.length <= to) {
-    // 输入长度小于当前词首，未打
-    const type = ['grid', `code${code.length}`]
-    words.push({ id: to, text, type, code, select })
-    return 0
-  } else {
-    // 输入长度大于当前词尾，已打, 否则部分已打
-    const length = content.length
-    const source = content.substring(to, Math.min(from, length))
-    check(to, source, text, words, 'grid')
-    return length > from ? 0 : length
-  }
-}
-
 const state: ArticleState = {
   title: '',
   identity: '',
@@ -139,36 +93,6 @@ const getters: GetterTree<ArticleState, QuickTypingState> = {
   // 长度
   length ({ content }): number {
     return content.length
-  },
-
-  // 拆分开的字词
-  words ({ content, shortest }, getters, { racing, setting }): Array<Word> {
-    const input = racing.input
-    if (content.length === 0) {
-      return []
-    }
-
-    const length = content.length
-    const words: Array<Word> = []
-
-    if (!setting.hint || shortest === null) {
-      const typed = content.substring(0, input.length)
-      check(0, input, typed, words, 'inline')
-      const pending = content.substring(input.length)
-      words.push({ id: input.length, text: pending, type: ['inline', 'pending'] })
-    } else {
-      const { path, vertices } = shortest
-      for (let i = 0; i < length;) {
-        const edge = vertices[path[i]].get(i)
-        if (!edge) {
-          break
-        }
-        const next = addWord(input, edge, words)
-        i = next === 0 ? path[i] : next
-      }
-    }
-
-    return words
   }
 }
 
