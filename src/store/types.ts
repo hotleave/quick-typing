@@ -225,57 +225,10 @@ export class SettingState implements Identity {
   replacePunctuation = false
 
   /**
-   * 理论码长
+   * 结果选项
    */
-  ideal = true
-  /**
-   * 文章字数
-   */
-  length = true
-  /**
-   * 退格数量
-   */
-  backspace = true
-  /**
-   * 回改数量
-   */
-  replace = true
-  /**
-   * 击键数量
-   */
-  keys = true
-  /**
-   * 选重数量
-   */
-  selective = true
-  /**
-   * 选重率
-   */
-  selectiveRate = true
-  /**
-   * 打词数
-   */
-  phrase = true
-  /**
-   * 打词率
-   */
-  phraseRate = true
-  /**
-   * 键准
-   */
-  accuracy = true
-  /**
-   * 重打次数
-   */
-  retry = true
-  /**
-   * 键法
-   */
-  balance = true
-  /**
-   * 版本号
-   */
-  version = true
+  resultOptions = ['identity', 'typeSpeed', 'hitSpeed', 'codeLength', 'version']
+
   /**
    * 输入法
    */

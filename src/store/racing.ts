@@ -146,31 +146,43 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   },
 
   // 比赛结果
-  result (state, getters, { article }): string {
-    const statistics = [
-      `第${article.identity}段`,
-      `速度${getters.typeSpeed}`,
-      `击键${getters.hitSpeed}`,
-      `用时${formatTime(getters.usedTime)}`,
-      `键准${getters.accuracy}%`,
-      `键法${getters.balance}%`,
-      `左${state.leftHand}`,
-      `右${state.rightHand}`,
-      `码长${getters.codeLength}`,
-      `理论码长${getters.idealCodeLength}`,
-      `字数${article.content.length}`,
-      `打词${state.phrase}`,
-      `打词率${getters.phraseRate}%`,
-      `选重${state.selective}`,
-      `回改${state.replace}`,
-      `键数${state.keys.length}`,
-      `退格${state.backspace}`,
-      `回车${state.enter}`,
-      `重打${state.retry}`,
-      `QuickTyping-${process.env.VUE_APP_VERSION}`
-    ]
+  result (state, getters, { article, setting }): string {
+    const statistics: Map<string, string> = new Map([
+      ['identity', `第${article.identity}段`],
+      ['typeSpeed', `速度${getters.typeSpeed}`],
+      ['hitSpeed', `击键${getters.hitSpeed}`],
+      ['codeLength', `码长${getters.codeLength}`],
+      ['contentLength', `字数${article.content.length}`],
+      ['usedTime', `用时${formatTime(getters.usedTime)}`],
+      ['accuracy', `键准${getters.accuracy}%`],
+      ['balance', `键法${getters.balance}%`],
+      ['leftHand', `左${state.leftHand}`],
+      ['rightHand', `右${state.rightHand}`],
+      ['idealCodeLength', `理论码长${getters.idealCodeLength}`],
+      ['phrase', `打词${state.phrase}`],
+      ['phraseRate', `打词率${getters.phraseRate}%`],
+      ['selective', `选重${state.selective}`],
+      ['replace', `回改${state.replace}`],
+      ['keys', `键数${state.keys.length}`],
+      ['backspace', `退格${state.backspace}`],
+      ['enter', `回车${state.enter}`],
+      ['retry', `重打${state.retry}`],
+      ['version', `QuickTyping-${process.env.VUE_APP_VERSION}`]
+    ])
 
-    return statistics.join(' ')
+    const options = setting.resultOptions.slice(0)
+    const versionIndex = options.indexOf('version')
+    const { inputMethod, inputMethodName, signature, signatureText } = setting
+    if (inputMethod && inputMethodName) {
+      versionIndex > 0 ? options.splice(versionIndex, 0, 'inputMethod') : options.push('inputMethod')
+      statistics.set('inputMethod', `输入法:${inputMethodName}`)
+    }
+    if (signature && signatureText) {
+      versionIndex > 0 ? options.splice(versionIndex, 0, 'signature') : options.push('signature')
+      statistics.set('signature', `个性签名:${signatureText}`)
+    }
+
+    return options.map(v => statistics.get(v)).join(' ')
   }
 }
 

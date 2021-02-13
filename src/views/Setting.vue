@@ -21,7 +21,7 @@
         </el-form-item>
         <el-form-item v-if="form.hint" label="提示选项">
           <el-checkbox-group v-model="form.hintOptions">
-            <el-checkbox-button v-for="o in hintOptions" :label="o.label" :key="o.label" :disabled="o.label === 'phrase'">{{ o.text }}</el-checkbox-button>
+            <el-checkbox-button v-for="o in hintOptions" :label="o.value" :key="o.value" :disabled="o.disabled">{{ o.text }}</el-checkbox-button>
           </el-checkbox-group>
         </el-form-item>
         <el-form-item v-if="form.hint" label="选重键">
@@ -53,48 +53,17 @@
         </el-form-item>
       </el-tab-pane>
       <el-tab-pane label="成绩设置">
-        <el-form-item label="理论码长">
-          <el-switch v-model="form.ideal"></el-switch>
+        <el-form-item label="选项">
+          <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
+          <div style="margin: 15px 0;"></div>
+          <el-checkbox-group v-model="form.resultOptions" @change="handleCheckedResultChange">
+            <el-checkbox v-for="o in resultOptions" :label="o.value" :key="o.value" :disabled="o.disabled">{{ o.text }}</el-checkbox>
+          </el-checkbox-group>
         </el-form-item>
-        <el-form-item label="文章字数">
-          <el-switch v-model="form.length"></el-switch>
-        </el-form-item>
-        <el-form-item label="退格数量">
-          <el-switch v-model="form.backspace"></el-switch>
-        </el-form-item>
-        <el-form-item label="回改数量">
-          <el-switch v-model="form.replace"></el-switch>
-        </el-form-item>
-        <el-form-item label="击键数量">
-          <el-switch v-model="form.keys"></el-switch>
-        </el-form-item>
-        <el-form-item label="选重数量">
-          <el-switch v-model="form.selective"></el-switch>
-        </el-form-item>
-        <el-form-item label="选重率">
-          <el-switch v-model="form.selectiveRate"></el-switch>
-        </el-form-item>
-        <el-form-item label="打词数量">
-          <el-switch v-model="form.phrase"></el-switch>
-        </el-form-item>
-        <el-form-item label="打词率">
-          <el-switch v-model="form.phraseRate"></el-switch>
-        </el-form-item>
-        <el-form-item label="键准">
-          <el-switch v-model="form.accuracy"></el-switch>
-        </el-form-item>
-        <el-form-item label="键法">
-          <el-switch v-model="form.balance"></el-switch>
-        </el-form-item>
-        <el-form-item label="重打次数">
-          <el-switch v-model="form.retry"></el-switch>
-        </el-form-item>
-        <el-form-item label="版本号">
-          <el-switch v-model="form.version"></el-switch>
-        </el-form-item>
+
         <el-form-item label="输入法">
           <el-switch v-model="form.inputMethod"></el-switch>
-          <el-input maxlength="10" v-if="form.inputMethod" v-model="form.inputMethodName"></el-input>
+          <el-input maxlength="20" v-if="form.inputMethod" v-model="form.inputMethodName"></el-input>
         </el-form-item>
         <el-form-item label="个性签名">
           <el-switch v-model="form.signature"></el-switch>
@@ -127,14 +96,41 @@ import { namespace } from 'vuex-class'
 
 const setting = namespace('setting')
 
+const HINT_OPTIONS = [
+  { value: 'phrase', text: '词语', disabled: true },
+  { value: 'color', text: '颜色' },
+  { value: 'select', text: '选重' },
+  { value: 'code', text: '编码' }
+]
+
+const RESULT_OPTIONS = [
+  { value: 'identity', text: '标识', disabled: true },
+  { value: 'typeSpeed', text: '速度', disabled: true },
+  { value: 'hitSpeed', text: '击键', disabled: true },
+  { value: 'codeLength', text: '码长', disabled: true },
+  { value: 'idealCodeLength', text: '理论码长' },
+  { value: 'contentLength', text: '字数' },
+  { value: 'usedTime', text: '用时' },
+  { value: 'accuracy', text: '键准' },
+  { value: 'balance', text: '键法' },
+  { value: 'leftHand', text: '左' },
+  { value: 'rightHand', text: '右' },
+  { value: 'phrase', text: '打词' },
+  { value: 'phraseRate', text: '打词率' },
+  { value: 'selective', text: '选重' },
+  { value: 'replace', text: '回改' },
+  { value: 'keys', text: '键数' },
+  { value: 'backspace', text: '退格' },
+  { value: 'enter', text: '回车' },
+  { value: 'retry', text: '重打' },
+  { value: 'version', text: '版本' }
+]
+
 @Component
 export default class Setting extends Vue {
-  private hintOptions = [
-    { label: 'phrase', text: '词语' },
-    { label: 'color', text: '颜色' },
-    { label: 'select', text: '选重' },
-    { label: 'code', text: '编码' }
-  ]
+  private hintOptions = HINT_OPTIONS
+
+  private resultOptions = RESULT_OPTIONS
 
   private form = new SettingState()
 
@@ -146,6 +142,21 @@ export default class Setting extends Vue {
 
   @setting.Mutation('update')
   private updateSetting!: Function
+
+  private checkAll = false
+
+  private isIndeterminate = true
+
+  handleCheckAllChange (val: boolean) {
+    this.form.resultOptions = val ? RESULT_OPTIONS.map(v => v.value) : ['identity', 'typeSpeed', 'hitSpeed', 'codeLength']
+    this.isIndeterminate = !val
+  }
+
+  handleCheckedResultChange (value: string) {
+    const checkedCount = value.length
+    this.checkAll = checkedCount === this.resultOptions.length
+    this.isIndeterminate = checkedCount > 0 && checkedCount < this.resultOptions.length
+  }
 
   loadPhrase (file: { raw: File }): void {
     const reader = new FileReader()
