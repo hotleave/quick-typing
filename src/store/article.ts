@@ -1,8 +1,25 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
 import { ArticleState, Phrase, QuickTypingState } from './types'
-import { Graph, ShortestPath } from './util/Graph'
+import { Edge, Graph, ShortestPath } from './util/Graph'
 import { TrieNode } from './util/TrieTree'
 import { punctuation } from './util/punctuation'
+
+const mergeEdge = (vertex: Map<number, Edge<Phrase>>, graph: Graph<Phrase>): void => {
+  for (const edge of vertex.values()) {
+    if (!punctuation.has(edge.value.text)) {
+      continue
+    }
+
+    for (const prev of graph.vertices[edge.to].values()) {
+      const { value, to, length } = prev
+      if (value.length < 4 && value.first) {
+        const phrase = new Phrase(value.text + edge.value.text, value.code + edge.value.code)
+        phrase.length = value.length
+        graph.addEdge({ from: edge.from, to, length: edge.length + length - 1, value: phrase })
+      }
+    }
+  }
+}
 
 const parse = (content: string, codings: TrieNode): ShortestPath<Phrase> | null => {
   if (!codings) {
@@ -21,20 +38,17 @@ const parse = (content: string, codings: TrieNode): ShortestPath<Phrase> | null 
         break
       }
 
-      if (sub.value) {
+      let { value } = sub
+      if (value) {
         const next = j + 1
-        const { text, code, first } = sub.value
-        let { select, length } = sub.value
-        if (first && length < 4 && next < contentLength && punctuation.has(content[next])) {
-          // 该字/词码长小于4的首选，且后面的字符是标点，可自动顶屏，无须再用空格上屏
-          select = ''
-          // console.log('found', text, code, select, next, i)
-        } else if (first && length === 4 && next === contentLength) {
+        let { select, length } = value
+        if (value.first && length === 4 && next === contentLength) {
           // 该字/词为4码首选，且为最后一个，需要补充空格
           select = '_'
+          value = Object.assign({}, value, { select })
         }
         length += select.length
-        graph.addEdge({ from: next, to: i, length, value: new Phrase(text, code, select) })
+        graph.addEdge({ from: next, to: i, length, value })
       }
       node = sub
     }
@@ -45,11 +59,11 @@ const parse = (content: string, codings: TrieNode): ShortestPath<Phrase> | null 
   for (let i = 1; i <= contentLength; i++) {
     const vertex = vertices[i]
     if (vertex && vertex.size > 0) {
-      continue
+      mergeEdge(vertex, graph)
+    } else {
+      const text = content[i - 1]
+      graph.addEdge({ from: i, to: i - 1, length: 1, value: new Phrase(text, text) })
     }
-
-    const text = content[i - 1]
-    graph.addEdge({ from: i, to: i - 1, length: 1, value: new Phrase(text, text) })
   }
   return graph.shortestPath()
 }

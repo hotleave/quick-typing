@@ -151,11 +151,11 @@ export default class Article extends Vue {
 
   addPhrase (content: string, edge: Edge<Phrase>, words: Array<Word>): number {
     const { from, to, value } = edge
-    const { text, code, select } = value
+    const { text, code, select, length } = value
 
     if (content.length <= to) {
       // 输入长度小于当前词首，未打
-      const type = `code${this.colorHint ? code.length : ''}`
+      const type = `code${this.colorHint ? length : ''}`
       let hint = ''
       if (this.codeHint) {
         hint += code
