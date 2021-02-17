@@ -21,7 +21,7 @@ const mergeEdge = (vertex: Map<number, Edge<Phrase>>, graph: Graph<Phrase>): voi
   }
 }
 
-const parse = (content: string, codings: TrieNode): ShortestPath<Phrase> | null => {
+const parse = (content: string, codings: TrieNode, selective: string): ShortestPath<Phrase> | null => {
   if (!codings) {
     return null
   }
@@ -42,11 +42,13 @@ const parse = (content: string, codings: TrieNode): ShortestPath<Phrase> | null 
       if (value) {
         const next = j + 1
         let { select, length } = value
-        if (value.first && length === 4 && next === contentLength) {
+        if (value.first && length === 4 && (next === contentLength || selective.indexOf(content[next]) >= 0)) {
           // 该字/词为4码首选，且为最后一个，需要补充空格
           select = '_'
           value = Object.assign({}, value, { select })
         }
+
+        // 如果后缀的是选重，则需要先上屏
         length += select.length
         graph.addEdge({ from: next, to: i, length, value })
       }
@@ -145,7 +147,7 @@ const actions: ActionTree<ArticleState, QuickTypingState> = {
 
     setTimeout(() => {
       const { codings } = rootState
-      const shortest = parse(article.content, codings)
+      const shortest = parse(article.content, codings, rootState.setting.select)
       commit('shortest', shortest)
     })
 
