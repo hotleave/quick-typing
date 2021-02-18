@@ -57,10 +57,9 @@ export class TrieTree {
    * 加词
    * @param text 短语
    * @param code 编码
-   * @param select 选重键
-   * @param first 是否为首选
+   * @param index 选重位置, `-1`表示无须选重，何如标点
    */
-  put (text: string, code: string, select: string, first: boolean): void {
+  put (text: string, code: string, index = -1): void {
     let node = this.root
     for (const word of text) {
       let sub = node.get(word)
@@ -70,8 +69,7 @@ export class TrieTree {
       node = sub
     }
 
-    const length = code.length
-    node.value = { text, code, select, length, first }
+    node.value = new Phrase(text, code, index)
   }
 
   /**

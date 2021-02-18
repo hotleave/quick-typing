@@ -1,5 +1,5 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { Phrase, QuickTypingState, RacingState } from './types'
+import { QuickTypingState, RacingState, Word } from './types'
 import { Edge } from './util/Graph'
 
 const leftHandKeys = '`12345~!@#$%⇆qwertasdfgzxcvb'
@@ -28,9 +28,9 @@ const formatTime = (time: number): string => {
   return `${total.toFixed(0)}:${minutes.toFixed(0)}′${seconds.toFixed(3)}″`
 }
 
-const codeHint = (edge: Edge<Phrase>): string => {
-  const { code, text, select } = edge.value
-  return `${text}: ${code}${select}`
+const codeHint = (edge: Edge<Word>): string => {
+  const { code, text } = edge.value
+  return `${text}: ${code}`
 }
 
 const init = {
@@ -355,6 +355,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     if (content === article.content) {
       clearInterval(state.timer)
       commit('finish')
+      console.log('Input', state.keys)
     }
   }
 }

@@ -6,7 +6,6 @@ export interface Identity {
 }
 
 export class Phrase {
-  id?: number;
   /**
    * 文本
    */
@@ -16,24 +15,62 @@ export class Phrase {
    */
   code: string;
   /**
-   * 选重
+   * 选重位置
    */
-  select = '';
+  index = 0;
+
+  constructor (text: string, code: string, index?: number) {
+    this.text = text
+    this.code = code
+    if (index !== undefined) {
+      this.index = index
+    }
+  }
+}
+
+/**
+ * 提示文字
+ */
+export class Word {
+  id: number;
+  /**
+   * 文字
+   */
+  text: string;
+  /**
+   * 编码
+   */
+  code: string;
   /**
    * 码长
    */
-  length = 0;
+  length: number;
   /**
-   * 是否为首选
+   * 选重
    */
-  first = false;
+  select: string;
+  /**
+   *  位置
+   */
+  index: number;
+  /**
+   * 类别
+   */
+  type: string;
+  /**
+   * 提示
+   */
+  hint?: string;
 
-  constructor (text: string, code: string, select?: string) {
+  constructor (id: number, text: string, type = '', code = '', length = 0, select = '', index = -1, hint?: string) {
+    this.id = id
     this.text = text
     this.code = code
-    if (select) {
-      this.select = select
-    }
+    this.select = select
+    this.hint = hint
+    this.length = length
+    this.index = index
+    this.type = type
   }
 }
 
@@ -53,7 +90,7 @@ export interface ArticleState {
   /**
    * 最短路径
    */
-  shortest: ShortestPath<Phrase> | null;
+  shortest: ShortestPath<Word> | null;
 }
 
 export interface RacingState {
@@ -144,6 +181,10 @@ export interface InterfaceStyle {
    */
   '--error': string;
   /**
+   * 提示颜色
+   */
+  '--hint': string;
+  /**
    * 一码颜色
    */
   '--code1': string;
@@ -170,7 +211,7 @@ export class SettingState implements Identity {
   /**
    * 选重键
    */
-  select = '_;\'456789'
+  selective = '_;\'456789'
 
   /**
    * 未打文字颜色
@@ -199,6 +240,10 @@ export class SettingState implements Identity {
    */
   hintOptions = ['phrase', 'color', 'select']
   /**
+   * 提示颜色
+   */
+  hintColor = '#909399'
+  /**
    * 一码颜色
    */
   code1 = '#F56C6C'
@@ -213,7 +258,7 @@ export class SettingState implements Identity {
   /**
    * 全码颜色
    */
-  code4 = '#606266'
+  code4 = '#909399'
 
   /**
    * 替换空格

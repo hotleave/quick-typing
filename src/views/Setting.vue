@@ -25,7 +25,7 @@
           </el-checkbox-group>
         </el-form-item>
         <el-form-item v-if="form.hint" label="选重键">
-          <el-input v-model="form.select"/>
+          <el-input v-model="form.selective"/>
           <span class="el-upload__tip">修改选重键需要重新上传码表文件</span>
         </el-form-item>
         <el-form-item v-if="form.hint" label="码表文件">
@@ -38,6 +38,9 @@
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
             <div class="el-upload__tip" slot="tip">文本格式文件，UTF8编码，多多格式，即`字  编码`，每行一条记录</div>
           </el-upload>
+        </el-form-item>
+        <el-form-item v-if="form.hint" label="提示颜色">
+          <el-color-picker v-model="form.hintColor"></el-color-picker>
         </el-form-item>
         <el-form-item v-if="form.hint" label="一码颜色">
           <el-color-picker v-model="form.code1"></el-color-picker>
@@ -92,7 +95,7 @@ import { TrieTree } from '../store/util/TrieTree'
 import db from '../store/util/Database'
 import punctuation from '../store/util/punctuation'
 import { SettingState } from '../store/types'
-import { namespace } from 'vuex-class'
+import { Action, namespace } from 'vuex-class'
 
 const setting = namespace('setting')
 
@@ -143,6 +146,9 @@ export default class Setting extends Vue {
   @setting.Mutation('update')
   private updateSetting!: Function
 
+  @Action('codings')
+  private codings!: Function
+
   private checkAll = false
 
   private isIndeterminate = true
@@ -158,50 +164,42 @@ export default class Setting extends Vue {
     this.isIndeterminate = checkedCount > 0 && checkedCount < this.resultOptions.length
   }
 
+  /**
+   * 处理码表文件
+   * @param file 码表文件
+   */
   loadPhrase (file: { raw: File }): void {
     const reader = new FileReader()
-    const alternatives = this.form.select
     reader.onload = () => {
       const trie = new TrieTree()
       const lines = (reader.result as string).split(/[\r\n]/)
-      const altCount = alternatives.length
       let count = 0
       let lastCode = ''
       lines.map(line => line.split('\t'))
         .filter(line => line.length === 2)
         .forEach(line => {
           const text = line[0]
-          const exist = trie.get(text)
           const code = line[1]
-          let select = ''
-          let index
 
           if (code === lastCode) {
-            index = ++count
-
-            while (index >= altCount) {
-              select += '+'
-              index -= altCount
-            }
+            ++count
           } else {
-            index = count = 0
+            count = 0
             lastCode = code
           }
 
-          if (code.length < 4 || index > 0) {
-            select += alternatives[index]
-          }
-
+          const exist = trie.get(text)
           if (!exist || exist.code.length > code.length) {
-            trie.put(text, code, select, index === 0)
+            trie.put(text, code, count)
           }
         })
 
       for (const entry of punctuation.entries()) {
-        trie.put(entry[0], entry[1], '', false)
+        trie.put(entry[0], entry[1], -1)
       }
 
       db.configs.put(trie.root).then(() => {
+        this.codings(trie.root)
         this.$message({ message: '码表处理完成', type: 'success', showClose: true })
       })
     }

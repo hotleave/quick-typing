@@ -35,7 +35,6 @@ const racing = namespace('racing')
     Racing
   }
 })
-
 export default class Home extends Vue {
   @racing.Mutation('pause')
   private pause!: Function

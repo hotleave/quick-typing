@@ -1,33 +1,23 @@
 <template>
   <div :class="articleStyle" :style="styles">
-    <div v-for="word in words" :key="word.id" :class="word.type">
-      <span>{{ word.text }}</span>
-      <label v-if="word.hint">{{ word.hint }}</label>
-    </div>
+    <Words v-for="word in words" :key="word.id" :word="word"/>
   </div>
 </template>
 
 <script lang="ts">
-import { InterfaceStyle, Phrase } from '@/store/types'
+import { InterfaceStyle, Word } from '@/store/types'
 import { Edge, ShortestPath } from '@/store/util/Graph'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
-
-/**
- * 提示文字
- */
-interface Word {
-  id: number;
-  text: string;
-  type: string;
-  hint?: string;
-}
+import Words from '@/components/Words.vue'
 
 const article = namespace('article')
 const racing = namespace('racing')
 const setting = namespace('setting')
 
-@Component
+@Component({
+  components: { Words }
+})
 export default class Article extends Vue {
   @article.State('content')
   private content!: string
@@ -36,7 +26,7 @@ export default class Article extends Vue {
   private input!: string
 
   @article.State('shortest')
-  private shortest!: ShortestPath<Phrase> | null;
+  private shortest!: ShortestPath<Word> | null;
 
   @racing.Getter('progress')
   private progress!: number
@@ -56,10 +46,6 @@ export default class Article extends Vue {
       mode = 'grid'
     }
     return ['article', mode]
-  }
-
-  get colorHint (): boolean {
-    return this.hintOptions.indexOf('color') >= 0
   }
 
   get selectHint (): boolean {
@@ -83,7 +69,7 @@ export default class Article extends Vue {
       const typed = this.content.substring(0, inputLength)
       this.check(0, input, typed, words)
       const pending = this.content.substring(inputLength)
-      words.push({ id: inputLength, text: pending, type: 'pending' })
+      words.push(new Word(inputLength, pending, 'pending'))
     } else {
       const { path, vertices } = this.shortest
       for (let i = 0; i < length;) {
@@ -137,7 +123,7 @@ export default class Article extends Vue {
       const correct = v === target
 
       if (correct !== lastCorrect) {
-        words.push({ id: index + i - text.length, text, type: lastCorrect ? 'correct' : 'error' })
+        words.push(new Word(index + i - text.length, text, lastCorrect ? 'correct' : 'error'))
         text = ''
         lastCorrect = correct
       }
@@ -145,38 +131,29 @@ export default class Article extends Vue {
     })
 
     if (text.length > 0) {
-      words.push({ id: index + input.length - text.length, text, type: lastCorrect ? 'correct' : 'error' })
+      words.push(new Word(index + input.length - text.length, text, lastCorrect ? 'correct' : 'error'))
     }
   }
 
-  addPhrase (content: string, edge: Edge<Phrase>, words: Array<Word>): number {
+  addPhrase (content: string, edge: Edge<Word>, words: Array<Word>): number {
     const { from, to, value } = edge
-    const { text, code, select, length } = value
 
     if (content.length <= to) {
       // 输入长度小于当前词首，未打
-      const type = `code${this.colorHint ? length : ''}`
-      let hint = ''
-      if (this.codeHint) {
-        hint += code
-      }
-      if (this.selectHint) {
-        hint += select
-      }
-      words.push({ id: to, text, type, hint })
+      words.push(value)
       return 0
     } else {
       // 输入长度大于当前词尾，已打, 否则部分已打
       const length = content.length
       const source = content.substring(to, Math.min(from, length))
-      this.check(to, source, text, words)
+      this.check(to, source, value.text, words)
       return length > from ? 0 : length
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 .article {
   padding: 5px 15px;
   border: 1px solid #EBEEF5;
@@ -187,9 +164,15 @@ export default class Article extends Vue {
   overflow: auto;
   color: var(--pending, #606266);
 
+  :nth-child(2n) {
+    font-weight: bold;
+  }
+
+  .correct, .error, .pending {
+    font-weight: normal;
+  }
   .correct, .error {
     color: var(--typed, #fff);
-    font-weight: normal;
   }
   .correct {
     background-color: var(--correct, #C0C4CC);
@@ -198,8 +181,17 @@ export default class Article extends Vue {
     background-color: var(--error, #F56C6C);
   }
 
-  .code:nth-child(2n) {
-    font-weight: bold;
+  .code1 {
+    color: var(--code1, #F56C6C);
+  }
+  .code2 {
+    color: var(--code2, #E6A23C);
+  }
+  .code3 {
+    color: var(--code3, #409EFF);
+  }
+  .code4 {
+    color: var(--code4, #909399);
   }
 }
 
@@ -213,32 +205,15 @@ export default class Article extends Vue {
     width: 90%;
     margin: 0 auto;
     text-align: center;
-    font-size: 0.6rem;
+    font-size: 12px;
     font-weight: normal;
-    color: var(--hint, #C0C4CC);
+    color: var(--hint, #909399);
     letter-spacing: 1px;
-    border-top: 1px solid var(--hint, #C0C4CC);
+    border-top: 1px solid var(--hint, #909399);
   }
 
   span:last-child {
     height: 4rem;
-  }
-
-  :nth-child(2n) {
-    font-weight: bold;
-  }
-
-  .code1 {
-    color: var(--code1, #F56C6C);
-  }
-  .code2 {
-    color: var(--code2, #E6A23C);
-  }
-  .code3 {
-    color: var(--code3, #409EFF);
-  }
-  .code4 {
-    color: var(--code4, #C0C4CC);
   }
 }
 
