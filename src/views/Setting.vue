@@ -17,7 +17,7 @@
       </el-tab-pane>
       <el-tab-pane label="词语提示设置">
         <el-form-item label="词语提示">
-          <el-switch v-model="form.hint"></el-switch>
+          <el-switch v-model="form.hint"/>
         </el-form-item>
         <el-form-item v-if="form.hint" label="提示选项">
           <el-checkbox-group v-model="form.hintOptions">
@@ -26,7 +26,13 @@
         </el-form-item>
         <el-form-item v-if="form.hint" label="选重键">
           <el-input v-model="form.selective"/>
-          <span class="el-upload__tip">修改选重键需要重新上传码表文件</span>
+          <span class="el-upload__tip">长度需对应输入法候选词数量</span>
+        </el-form-item>
+        <el-form-item v-if="form.hint" label="四码唯一自动上屏">
+          <el-switch v-model="form.fourthAutoSelect"/>
+        </el-form-item>
+        <el-form-item v-if="form.hint" label="第五码首选上屏">
+          <el-switch v-model="form.fifthAutoSelect"/>
         </el-form-item>
         <el-form-item v-if="form.hint" label="码表文件">
           <el-upload drag action="#"
@@ -39,20 +45,23 @@
             <div class="el-upload__tip" slot="tip">文本格式文件，UTF8编码，多多格式，即`字  编码`，每行一条记录</div>
           </el-upload>
         </el-form-item>
+        <el-form-item v-if="form.hint" label="标点顶屏提示">
+          <el-input v-model="form.punctuationAutoSelectHint"/>
+        </el-form-item>
         <el-form-item v-if="form.hint" label="提示颜色">
-          <el-color-picker v-model="form.hintColor"></el-color-picker>
+          <el-color-picker v-model="form.hintColor"/>
         </el-form-item>
         <el-form-item v-if="form.hint" label="一码颜色">
-          <el-color-picker v-model="form.code1"></el-color-picker>
+          <el-color-picker v-model="form.code1"/>
         </el-form-item>
         <el-form-item v-if="form.hint" label="二码颜色">
-          <el-color-picker v-model="form.code2"></el-color-picker>
+          <el-color-picker v-model="form.code2"/>
         </el-form-item>
         <el-form-item v-if="form.hint" label="三码颜色">
-          <el-color-picker v-model="form.code3"></el-color-picker>
+          <el-color-picker v-model="form.code3"/>
         </el-form-item>
         <el-form-item v-if="form.hint" label="全码颜色">
-          <el-color-picker v-model="form.code4"></el-color-picker>
+          <el-color-picker v-model="form.code4"/>
         </el-form-item>
       </el-tab-pane>
       <el-tab-pane label="成绩设置">
@@ -65,20 +74,20 @@
         </el-form-item>
 
         <el-form-item label="输入法">
-          <el-switch v-model="form.inputMethod"></el-switch>
-          <el-input maxlength="20" v-if="form.inputMethod" v-model="form.inputMethodName"></el-input>
+          <el-switch v-model="form.inputMethod"/>
+          <el-input maxlength="20" v-if="form.inputMethod" v-model="form.inputMethodName"/>
         </el-form-item>
         <el-form-item label="个性签名">
-          <el-switch v-model="form.signature"></el-switch>
-          <el-input maxlength="20" v-if="form.signature" v-model="form.signatureText"></el-input>
+          <el-switch v-model="form.signature"/>
+          <el-input maxlength="20" v-if="form.signature" v-model="form.signatureText"/>
         </el-form-item>
       </el-tab-pane>
       <el-tab-pane label="载文设置">
         <el-form-item label="去除空格">
-          <el-switch v-model="form.replaceSpace"></el-switch>
+          <el-switch v-model="form.replaceSpace"/>
         </el-form-item>
         <el-form-item label="替换符号">
-          <el-switch v-model="form.replacePunctuation"></el-switch>
+          <el-switch v-model="form.replacePunctuation"/>
         </el-form-item>
       </el-tab-pane>
     </el-tabs>
@@ -96,6 +105,19 @@ import db from '../store/util/Database'
 import punctuation from '../store/util/punctuation'
 import { SettingState } from '../store/types'
 import { Action, namespace } from 'vuex-class'
+
+class Duplicate {
+  text: string;
+  count = 1;
+
+  constructor (text: string) {
+    this.text = text
+  }
+
+  increase (): void {
+    this.count += 1
+  }
+}
 
 const setting = namespace('setting')
 
@@ -146,8 +168,8 @@ export default class Setting extends Vue {
   @setting.Mutation('update')
   private updateSetting!: Function
 
-  @Action('codings')
-  private codings!: Function
+  @Action('updateCodings')
+  private updateCodings!: Function
 
   private checkAll = false
 
@@ -173,6 +195,7 @@ export default class Setting extends Vue {
     reader.onload = () => {
       const trie = new TrieTree()
       const lines = (reader.result as string).split(/[\r\n]/)
+      const fullCodeMap = new Map<string, Duplicate>()
       let count = 0
       let lastCode = ''
       lines.map(line => line.split('\t'))
@@ -180,6 +203,15 @@ export default class Setting extends Vue {
         .forEach(line => {
           const text = line[0]
           const code = line[1]
+
+          if (code.length === 4) {
+            const duplicate = fullCodeMap.get(code)
+            if (!duplicate) {
+              fullCodeMap.set(code, new Duplicate(text))
+            } else {
+              duplicate.increase()
+            }
+          }
 
           if (code === lastCode) {
             ++count
@@ -198,8 +230,19 @@ export default class Setting extends Vue {
         trie.put(entry[0], entry[1], -1)
       }
 
+      // 记录四码唯一词
+      for (const duplicate of fullCodeMap.values()) {
+        if (duplicate.count > 1) {
+          continue
+        }
+        const phrase = trie.get(duplicate.text)
+        if (phrase) {
+          phrase.fourthSingle = true
+        }
+      }
+
       db.configs.put(trie.root).then(() => {
-        this.codings(trie.root)
+        this.updateCodings(trie.root)
         this.$message({ message: '码表处理完成', type: 'success', showClose: true })
       })
     }

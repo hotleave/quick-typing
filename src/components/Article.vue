@@ -162,7 +162,7 @@ export default class Article extends Vue {
   font-size: 2rem;
   height: 15rem;
   overflow: auto;
-  color: var(--pending, #606266);
+  color: var(--pending, #909399);
 
   :nth-child(2n) {
     font-weight: bold;

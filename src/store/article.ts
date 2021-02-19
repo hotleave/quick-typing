@@ -1,31 +1,37 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { ArticleState, QuickTypingState, Word } from './types'
+import { ArticleState, QuickTypingState, SettingState, Word } from './types'
 import { Edge, Graph, ShortestPath } from './util/Graph'
 import { TrieNode } from './util/TrieTree'
 import { punctuation } from './util/punctuation'
+
+const alphaPattern = /[a-zA-Z0-9]/
 
 /**
  * 处理标点顶屏
  * @param vertex 边
  * @param graph DAG图
  */
-const mergeEdge = (vertex: Map<number, Edge<Word>>, graph: Graph<Word>): void => {
+const mergeEdge = (vertex: Map<number, Edge<Word>>, graph: Graph<Word>, selective: string): void => {
   for (const edge of vertex.values()) {
-    if (!punctuation.has(edge.value.text)) {
+    if (!punctuation.has(edge.value.text) || selective.indexOf(edge.value.text) >= 0) {
       continue
     }
 
     for (const prev of graph.vertices[edge.to].values()) {
       const { to, length } = prev
       const { text, code, index, type } = prev.value
-      if (/[a-zA-Z0-9]/.test(text)) {
+      if (alphaPattern.test(text)) {
         continue
       }
 
       if (code.length < 4 && index === 0) {
         const newCode = code + edge.value.code
         const value = new Word(to, text + edge.value.text, type, newCode, code.length, '', 0, '顶')
-        graph.addEdge({ from: edge.from, to, length: edge.length + length - 1, value })
+        const exist = vertex.get(to)
+        const newLength = edge.length + length - 1
+        if (!exist || exist.length > newLength) {
+          graph.addEdge({ from: edge.from, to, length: newLength, value })
+        }
       }
     }
   }
@@ -57,13 +63,14 @@ const getSelectChar = (length: number, index: number, selective: string): string
  * 处理文章计算最佳码长
  * @param content 文章内容
  * @param codings 码表
- * @param selective 选重键
+ * @param setting 设置
  */
-const parse = (content: string, codings: TrieNode, selective: string): ShortestPath<Word> | null => {
+const parse = (content: string, codings: TrieNode, setting: SettingState): ShortestPath<Word> | null => {
   if (!codings) {
     return null
   }
 
+  const { selective, fourthAutoSelect, fifthAutoSelect } = setting
   const graph = new Graph<Word>()
   const contentLength = content.length
   let node: TrieNode
@@ -78,16 +85,23 @@ const parse = (content: string, codings: TrieNode, selective: string): ShortestP
 
       if (sub.value) {
         const next = j + 1
-        const { index, text, code } = sub.value
+        const { index, text, code, fourthSingle } = sub.value
         const length = code.length
         let select = getSelectChar(length, index, selective)
-        if (index === 0 && length === 4 && (next === contentLength || selective.indexOf(content[next]) >= 0)) {
+        // 全码首选
+        const fullCode = index === 0 && length === 4
+        // 不符合四码唯一自动上屏
+        const notFourthAutoSelect = (!fourthAutoSelect || !fourthSingle) && next === contentLength
+        // 不符合第五码首选上屏
+        const notFifthAutoSelect = !fifthAutoSelect || next === contentLength
+        // 后面是选重符号
+        const selectiveNext = selective.indexOf(content[next]) >= 0
+        if (fullCode && (notFourthAutoSelect || notFifthAutoSelect || selectiveNext)) {
           // 该字/词为4码首选，且为最后一个，或者是后续的是选重符号，需要补充空格
           select = selective[0]
         }
 
-        const type = `code${length}`
-        const value = new Word(i, text, type, code, length, select, index)
+        const value = new Word(i, text, `code${length}`, code, length, select, index)
         graph.addEdge({ from: next, to: i, length: length + select.length, value })
       }
       node = sub
@@ -96,10 +110,11 @@ const parse = (content: string, codings: TrieNode, selective: string): ShortestP
 
   // 补全缺失的边
   const vertices = graph.vertices
+  // console.log(vertices)
   for (let i = 1; i <= contentLength; i++) {
     const vertex = vertices[i]
     if (vertex && vertex.size > 0) {
-      mergeEdge(vertex, graph)
+      mergeEdge(vertex, graph, selective)
     } else {
       const text = content[i - 1]
       graph.addEdge({ from: i, to: i - 1, length: 1, value: new Word(i - 1, text) })
@@ -186,7 +201,7 @@ const actions: ActionTree<ArticleState, QuickTypingState> = {
 
     setTimeout(() => {
       const { codings, setting } = rootState
-      const shortest = parse(article.content, codings, setting.selective)
+      const shortest = parse(article.content, codings, setting)
       commit('shortest', shortest)
     })
 

@@ -32,7 +32,6 @@ export default class Words extends Vue {
   }
 
   get codeHint (): boolean {
-    console.log('codeHint')
     return this.hintOptions.indexOf('code') >= 0
   }
 

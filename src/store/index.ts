@@ -21,7 +21,7 @@ const store: StoreOptions<QuickTypingState> = {
   },
 
   actions: {
-    codings ({ commit }, codings: TrieNode) {
+    updateCodings ({ commit }, codings: TrieNode) {
       commit('codings', codings)
     }
   }

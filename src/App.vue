@@ -28,15 +28,14 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { TrieNode } from './store/util/TrieTree'
 import db from './store/util/Database'
-import { Identity } from './store/types'
 import { Action, namespace } from 'vuex-class'
 
 const setting = namespace('setting')
 
 @Component
 export default class Setting extends Vue {
-  @Action('codings')
-  private codings!: Function
+  @Action('updateCodings')
+  private updateCodings!: Function
 
   @setting.Action('load')
   private loadSetting!: Function
@@ -52,10 +51,10 @@ export default class Setting extends Vue {
       }
     })
     // 读取数据库中的码表
-    db.configs.get('codings').then((root: Identity | undefined) => {
+    db.configs.get('codings').then(root => {
       if (root) {
         const node = TrieNode.convert(root)
-        this.codings(node)
+        this.updateCodings(node)
         console.log('Trie tree loaded')
       }
     })

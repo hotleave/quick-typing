@@ -18,6 +18,10 @@ export class Phrase {
    * 选重位置
    */
   index = 0;
+  /**
+   * 编码是为四码唯一
+   */
+  fourthSingle = false;
 
   constructor (text: string, code: string, index?: number) {
     this.text = text
@@ -208,15 +212,11 @@ export class SettingState implements Identity {
    * 是否已从DB中加载
    */
   loaded = false
-  /**
-   * 选重键
-   */
-  selective = '_;\'456789'
 
   /**
    * 未打文字颜色
    */
-  pending = '#606266'
+  pending = '#909399'
   /**
    * 已打文字颜色
    */
@@ -236,9 +236,25 @@ export class SettingState implements Identity {
    */
   hint = false
   /**
+   * 选重键
+   */
+  selective = '_23456789'
+  /**
+   * 是否启用4码唯一时自动上屏
+   */
+  fourthAutoSelect = true
+  /**
+   * 是否启用第5码顶屏
+   */
+  fifthAutoSelect = true
+  /**
    * 提示选项
    */
   hintOptions = ['phrase', 'color', 'select']
+  /**
+   * 标点顶屏提示
+   */
+  punctuationAutoSelectHint = '顶'
   /**
    * 提示颜色
    */
