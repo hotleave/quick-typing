@@ -20,48 +20,53 @@ export default class Words extends Vue {
   @setting.State('hint')
   private hint!: boolean
 
+  @setting.State('punctuationAutoSelectHint')
+  private punctuationAutoSelectHint!: string
+
   @setting.State('hintOptions')
   private hintOptions!: Array<string>
 
-  get colorHint (): boolean {
-    return this.hintOptions.indexOf('color') >= 0
+  get hasColorHint (): boolean {
+    return this.hintOptions.indexOf('color') >= 0 || !this.word.type.startsWith('code')
   }
 
-  get selectHint (): boolean {
-    return this.hintOptions.indexOf('select') >= 0
+  get hasSelectHint (): boolean {
+    return this.hintOptions.indexOf('select') >= 0 && !!this.word.select
   }
 
-  get codeHint (): boolean {
-    return this.hintOptions.indexOf('code') >= 0
+  get hasCodeHint (): boolean {
+    return this.hintOptions.indexOf('code') >= 0 && !!this.word.code
+  }
+
+  get hasAutoSelectHint (): boolean {
+    return this.hintOptions.indexOf('punctuation') >= 0 && this.word.autoSelect
   }
 
   get style (): Array<string> {
     const styles = ['code']
-    const { type } = this.word
 
-    if (this.colorHint || !type.startsWith('code')) {
-      styles.push(type)
+    if (this.hasColorHint) {
+      styles.push(this.word.type)
     }
 
     return styles
   }
 
   get hasHint (): boolean {
-    const { code, select, hint } = this.word
-    return this.hint && ((this.codeHint && !!code) || (this.selectHint && (!!select || !!hint)))
+    return this.hint && (this.hasCodeHint || this.hasSelectHint || this.hasAutoSelectHint)
   }
 
   get hintText (): string {
     let text = ''
-    const { code, select, hint } = this.word
-    if (this.codeHint) {
+    const { code, select } = this.word
+    if (this.hasCodeHint) {
       text += code
     }
-    if (this.selectHint) {
+    if (this.hasSelectHint) {
       text += select
-      if (hint) {
-        text += hint
-      }
+    }
+    if (this.hasAutoSelectHint) {
+      text += this.punctuationAutoSelectHint
     }
     return text
   }

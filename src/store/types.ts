@@ -62,19 +62,19 @@ export class Word {
    */
   type: string;
   /**
-   * 提示
+   * 可以用标点顶屏
    */
-  hint?: string;
+  autoSelect: boolean;
 
-  constructor (id: number, text: string, type = '', code = '', length = 0, select = '', index = -1, hint?: string) {
+  constructor (id: number, text: string, type = '', code = '', length = 0, select = '', index = -1, autoSelect = false) {
     this.id = id
     this.text = text
     this.code = code
     this.select = select
-    this.hint = hint
     this.length = length
     this.index = index
     this.type = type
+    this.autoSelect = autoSelect
   }
 }
 
@@ -236,9 +236,29 @@ export class SettingState implements Identity {
    */
   hint = false
   /**
-   * 选重键
+   * 候选词条数
+   */
+  pageSize = 9
+  /**
+   * 最大页数，超过指定页数的候选词丢弃, `0`为不限制
+   */
+  maxIndex = 0
+  /**
+   * 选重键，用于提示
    */
   selective = '_23456789'
+  /**
+   * 下一页按键
+   */
+  nextPage = '+'
+  /**
+   * 额外的二三选键
+   */
+  extra23Selective = ';\''
+  /**
+   * 在出现以下字符时需要手动选取全码首选候选词
+   */
+  disableAutoSelectText = '2;3\'4567890 　２；３’４５６７８９０'
   /**
    * 是否启用4码唯一时自动上屏
    */
@@ -250,7 +270,7 @@ export class SettingState implements Identity {
   /**
    * 提示选项
    */
-  hintOptions = ['phrase', 'color', 'select']
+  hintOptions = ['phrase', 'color', 'select', 'punctuation']
   /**
    * 标点顶屏提示
    */

@@ -148,7 +148,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   // 比赛结果
   result (state, getters, { article, setting }): string {
     const statistics: Map<string, string> = new Map([
-      ['identity', `第${article.identity}段`],
+      ['identity', `第${article.identity || 1}段`],
       ['typeSpeed', `速度${getters.typeSpeed}`],
       ['hitSpeed', `击键${getters.hitSpeed}`],
       ['codeLength', `码长${getters.codeLength}`],

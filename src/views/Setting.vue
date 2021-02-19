@@ -1,5 +1,5 @@
 <template>
-  <el-form :model="form" label-suffix=":" label-width="8rem">
+  <el-form ref="settingForm" :model="form" :rules="rules" label-suffix=":" label-width="16rem">
     <el-tabs>
       <el-tab-pane label="基本设置">
         <el-form-item label="未打颜色">
@@ -24,9 +24,29 @@
             <el-checkbox-button v-for="o in hintOptions" :label="o.value" :key="o.value" :disabled="o.disabled">{{ o.text }}</el-checkbox-button>
           </el-checkbox-group>
         </el-form-item>
-        <el-form-item v-if="form.hint" label="选重键">
+        <el-form-item v-if="form.hint" label="候选词条数" prop="pageSize">
+          <el-input type="number" step="1" v-model.number="form.pageSize"/>
+          <span class="el-upload__tip">输入法候选词条数量，需与输入法设置一致</span>
+        </el-form-item>
+        <el-form-item v-if="form.hint" label="最大候选词位置" prop="maxIndex">
+          <el-input type="number" step="1" v-model.number="form.maxIndex"/>
+          <span class="el-upload__tip">超过该位置的候选词将被丢弃</span>
+        </el-form-item>
+        <el-form-item v-if="form.hint" label="选择键">
           <el-input v-model="form.selective"/>
-          <span class="el-upload__tip">长度需对应输入法候选词数量</span>
+          <span class="el-upload__tip">长度需对应输入法候选词条数量</span>
+        </el-form-item>
+        <el-form-item v-if="form.hint" label="额外的二三候选词选择键">
+          <el-input v-model="form.extra23Selective" size="2"/>
+          <span class="el-upload__tip">如果不用可留空</span>
+        </el-form-item>
+        <el-form-item v-if="form.hint" label="无效顶屏字符">
+          <el-input v-model="form.disableAutoSelectText"/>
+          <span class="el-upload__tip">在首选字词后出现以上字符时，顶屏将不可用，需要手动选择</span>
+        </el-form-item>
+        <el-form-item v-if="form.hint" label="翻页键">
+          <el-input v-model="form.nextPage" size="1"/>
+          <span class="el-upload__tip">下一页候选词条键</span>
         </el-form-item>
         <el-form-item v-if="form.hint" label="四码唯一自动上屏">
           <el-switch v-model="form.fourthAutoSelect"/>
@@ -45,23 +65,23 @@
             <div class="el-upload__tip" slot="tip">文本格式文件，UTF8编码，多多格式，即`字  编码`，每行一条记录</div>
           </el-upload>
         </el-form-item>
-        <el-form-item v-if="form.hint" label="标点顶屏提示">
-          <el-input v-model="form.punctuationAutoSelectHint"/>
-        </el-form-item>
-        <el-form-item v-if="form.hint" label="提示颜色">
+        <el-form-item v-if="showHintColor" label="提示颜色">
           <el-color-picker v-model="form.hintColor"/>
         </el-form-item>
-        <el-form-item v-if="form.hint" label="一码颜色">
+        <el-form-item v-if="colorHintEnabled" label="一码颜色">
           <el-color-picker v-model="form.code1"/>
         </el-form-item>
-        <el-form-item v-if="form.hint" label="二码颜色">
+        <el-form-item v-if="colorHintEnabled" label="二码颜色">
           <el-color-picker v-model="form.code2"/>
         </el-form-item>
-        <el-form-item v-if="form.hint" label="三码颜色">
+        <el-form-item v-if="colorHintEnabled" label="三码颜色">
           <el-color-picker v-model="form.code3"/>
         </el-form-item>
-        <el-form-item v-if="form.hint" label="全码颜色">
+        <el-form-item v-if="colorHintEnabled" label="全码颜色">
           <el-color-picker v-model="form.code4"/>
+        </el-form-item>
+        <el-form-item v-if="form.hint && form.hintOptions.indexOf('punctuation') >= 0" label="标点顶屏提示">
+          <el-input v-model="form.punctuationAutoSelectHint"/>
         </el-form-item>
       </el-tab-pane>
       <el-tab-pane label="成绩设置">
@@ -105,6 +125,7 @@ import db from '../store/util/Database'
 import punctuation from '../store/util/punctuation'
 import { SettingState } from '../store/types'
 import { Action, namespace } from 'vuex-class'
+import { Form } from 'element-ui'
 
 class Duplicate {
   text: string;
@@ -125,7 +146,8 @@ const HINT_OPTIONS = [
   { value: 'phrase', text: '词语', disabled: true },
   { value: 'color', text: '颜色' },
   { value: 'select', text: '选重' },
-  { value: 'code', text: '编码' }
+  { value: 'code', text: '编码' },
+  { value: 'punctuation', text: '顶屏' }
 ]
 
 const RESULT_OPTIONS = [
@@ -175,6 +197,17 @@ export default class Setting extends Vue {
 
   private isIndeterminate = true
 
+  private rules = {
+    maxIndex: [
+      { required: true, type: 'number', message: '请输入最大候选词条位置，如不限制，请输入"0"', trigger: 'blur' },
+      { type: 'number', min: 0, message: '最大候选词条位置不得小于0', trigger: 'blur' }
+    ],
+    pageSize: [
+      { required: true, type: 'number', message: '请输入候每页选词条数', trigger: 'blur' },
+      { type: 'number', min: 1, message: '每页候选词条数不得小于1', trigger: 'blur' }
+    ]
+  }
+
   handleCheckAllChange (val: boolean) {
     this.form.resultOptions = val ? RESULT_OPTIONS.map(v => v.value) : ['identity', 'typeSpeed', 'hitSpeed', 'codeLength']
     this.isIndeterminate = !val
@@ -184,6 +217,16 @@ export default class Setting extends Vue {
     const checkedCount = value.length
     this.checkAll = checkedCount === this.resultOptions.length
     this.isIndeterminate = checkedCount > 0 && checkedCount < this.resultOptions.length
+  }
+
+  get colorHintEnabled (): boolean {
+    const { hint, hintOptions } = this.form
+    return hint && hintOptions.indexOf('color') >= 0
+  }
+
+  get showHintColor (): boolean {
+    const { hint, hintOptions } = this.form
+    return hint && (hintOptions.indexOf('code') >= 0 || hintOptions.indexOf('select') >= 0)
   }
 
   /**
@@ -251,9 +294,16 @@ export default class Setting extends Vue {
   }
 
   submitForm (): void {
-    db.configs.put(this.form).then(() => {
-      this.$message({ message: '保存成功', type: 'success', showClose: true })
-      this.updateSetting(this.form)
+    (this.$refs.settingForm as Form).validate((valid: boolean) => {
+      if (valid) {
+        db.configs.put(this.form).then(() => {
+          this.$message({ message: '保存成功', type: 'success', showClose: true })
+          this.updateSetting(this.form)
+        })
+      } else {
+        this.$message({ message: '检验失败', type: 'warning', showClose: true, duration: 5000 })
+        return false
+      }
     })
   }
 
