@@ -127,7 +127,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   hint ({ input }, getters, { article }): string {
     const { shortest } = article
     const length = input.length
-    if (!shortest || length === shortest.path.length) {
+    if (!shortest || length >= shortest.path.length) {
       return '-'
     }
 
@@ -221,17 +221,18 @@ const mutations: MutationTree<RacingState> = {
     state.retry = retry
   },
 
-  typing (state, e): void {
+  typing (state, { e, selectiveText }: { e: KeyboardEvent; selectiveText: string }): void {
     let typed = e.key
     switch (typed) {
       case 'Shift':
         typed = '⇧'
         break
       case 'Enter':
-        typed = '↵'
+        typed = '¶'
         state.enter++
         break
       case 'Backspace':
+      case 'Delete':
         typed = '⌫'
         state.backspace++
         break
@@ -239,8 +240,34 @@ const mutations: MutationTree<RacingState> = {
         typed = '_'
         break
       case 'Escape':
-      case 'Meta':
+      case 'F1':
+      case 'F2':
+      case 'F3':
+      case 'F4':
+      case 'F5':
+      case 'F6':
+      case 'F7':
+      case 'F8':
+      case 'F9':
+      case 'F10':
+      case 'F11':
+      case 'F12':
+      case 'F13':
+      case 'Insert':
+      case 'Help':
         typed = ''
+        break
+      case 'Control':
+        typed = '⌃'
+        break
+      case 'Alt':
+        typed = '⌥'
+        break
+      case 'Meta':
+        typed = '⌘'
+        break
+      case 'CapsLock':
+        typed = '⇪'
         break
       case 'ArrowUp':
         typed = '↑'
@@ -263,9 +290,16 @@ const mutations: MutationTree<RacingState> = {
       case 'Tab':
         typed = '⇆'
         break
+      case 'PageUp':
+        typed = '«'
+        break
+      case 'PageDown':
+        typed = '»'
+        break
     }
 
     state.keys += typed
+    console.log(typed)
 
     if (leftHandKeys.indexOf(typed) >= 0) {
       state.leftHand++
@@ -274,7 +308,7 @@ const mutations: MutationTree<RacingState> = {
     }
 
     // 判断选重
-    if (e.isComposing && ';\'23456789'.indexOf(e.key) >= 0) {
+    if (e.isComposing && selectiveText.indexOf(e.key) > 0) {
       state.selective++
     }
   },
@@ -322,7 +356,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     }
   },
 
-  typing ({ commit, state }, e) {
+  typing ({ commit, state, rootState }, e) {
     if (state.status === 'init') {
       commit('start')
       const interval = 1000
@@ -334,7 +368,8 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
       commit('timer', id)
     }
 
-    commit('typing', e)
+    const { selectiveText } = rootState.setting
+    commit('typing', { e, selectiveText })
   },
 
   accept ({ commit, state, rootState }, content: string): void {

@@ -246,19 +246,15 @@ export class SettingState implements Identity {
   /**
    * 选重键，用于提示
    */
-  selective = '_23456789'
+  selective = '␣23456789'
   /**
    * 下一页按键
    */
   nextPage = '+'
   /**
-   * 额外的二三选键
+   * 选重键对应文本，在首选字后出现以下字符时需要手动上屏
    */
-  extra23Selective = ';\''
-  /**
-   * 在出现以下字符时需要手动选取全码首选候选词
-   */
-  disableAutoSelectText = '2;3\'4567890 　２；３’４５６７８９０'
+  selectiveText = ' 234567890;+\'　２３４５６７８９０＋；’'
   /**
    * 是否启用4码唯一时自动上屏
    */
@@ -270,7 +266,7 @@ export class SettingState implements Identity {
   /**
    * 提示选项
    */
-  hintOptions = ['phrase', 'color', 'select', 'punctuation']
+  hintOptions = ['phrase', 'color', 'select', 'autoSelect']
   /**
    * 标点顶屏提示
    */
@@ -326,4 +322,8 @@ export class SettingState implements Identity {
    * 个性签名内容
    */
   signatureText = ''
+  /**
+   * 标点码表
+   */
+  punctuations: Map<string, string> = new Map()
 }

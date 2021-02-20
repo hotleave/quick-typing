@@ -12,9 +12,9 @@ const alphaPattern = /[a-zA-Z0-9]/
  * @param graph DAG图
  */
 const mergeEdge = (vertex: Map<number, Edge<Word>>, graph: Graph<Word>, setting: SettingState): void => {
-  const { disableAutoSelectText, fourthAutoSelect } = setting
+  const { selectiveText, fourthAutoSelect } = setting
   for (const edge of vertex.values()) {
-    if (!punctuation.has(edge.value.text) || disableAutoSelectText.indexOf(edge.value.text) >= 0) {
+    if (!punctuation.has(edge.value.text) || selectiveText.indexOf(edge.value.text) >= 0) {
       continue
     }
 
@@ -72,7 +72,7 @@ const parse = (content: string, codings: TrieNode, setting: SettingState): Short
     return null
   }
 
-  const { selective, pageSize, maxIndex, fourthAutoSelect, fifthAutoSelect, nextPage, disableAutoSelectText } = setting
+  const { selective, pageSize, maxIndex, fourthAutoSelect, fifthAutoSelect, nextPage, selectiveText } = setting
   const max = maxIndex === 0 ? Infinity : maxIndex
   const graph = new Graph<Word>()
   const contentLength = content.length
@@ -97,16 +97,16 @@ const parse = (content: string, codings: TrieNode, setting: SettingState): Short
         const length = code.length
         let select = getSelectChar(length, index, selective, pageSize, nextPage)
         // 全码首选
-        const fullCode = index === 0 && length === 4
-        // 不符合四码唯一自动上屏: 未启用四码唯一自动上屏，或不是四码唯一
-        const notFourthAutoSelect = !fourthAutoSelect || !fourthSingle
-        // 不符合第五码首选上屏：未启用第五码时首选上屏，或已是最后一个字
-        const notFifthAutoSelect = (!fifthAutoSelect || next === contentLength) && notFourthAutoSelect
-        // 需要第5码顶屏，但是后面是选重符号
-        const disableAutoSelect = !notFifthAutoSelect && disableAutoSelectText.indexOf(content[next]) >= 0
-        if (fullCode && ((notFourthAutoSelect && notFifthAutoSelect) || disableAutoSelect)) {
-          // 该字/词为4码首选，且为最后一个，或者是后续的是选重符号，需要补充空格
-          select = selective[0]
+        const fullCodeFirst = index === 0 && length === 4
+        if (fullCodeFirst) {
+          // 无法适用四码唯一自动上屏: 未启用四码唯一自动上屏，或不是四码唯一
+          const notAutoSelect4 = !fourthAutoSelect || fourthSingle
+          // 无法适用第五码首选上屏：未启用第五码时首选上屏，或已是最后一个字，或后面是选重符号
+          const notAutoSelect5 = !fifthAutoSelect || next === contentLength || selectiveText.indexOf(content[next]) >= 0
+          if (notAutoSelect4 && notAutoSelect5) {
+            // 该字/词为4码首选，且无法使用四码唯一上屏，也无法使用第5码顶屏，需要手动上屏
+            select = selective[0]
+          }
         }
 
         const value = new Word(i, text, `code${length}`, code, length, select, index)
