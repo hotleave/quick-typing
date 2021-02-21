@@ -2,7 +2,6 @@ import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
 import { ArticleState, QuickTypingState, SettingState, Word } from './types'
 import { Edge, Graph, ShortestPath } from './util/Graph'
 import { TrieNode } from './util/TrieTree'
-import { punctuation } from './util/punctuation'
 
 const alphaPattern = /[a-zA-Z0-9]/
 
@@ -12,20 +11,20 @@ const alphaPattern = /[a-zA-Z0-9]/
  * @param graph DAG图
  */
 const mergeEdge = (vertex: Map<number, Edge<Word>>, graph: Graph<Word>, setting: SettingState): void => {
-  const { selectiveText, fourthAutoSelect } = setting
+  const { selectiveText, fourthAutoSelect, punctuations } = setting
   for (const edge of vertex.values()) {
-    if (!punctuation.has(edge.value.text) || selectiveText.indexOf(edge.value.text) >= 0) {
+    if (!punctuations.has(edge.value.text) || selectiveText.indexOf(edge.value.text) >= 0) {
       continue
     }
 
     for (const prev of graph.vertices[edge.to].values()) {
       const { to, length } = prev
-      const { text, code, index, type } = prev.value
+      const { text, code, index, type, fourthSingle } = prev.value
       if (alphaPattern.test(text)) {
         continue
       }
 
-      if ((code.length < 4 || !fourthAutoSelect) && index === 0) {
+      if ((code.length < 4 || !fourthAutoSelect || !fourthSingle) && index === 0) {
         const newCode = code + edge.value.code
         const value = new Word(to, text + edge.value.text, type, newCode, code.length, '', 0, true)
         const exist = vertex.get(to)
@@ -109,7 +108,7 @@ const parse = (content: string, codings: TrieNode, setting: SettingState): Short
           }
         }
 
-        const value = new Word(i, text, `code${length}`, code, length, select, index)
+        const value = new Word(i, text, `code${length}`, code, length, select, index, false, fourthSingle)
         graph.addEdge({ from: next, to: i, length: length + select.length, value })
       }
       node = sub
@@ -121,12 +120,15 @@ const parse = (content: string, codings: TrieNode, setting: SettingState): Short
   // console.log(vertices)
   for (let i = 1; i <= contentLength; i++) {
     const vertex = vertices[i]
-    if (vertex && vertex.size > 0) {
-      mergeEdge(vertex, graph, setting)
-    } else {
+    if (!vertex || vertex.size === 0) {
       const text = content[i - 1]
       graph.addEdge({ from: i, to: i - 1, length: 1, value: new Word(i - 1, text, 'pending', text) })
     }
+  }
+
+  // 计算标点顶屏
+  for (let i = 1; i <= contentLength; i++) {
+    mergeEdge(vertices[i], graph, setting)
   }
 
   return graph.shortestPath()

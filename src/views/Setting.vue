@@ -1,6 +1,6 @@
 <template>
   <el-form ref="settingForm" :model="form" :rules="rules" label-suffix=":" label-width="16rem">
-    <el-tabs>
+    <el-tabs v-model="activeTab">
       <el-tab-pane label="基本设置" name="basic">
         <el-form-item label="未打颜色">
           <el-color-picker v-model="form.pending"></el-color-picker>
@@ -55,7 +55,7 @@
             accept=".tsv,.txt"
             :auto-upload="false"
             :show-file-list="false"
-            :on-change="loadPhrase">
+            :on-change="loadCodings">
             <i class="el-icon-upload"></i>
             <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
             <div class="el-upload__tip" slot="tip">文本格式文件，UTF8编码，多多格式，即`字  编码`，每行一条记录</div>
@@ -80,10 +80,32 @@
           <el-input v-model="form.punctuationAutoSelectHint"/>
         </el-form-item>
       </el-tab-pane>
-      <!-- <el-tab-pane v-if="form.hint" label="标点设置" name="punctuation">
-        <el-table :data="form.punctuations.values()">
-        </el-table>
-      </el-tab-pane> -->
+      <el-tab-pane v-if="form.hint" label="标点设置" name="punctuation">
+        <el-form-item label="标点用于">
+          <el-switch v-model="form.addPunctuationToCodings" active-text="码表及顶屏计算" inactive-text="顶屏计算"/>
+        </el-form-item>
+        <el-form-item>
+          <el-table ref="punctuationTable" :data="punctuations" border :height="punctuationTableHeight" size="mini">
+            <el-table-column prop="key" label="标点"/>
+            <el-table-column prop="value" label="编码" v-if="form.addPunctuationToCodings"/>
+            <el-table-column label="操作">
+              <template slot-scope="scope">
+                <el-popconfirm
+                  confirm-button-text='好的'
+                  cancel-button-text='不用了'
+                  @confirm="deletePunctuation(scope.$index, scope.row, punctuations)"
+                  icon="el-icon-info"
+                  icon-color="red"
+                  title="确定要删除这个标点吗？"
+                >
+                  <el-button slot="reference" type="text" size="small">移除</el-button>
+                </el-popconfirm>
+                <el-button @click.native.prevent="addPunctuation(scope.$index)" type="text" size="small">添加</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </el-form-item>
+      </el-tab-pane>
       <el-tab-pane label="成绩设置" name="result">
         <el-form-item label="选项">
           <el-checkbox :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全选</el-checkbox>
@@ -115,6 +137,20 @@
       <el-button type="primary" @click="submitForm">保存</el-button>
       <el-button @click="resetForm">重置</el-button>
     </el-form-item>
+    <el-dialog title="添加标点" :visible="punctuationFormVisiable">
+      <el-form :model="punctuationForm" inline>
+        <el-form-item label="标点">
+          <el-input v-model="punctuationForm.key"/>
+        </el-form-item>
+        <el-form-item label="编码">
+          <el-input v-model="punctuationForm.value"/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="punctuationFormVisiable = false">取 消</el-button>
+        <el-button type="primary" @click="submitPunctuationForm()">确 定</el-button>
+      </div>
+    </el-dialog>
   </el-form>
 </template>
 
@@ -122,10 +158,9 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { TrieTree } from '../store/util/TrieTree'
 import db from '../store/util/Database'
-import punctuation from '../store/util/punctuation'
 import { SettingState } from '../store/types'
 import { Action, namespace } from 'vuex-class'
-import { Form } from 'element-ui'
+import { Form, Table } from 'element-ui'
 
 class Duplicate {
   text: string;
@@ -138,6 +173,11 @@ class Duplicate {
   increase (): void {
     this.count += 1
   }
+}
+
+interface KeyValue {
+  key: string;
+  value: string;
 }
 
 const setting = namespace('setting')
@@ -197,6 +237,14 @@ export default class Setting extends Vue {
 
   private isIndeterminate = true
 
+  private activeTab = 'basic'
+
+  private punctuationFormVisiable = false
+
+  private punctuationIndex = -1
+
+  private punctuationForm = { key: '', value: '' }
+
   private rules = {
     maxIndex: [
       { required: true, type: 'number', message: '请输入最大候选词条位置，如不限制，请输入"0"', trigger: 'blur' },
@@ -206,22 +254,6 @@ export default class Setting extends Vue {
       { required: true, type: 'number', message: '请输入候每页选词条数', trigger: 'blur' },
       { type: 'number', min: 1, message: '每页候选词条数不得小于1', trigger: 'blur' }
     ]
-  }
-
-  handleCheckAllChange (val: boolean) {
-    this.form.resultOptions = val ? RESULT_OPTIONS.map(v => v.value) : ['identity', 'typeSpeed', 'hitSpeed', 'codeLength']
-    this.isIndeterminate = !val
-  }
-
-  handleCheckedResultChange (value: string) {
-    const checkedCount = value.length
-    this.checkAll = checkedCount === this.resultOptions.length
-    this.isIndeterminate = checkedCount > 0 && checkedCount < this.resultOptions.length
-  }
-
-  isHintOptionEnabled (option: string): boolean {
-    const { hint, hintOptions } = this.form
-    return hint && hintOptions.indexOf(option) >= 0
   }
 
   get colorHintEnabled (): boolean {
@@ -240,11 +272,39 @@ export default class Setting extends Vue {
     return this.selectHintEnabled || this.isHintOptionEnabled('code') || this.autoSelectHintEnabled
   }
 
+  get punctuationTableHeight (): number {
+    return window.innerHeight - 300
+  }
+
+  get punctuations (): Array<KeyValue> {
+    const result: Array<KeyValue> = []
+    for (const [key, value] of this.form.punctuations) {
+      result.push({ key, value })
+    }
+    return result
+  }
+
+  handleCheckAllChange (val: boolean) {
+    this.form.resultOptions = val ? RESULT_OPTIONS.map(v => v.value) : ['identity', 'typeSpeed', 'hitSpeed', 'codeLength']
+    this.isIndeterminate = !val
+  }
+
+  handleCheckedResultChange (value: string) {
+    const checkedCount = value.length
+    this.checkAll = checkedCount === this.resultOptions.length
+    this.isIndeterminate = checkedCount > 0 && checkedCount < this.resultOptions.length
+  }
+
+  isHintOptionEnabled (option: string): boolean {
+    const { hint, hintOptions } = this.form
+    return hint && hintOptions.indexOf(option) >= 0
+  }
+
   /**
    * 处理码表文件
    * @param file 码表文件
    */
-  loadPhrase (file: { raw: File }): void {
+  loadCodings (file: { raw: File }): void {
     const reader = new FileReader()
     reader.onload = () => {
       const trie = new TrieTree()
@@ -280,8 +340,10 @@ export default class Setting extends Vue {
           }
         })
 
-      for (const entry of punctuation.entries()) {
-        trie.put(entry[0], entry[1], -1)
+      if (this.form.addToCodings) {
+        for (const [key, value] of this.form.punctuations) {
+          trie.put(key, value, -1)
+        }
       }
 
       // 记录四码唯一词
@@ -302,6 +364,23 @@ export default class Setting extends Vue {
     }
 
     reader.readAsText(file.raw)
+  }
+
+  deletePunctuation (index: number, row: KeyValue, punctuations: Array<KeyValue>): void {
+    punctuations.splice(index, 1)
+    this.form.punctuations.delete(row.key)
+  }
+
+  addPunctuation (index: number): void {
+    this.punctuationIndex = index
+    this.punctuationFormVisiable = true
+  }
+
+  submitPunctuationForm (): void {
+    const punctuations = (this.$refs.punctuationTable as Table).data as Array<KeyValue>
+    punctuations.splice(this.punctuationIndex + 1, 0, this.punctuationForm)
+    this.form.punctuations = new Map(punctuations.map(v => [v.key, v.value]))
+    this.punctuationFormVisiable = false
   }
 
   submitForm (): void {

@@ -1,4 +1,4 @@
-export const punctuation = new Map<string, string>([
+export const punctuations = new Map<string, string>([
   ['　', '␣'],
   ['，', ','],
   ['。', '.'],
@@ -79,4 +79,4 @@ export const punctuation = new Map<string, string>([
   ['}', '⇧]']
 ])
 
-export default punctuation
+export default punctuations

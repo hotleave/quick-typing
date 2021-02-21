@@ -228,16 +228,19 @@ const mutations: MutationTree<RacingState> = {
         typed = '⇧'
         break
       case 'Enter':
-        typed = '¶'
+        typed = '⏎'
         state.enter++
         break
       case 'Backspace':
-      case 'Delete':
         typed = '⌫'
         state.backspace++
         break
+      case 'Delete':
+        typed = '⌦'
+        state.backspace++
+        break
       case ' ':
-        typed = '_'
+        typed = '␣'
         break
       case 'Escape':
       case 'F1':

@@ -39,7 +39,7 @@ export default class Words extends Vue {
   }
 
   get hasAutoSelectHint (): boolean {
-    return this.hintOptions.indexOf('punctuation') >= 0 && this.word.autoSelect
+    return this.hintOptions.indexOf('autoSelect') >= 0 && this.word.autoSelect
   }
 
   get style (): Array<string> {

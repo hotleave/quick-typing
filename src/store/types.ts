@@ -1,5 +1,6 @@
 import { ShortestPath } from './util/Graph'
 import { TrieNode } from './util/TrieTree'
+import { punctuations } from './util/punctuation'
 
 export interface Identity {
   id?: string;
@@ -65,8 +66,12 @@ export class Word {
    * 可以用标点顶屏
    */
   autoSelect: boolean;
+  /**
+   * 四码唯一
+   */
+  fourthSingle: boolean;
 
-  constructor (id: number, text: string, type = '', code = '', length = 0, select = '', index = -1, autoSelect = false) {
+  constructor (id: number, text: string, type = '', code = '', length = 0, select = '', index = -1, autoSelect = false, fourthSingle = false) {
     this.id = id
     this.text = text
     this.code = code
@@ -75,6 +80,7 @@ export class Word {
     this.index = index
     this.type = type
     this.autoSelect = autoSelect
+    this.fourthSingle = fourthSingle
   }
 }
 
@@ -323,7 +329,15 @@ export class SettingState implements Identity {
    */
   signatureText = ''
   /**
+   * 加入码表
+   */
+  addToCodings = ['numbers', 'letters', 'punctuations']
+  /**
    * 标点码表
    */
-  punctuations: Map<string, string> = new Map()
+  punctuations = punctuations
+  /**
+   * 将标点加入码表中
+   */
+  addPunctuationToCodings = false
 }
