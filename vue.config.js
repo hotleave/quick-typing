@@ -10,6 +10,11 @@ module.exports = {
       args[0].title = name
       return args
     })
+    config.module.rule('md')
+      .test(/\.md/)
+      .use('raw-loader')
+      .loader('raw-loader')
+      .end()
   },
 
   productionSourceMap: false
