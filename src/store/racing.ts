@@ -302,7 +302,7 @@ const mutations: MutationTree<RacingState> = {
     }
 
     state.keys += typed
-    console.log(typed)
+    // console.log(typed)
 
     if (leftHandKeys.indexOf(typed) >= 0) {
       state.leftHand++

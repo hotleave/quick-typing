@@ -18,7 +18,7 @@ const mergeEdge = (vertex: Map<number, Edge<Word>>, graph: Graph<Word>, setting:
     }
 
     for (const prev of graph.vertices[edge.to].values()) {
-      const { to, length } = prev
+      const { to } = prev
       const { text, code, index, type, fourthSingle } = prev.value
       if (alphaPattern.test(text)) {
         continue
@@ -28,7 +28,7 @@ const mergeEdge = (vertex: Map<number, Edge<Word>>, graph: Graph<Word>, setting:
         const newCode = code + edge.value.code
         const value = new Word(to, text + edge.value.text, type, newCode, code.length, '', 0, true)
         const exist = vertex.get(to)
-        const newLength = edge.length + length - 1
+        const newLength = newCode.length
         if (!exist || exist.length > newLength) {
           graph.addEdge({ from: edge.from, to, length: newLength, value })
         }
@@ -197,6 +197,9 @@ const mutations: MutationTree<ArticleState> = {
       }
       const { code, select } = edge.value
       codes += code + select
+      if ((code + select).length > edge.length) {
+        console.log(edge)
+      }
       i = path[i]
     }
 
@@ -212,6 +215,7 @@ const actions: ActionTree<ArticleState, QuickTypingState> = {
     setTimeout(() => {
       const { codings, setting } = rootState
       const shortest = parse(article.content, codings, setting)
+      console.log(shortest)
       commit('shortest', shortest)
     })
 
