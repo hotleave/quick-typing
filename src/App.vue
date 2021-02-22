@@ -2,6 +2,7 @@
   <div id="app">
     <el-container>
       <el-aside width="64px">
+        <el-avatar size="large" class="logo" :src="require('@/assets/logo.png')"/>
         <el-menu
           :router="true"
           :collapse="true"
@@ -78,6 +79,9 @@ html,body {
 .el-aside {
   background-color: #545c64;
   color: #FFFFFF;
+}
+.logo {
+  margin: 5px 12px;
 }
 
 #app{
