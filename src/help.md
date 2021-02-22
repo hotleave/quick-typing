@@ -1,0 +1,3 @@
+# Quick Typing
+
+QuickTyping，中式英语，直译快打，快来打，打得快，越来越快……

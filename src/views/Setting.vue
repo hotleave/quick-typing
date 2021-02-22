@@ -20,37 +20,6 @@
           <el-form-item label="词语提示">
             <el-switch v-model="form.hint"/>
           </el-form-item>
-          <el-form-item v-if="form.hint" label="提示选项">
-            <el-checkbox-group v-model="form.hintOptions">
-              <el-checkbox-button v-for="o in hintOptions" :label="o.value" :key="o.value" :disabled="o.disabled">{{ o.text }}</el-checkbox-button>
-            </el-checkbox-group>
-          </el-form-item>
-          <el-form-item v-if="selectHintEnabled" label="候选词条数" prop="pageSize">
-            <el-input type="number" step="1" v-model.number="form.pageSize"/>
-            <span class="el-upload__tip">输入法候选词条数量，需与输入法设置一致</span>
-          </el-form-item>
-          <el-form-item v-if="selectHintEnabled" label="翻页键">
-            <el-input v-model="form.nextPage" size="1"/>
-            <span class="el-upload__tip">下一页候选词条键</span>
-          </el-form-item>
-          <el-form-item v-if="selectHintEnabled" label="最大候选词位置" prop="maxIndex">
-            <el-input type="number" step="1" v-model.number="form.maxIndex"/>
-            <span class="el-upload__tip">超过该位置的候选词将被丢弃</span>
-          </el-form-item>
-          <el-form-item v-if="selectHintEnabled" label="选重键">
-            <el-input v-model="form.selective"/>
-            <span class="el-upload__tip">用于选重提示，长度需对应输入法候选词条数量</span>
-          </el-form-item>
-          <el-form-item v-if="selectHintEnabled" label="选重键文本">
-            <el-input v-model="form.selectiveText"/>
-            <span class="el-upload__tip">在首选字词后出现以上字符时，顶屏将不可用，需要手动选择</span>
-          </el-form-item>
-          <el-form-item v-if="selectHintEnabled" label="四码唯一自动上屏">
-            <el-switch v-model="form.fourthAutoSelect"/>
-          </el-form-item>
-          <el-form-item v-if="selectHintEnabled" label="第五码首选上屏">
-            <el-switch v-model="form.fifthAutoSelect"/>
-          </el-form-item>
           <el-form-item v-if="form.hint" label="码表文件">
             <el-upload drag action="#"
               accept=".tsv,.txt"
@@ -61,6 +30,40 @@
               <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
               <div class="el-upload__tip" slot="tip">文本格式文件，UTF8编码，多多格式，即`字  编码`，每行一条记录</div>
             </el-upload>
+          </el-form-item>
+          <el-form-item v-if="form.hint" label="提示选项">
+            <el-checkbox-group v-model="form.hintOptions">
+              <el-checkbox-button v-for="o in hintOptions" :label="o.value" :key="o.value" :disabled="o.disabled">{{ o.text }}</el-checkbox-button>
+            </el-checkbox-group>
+          </el-form-item>
+          <el-form-item v-if="selectHintEnabled" label="候选词条数" prop="pageSize">
+            <el-input type="number" step="1" v-model.number="form.pageSize"/>
+            <span class="el-upload__tip">输入法候选词条数量，需与输入法设置一致</span>
+          </el-form-item>
+          <el-form-item v-if="form.hint" label="最大候选词位置" prop="maxIndex">
+            <el-input type="number" step="1" v-model.number="form.maxIndex"/>
+            <span class="el-upload__tip">超过该位置的候选词将被丢弃</span>
+          </el-form-item>
+          <el-form-item v-if="selectHintEnabled" label="翻页键">
+            <el-input v-model="form.nextPage" size="1"/>
+            <span class="el-upload__tip">下一页候选词条键</span>
+          </el-form-item>
+          <el-form-item v-if="selectHintEnabled" label="选重键">
+            <el-input v-model="form.selective"/>
+            <span class="el-upload__tip">用于选重提示，长度需对应输入法候选词条数量</span>
+          </el-form-item>
+          <el-form-item v-if="selectHintEnabled" label="选重键文本">
+            <el-input v-model="form.selectiveText"/>
+            <span class="el-upload__tip">在首选字词后出现以上字符时，顶屏将不可用，需要手动选择</span>
+          </el-form-item>
+          <el-form-item v-if="autoSelectHintEnabled" label="标点顶屏提示">
+            <el-input v-model="form.punctuationAutoSelectHint"/>
+          </el-form-item>
+          <el-form-item v-if="selectHintEnabled" label="四码唯一自动上屏">
+            <el-switch v-model="form.fourthAutoSelect"/>
+          </el-form-item>
+          <el-form-item v-if="selectHintEnabled" label="第五码首选上屏">
+            <el-switch v-model="form.fifthAutoSelect"/>
           </el-form-item>
           <el-form-item v-if="showHintColor" label="提示颜色">
             <el-color-picker v-model="form.hintColor"/>
@@ -76,9 +79,6 @@
           </el-form-item>
           <el-form-item v-if="colorHintEnabled" label="全码颜色">
             <el-color-picker v-model="form.code4"/>
-          </el-form-item>
-          <el-form-item v-if="autoSelectHintEnabled" label="标点顶屏提示">
-            <el-input v-model="form.punctuationAutoSelectHint"/>
           </el-form-item>
         </el-tab-pane>
         <el-tab-pane v-if="form.hint" label="标点设置" name="punctuation">

@@ -18,6 +18,14 @@
             <i class="el-icon-setting"></i>
             <span slot="title">设置</span>
           </el-menu-item>
+          <el-menu-item index="/reward">
+            <i class="el-icon-tableware"></i>
+            <span slot="title">奖赏</span>
+          </el-menu-item>
+          <el-menu-item index="/about">
+            <i class="el-icon-question"></i>
+            <span slot="title">关于</span>
+          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-main><router-view/></el-main>
@@ -79,6 +87,7 @@ html,body {
 .el-aside {
   background-color: #545c64;
   color: #FFFFFF;
+  overflow-x: hidden;
 }
 .logo {
   margin: 5px 12px;

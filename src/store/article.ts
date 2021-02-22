@@ -197,9 +197,6 @@ const mutations: MutationTree<ArticleState> = {
       }
       const { code, select } = edge.value
       codes += code + select
-      if ((code + select).length > edge.length) {
-        console.log(edge)
-      }
       i = path[i]
     }
 
@@ -215,7 +212,6 @@ const actions: ActionTree<ArticleState, QuickTypingState> = {
     setTimeout(() => {
       const { codings, setting } = rootState
       const shortest = parse(article.content, codings, setting)
-      console.log(shortest)
       commit('shortest', shortest)
     })
 
