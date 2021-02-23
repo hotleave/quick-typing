@@ -1,5 +1,5 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { ArticleState, QuickTypingState, SettingState, Word } from './types'
+import { ArticleState, Coding, QuickTypingState, SettingState, Word } from './types'
 import { Edge, Graph, ShortestPath } from './util/Graph'
 import { TrieNode } from './util/TrieTree'
 
@@ -60,6 +60,11 @@ const getSelectChar = (length: number, index: number, selective: string, pageSiz
   return select + selective[alt]
 }
 
+const codingBeforeMaxIndex = (codings: Array<Coding>, maxIndex: number): Coding | null => {
+  const filtered = codings.filter(v => v.index <= maxIndex)
+  return filtered && filtered.length > 0 ? filtered[0] : null
+}
+
 /**
  * 处理文章计算最佳码长
  * @param content 文章内容
@@ -86,12 +91,13 @@ const parse = (content: string, codings: TrieNode, setting: SettingState): Short
       }
 
       if (sub.value) {
-        const { index, text, code, fourthSingle } = sub.value
-        if (index >= max) {
-          // 如果超过了最大词条位置，则不再使用
+        const { text, codings } = sub.value
+        const coding = codingBeforeMaxIndex(codings, max)
+        if (!coding) {
           break
         }
 
+        const { index, code, fourthSingle } = coding
         const next = j + 1
         const length = code.length
         let select = getSelectChar(length, index, selective, pageSize, nextPage)
@@ -99,7 +105,7 @@ const parse = (content: string, codings: TrieNode, setting: SettingState): Short
         const fullCodeFirst = index === 0 && length === 4
         if (fullCodeFirst) {
           // 无法适用四码唯一自动上屏: 未启用四码唯一自动上屏，或不是四码唯一
-          const notAutoSelect4 = !fourthAutoSelect || fourthSingle
+          const notAutoSelect4 = !fourthAutoSelect || !fourthSingle
           // 无法适用第五码首选上屏：未启用第五码时首选上屏，或已是最后一个字，或后面是选重符号
           const notAutoSelect5 = !fifthAutoSelect || next === contentLength || selectiveText.indexOf(content[next]) >= 0
           if (notAutoSelect4 && notAutoSelect5) {

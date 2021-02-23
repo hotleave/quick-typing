@@ -6,15 +6,15 @@ export interface Identity {
   id?: string;
 }
 
-export class Phrase {
-  /**
-   * 文本
-   */
-  text: string;
+export class Coding {
   /**
    * 编码
    */
   code: string;
+  /**
+   * 权重
+   */
+  weight: number;
   /**
    * 选重位置
    */
@@ -24,12 +24,28 @@ export class Phrase {
    */
   fourthSingle = false;
 
-  constructor (text: string, code: string, index?: number) {
-    this.text = text
+  constructor (weight: number, code: string, index?: number) {
     this.code = code
+    this.weight = weight
     if (index !== undefined) {
       this.index = index
     }
+  }
+}
+
+export class Phrase {
+  /**
+   * 文本
+   */
+  text: string;
+  /**
+   * 编码
+   */
+  codings: Array<Coding>
+
+  constructor (weight: number, text: string, code: string, index?: number) {
+    this.text = text
+    this.codings = [new Coding(weight, code, index)]
   }
 }
 

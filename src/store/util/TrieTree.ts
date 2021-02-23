@@ -1,4 +1,6 @@
-import { Identity, Phrase } from '../types'
+import { Coding, Identity, Phrase } from '../types'
+
+const compareFn = (a: Coding, b: Coding) => a.weight - b.weight
 
 export class TrieNode implements Identity {
   public id?: string
@@ -69,7 +71,13 @@ export class TrieTree {
       node = sub
     }
 
-    node.value = new Phrase(text, code, index)
+    const length = code.length
+    const weight = (index === -1 || (index === 0 && length === 4) ? length + 0.05 : length + 1) * 10 + Math.max(index, 0)
+    if (node.value) {
+      node.value.codings.push(new Coding(weight, code, index))
+    } else {
+      node.value = new Phrase(weight, text, code, index)
+    }
   }
 
   /**
@@ -87,5 +95,21 @@ export class TrieTree {
     }
 
     return node.value
+  }
+
+  sort (node?: TrieNode): void {
+    if (!node) {
+      node = this.root
+    }
+
+    if (node.value && node.value.codings.length > 1) {
+      node.value.codings.sort(compareFn)
+    }
+
+    if (node.children) {
+      for (const val of node.children.values()) {
+        this.sort(val)
+      }
+    }
   }
 }

@@ -318,7 +318,7 @@ export default class Setting extends Vue {
       const trie = new TrieTree()
       const lines = (reader.result as string).split(/[\r\n]/)
       const fullCodeMap = new Map<string, Duplicate>()
-      let count = 0
+      let index = 0
       let lastCode = ''
       lines.map(line => line.split('\t'))
         .filter(line => line.length === 2)
@@ -336,16 +336,13 @@ export default class Setting extends Vue {
           }
 
           if (code === lastCode) {
-            ++count
+            ++index
           } else {
-            count = 0
+            index = 0
             lastCode = code
           }
 
-          const exist = trie.get(text)
-          if (!exist || exist.code.length > code.length) {
-            trie.put(text, code, count)
-          }
+          trie.put(text, code, index)
         })
 
       if (this.form.addToCodings) {
@@ -355,15 +352,21 @@ export default class Setting extends Vue {
       }
 
       // 记录四码唯一词
-      for (const duplicate of fullCodeMap.values()) {
+      for (const [code, duplicate] of fullCodeMap.entries()) {
         if (duplicate.count > 1) {
           continue
         }
         const phrase = trie.get(duplicate.text)
         if (phrase) {
-          phrase.fourthSingle = true
+          phrase.codings.filter(v => v.code === code).every(v => {
+            v.fourthSingle = true
+            // 四码唯一时，权重减0.2: 3码首选=40，4码唯一=40.3， 4码首选=40.5
+            v.weight -= 0.2
+          })
         }
       }
+
+      trie.sort()
 
       db.configs.put(trie.root).then(() => {
         this.updateCodings(trie.root)
