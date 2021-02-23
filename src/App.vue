@@ -18,10 +18,6 @@
             <i class="el-icon-setting"></i>
             <span slot="title">设置</span>
           </el-menu-item>
-          <el-menu-item index="/reward">
-            <i class="el-icon-tableware"></i>
-            <span slot="title">奖赏</span>
-          </el-menu-item>
           <el-menu-item index="/about">
             <i class="el-icon-question"></i>
             <span slot="title">关于</span>

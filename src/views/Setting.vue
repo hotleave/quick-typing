@@ -44,13 +44,17 @@
             <el-input type="number" step="1" v-model.number="form.maxIndex"/>
             <span class="el-upload__tip">超过该位置的候选词将被丢弃</span>
           </el-form-item>
-          <el-form-item v-if="selectHintEnabled" label="翻页键">
+          <el-form-item v-if="selectHintEnabled" label="翻页提示">
             <el-input v-model="form.nextPage" size="1"/>
             <span class="el-upload__tip">下一页候选词条键</span>
           </el-form-item>
-          <el-form-item v-if="selectHintEnabled" label="选重键">
+          <el-form-item v-if="selectHintEnabled" label="选重提示">
             <el-input v-model="form.selective"/>
             <span class="el-upload__tip">用于选重提示，长度需对应输入法候选词条数量</span>
+          </el-form-item>
+          <el-form-item v-if="selectHintEnabled" label="非首选键">
+            <el-input v-model="form.altSelectKey"/>
+            <span class="el-upload__tip">选择非首选词条时所用的键，如果使用了";,"作为2，3选时，也需填入</span>
           </el-form-item>
           <el-form-item v-if="selectHintEnabled" label="选重键文本">
             <el-input v-model="form.selectiveText"/>
@@ -309,6 +313,7 @@ export default class Setting extends Vue {
    */
   loadCodings (file: { raw: File }): void {
     const reader = new FileReader()
+    // Fixme 候选词条数限制，需要将所有编码加入， 如：叁 -> df5, lnd, lndb
     reader.onload = () => {
       const trie = new TrieTree()
       const lines = (reader.result as string).split(/[\r\n]/)

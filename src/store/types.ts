@@ -260,7 +260,11 @@ export class SettingState implements Identity {
   /**
    * 选重键对应文本，在首选字后出现以下字符时需要手动上屏
    */
-  selectiveText = ' 234567890;+\'　２３４５６７８９０＋；’'
+  selectiveText = ' 1234567890;+\'＋；’'
+  /**
+   * 非首选键，用于判断选重率
+   */
+  altSelectKey = '234567890;\''
   /**
    * 是否启用4码唯一时自动上屏
    */

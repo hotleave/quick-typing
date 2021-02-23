@@ -4,7 +4,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import help from '@/help.md'
+import help from '@/docs/help.md'
 import showdown from 'showdown'
 
 const converter = new showdown.Converter()

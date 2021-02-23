@@ -221,7 +221,7 @@ const mutations: MutationTree<RacingState> = {
     state.retry = retry
   },
 
-  typing (state, { e, selectiveText }: { e: KeyboardEvent; selectiveText: string }): void {
+  typing (state, { e, altSelectKey }: { e: KeyboardEvent; altSelectKey: string }): void {
     let typed = e.key
     switch (typed) {
       case 'Shift':
@@ -311,7 +311,7 @@ const mutations: MutationTree<RacingState> = {
     }
 
     // 判断选重
-    if (e.isComposing && selectiveText.indexOf(e.key) > 0) {
+    if (e.isComposing && altSelectKey.indexOf(e.key) >= 0) {
       state.selective++
     }
   },
@@ -371,8 +371,8 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
       commit('timer', id)
     }
 
-    const { selectiveText } = rootState.setting
-    commit('typing', { e, selectiveText })
+    const { altSelectKey } = rootState.setting
+    commit('typing', { e, altSelectKey })
   },
 
   accept ({ commit, state, rootState }, content: string): void {
