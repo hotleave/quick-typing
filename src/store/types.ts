@@ -322,10 +322,6 @@ export class SettingState implements Identity {
    * 替换空格
    */
   replaceSpace = true
-  /**
-   * 替换英文标点符号
-   */
-  replacePunctuation = false
 
   /**
    * 结果选项

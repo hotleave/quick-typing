@@ -42,7 +42,7 @@ export default class Article extends Vue {
 
   get articleStyle (): Array<string> {
     let mode = 'inline'
-    if (this.hint && this.shortest !== null && (this.codeHint || this.selectHint)) {
+    if (this.hint && this.shortest && (this.codeHint || this.selectHint || this.autoSelectHint)) {
       mode = 'grid'
     }
     return ['article', mode]
@@ -56,6 +56,10 @@ export default class Article extends Vue {
     return this.hintOptions.indexOf('code') >= 0
   }
 
+  get autoSelectHint (): boolean {
+    return this.hintOptions.indexOf('autoSelect') >= 0
+  }
+
   get words (): Array<Word> {
     const length = this.content.length
     if (length === 0) {
@@ -64,7 +68,7 @@ export default class Article extends Vue {
 
     const input = this.input
     const words: Array<Word> = []
-    if (!this.hint || this.shortest === null) {
+    if (!this.hint || !this.shortest) {
       const inputLength = input.length
       const typed = this.content.substring(0, inputLength)
       this.check(0, input, typed, words)

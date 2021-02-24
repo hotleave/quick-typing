@@ -144,25 +144,30 @@ const parseIdentity = (content: string): string => {
   return content.replace(/-+第(\d+)段.*/, '$1')
 }
 
-const parseArticle = (content: string): ArticleState => {
+const parseArticle = (content: string, setting: SettingState): ArticleState => {
   const lines = content.split(/[\r\n]/)
   const totalLines = lines.length
-  let title = ''
-  let identity = ''
+  let title = '未知'
+  let identity = '1'
 
   if (totalLines > 1) {
-    identity = parseIdentity(lines[totalLines - 1])
-    if (identity === lines[totalLines - 1]) {
-      identity = ''
+    // 超过一行时尝试解析
+    const id = parseIdentity(lines[totalLines - 1])
+    if (id !== lines[totalLines - 1]) {
+      identity = id
+
+      if (totalLines === 2) {
+        content = lines[0]
+      } else {
+        title = lines[0]
+        content = lines.slice(1, totalLines - 1).join('')
+      }
     }
   }
 
-  if (identity && lines.length >= 3) {
-    title = lines[0]
-    content = lines[1]
-  } else if (lines.length === 2) {
-    content = lines[0]
-    identity = lines.pop() || ''
+  if (setting.replaceSpace) {
+    // 替换空白
+    content = content.replace(/\s/gm, '')
   }
 
   return { title, content, identity, shortest: null }
@@ -212,7 +217,8 @@ const mutations: MutationTree<ArticleState> = {
 
 const actions: ActionTree<ArticleState, QuickTypingState> = {
   loadArticle ({ commit, rootState }, content: string): void {
-    const article = parseArticle(content)
+    const { setting } = rootState
+    const article = parseArticle(content, setting)
     commit('load', article)
 
     setTimeout(() => {
