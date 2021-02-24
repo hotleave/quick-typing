@@ -11,19 +11,21 @@ const statusMap = new Map<string, string>([
   ['finished', '结束']
 ])
 
-const formatTime = (time: number): string => {
-  let total = time
+const formatTime = (time: number, mill = 3): string => {
+  let total = time / 1000
   if (total < 60) {
-    return `${time.toFixed(3)}`
+    return `${total.toFixed(mill)}`
   }
 
   const seconds = total % 60
   total = (total - seconds) / 60
-  return `${total.toFixed(0)}:${seconds.toFixed(3)}`
+  if (total < 60) {
+    return `${total.toFixed(0)}:${seconds.toFixed(mill)}`
+  }
 
-  // const minutes = total % 60
-  // total = (total - minutes) / 60
-  // return `${total.toFixed(0)}:${minutes.toFixed(0)}′${seconds.toFixed(3)}″`
+  const minutes = total % 60
+  total = (total - minutes) / 60
+  return `${total.toFixed(0)}:${minutes.toFixed(0)}:${seconds.toFixed(mill)}″`
 }
 
 const codeHint = (edge: Edge<Word>): string => {
@@ -118,10 +120,10 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
 
   passTime ({ time }): string {
     if (time === 0) {
-      return '--:--.---'
+      return '--:--'
     }
 
-    return formatTime(time)
+    return formatTime(time, 0)
   },
 
   // 进度
