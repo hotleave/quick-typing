@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-form ref="settingForm" :model="form" :rules="rules" label-suffix=":" label-width="16rem">
-      <el-tabs v-model="activeTab">
+      <el-tabs v-model="activeTab" tab-position="left">
         <el-tab-pane label="基本设置" name="basic">
           <el-form-item label="未打颜色">
             <el-color-picker v-model="form.pending"></el-color-picker>

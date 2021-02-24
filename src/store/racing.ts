@@ -14,18 +14,16 @@ const statusMap = new Map<string, string>([
 const formatTime = (time: number): string => {
   let total = time
   if (total < 60) {
-    return `${time.toFixed(3)}″`
+    return `${time.toFixed(3)}`
   }
 
   const seconds = total % 60
   total = (total - seconds) / 60
-  if (total < 60) {
-    return `${total.toFixed(0)}′${seconds.toFixed(3)}″`
-  }
+  return `${total.toFixed(0)}:${seconds.toFixed(3)}`
 
-  const minutes = total % 60
-  total = (total - minutes) / 60
-  return `${total.toFixed(0)}:${minutes.toFixed(0)}′${seconds.toFixed(3)}″`
+  // const minutes = total % 60
+  // total = (total - minutes) / 60
+  // return `${total.toFixed(0)}:${minutes.toFixed(0)}′${seconds.toFixed(3)}″`
 }
 
 const codeHint = (edge: Edge<Word>): string => {
@@ -116,6 +114,14 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
     } else {
       return (time + new Date().getTime() - start) / 1000
     }
+  },
+
+  passTime ({ time }): string {
+    if (time === 0) {
+      return '--:--.---'
+    }
+
+    return formatTime(time)
   },
 
   // 进度

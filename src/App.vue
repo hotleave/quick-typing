@@ -1,17 +1,13 @@
 <template>
   <div id="app">
     <el-container>
-      <el-aside width="64px">
-        <el-avatar size="large" class="logo" :src="require('@/assets/logo.png')"/>
+      <el-header>
         <el-menu
           :router="true"
-          :collapse="true"
           :default-active="pathname"
-          background-color="#545c64"
-          text-color="#fff"
-          active-text-color="#ffd04b">
+          mode="horizontal">
           <el-menu-item index="/">
-            <i class="el-icon-menu"></i>
+            <i class="el-icon-s-home"></i>
             <span slot="title">主界面</span>
           </el-menu-item>
           <el-menu-item index="/setting">
@@ -23,8 +19,10 @@
             <span slot="title">关于</span>
           </el-menu-item>
         </el-menu>
-      </el-aside>
-      <el-main><router-view/></el-main>
+      </el-header>
+      <el-main>
+        <router-view/>
+      </el-main>
     </el-container>
   </div>
 </template>
@@ -70,23 +68,19 @@ export default class Setting extends Vue {
 <style lang="scss">
 :root {
   font-size: 16px;
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
 }
+
+@font-face {
+  font-family: "Digital7 mono";
+  src: url("/font/digital-7-mono.ttf") format("truetype");
+}
+
 html,body {
   width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
-}
-.el-container {
-  height: 100%;
-}
-.el-aside {
-  background-color: #545c64;
-  color: #FFFFFF;
-  overflow-x: hidden;
-}
-.logo {
-  margin: 5px 12px;
 }
 
 #app{

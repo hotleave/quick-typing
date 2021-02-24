@@ -1,20 +1,34 @@
 <template>
   <div>
-    <el-row :gutter="10" type="flex">
-      <el-col :span="24">
+    <el-container>
+      <el-aside>
         <Indicator/>
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-col :span="24">
-        <Article ref="article"/>
-      </el-col>
-    </el-row>
-    <el-row>
-      <el-col :span="24">
-        <Racing ref="racing"/>
-      </el-col>
-    </el-row>
+      </el-aside>
+      <el-main>
+        <el-row>
+          <el-button-group>
+            <el-button type="primary" size="mini" icon="el-icon-document">载文</el-button>
+            <el-button type="primary" size="mini" icon="el-icon-video-pause">暂停</el-button>
+            <el-button type="primary" size="mini" icon="el-icon-video-play">继续</el-button>
+            <el-button type="primary" size="mini" icon="el-icon-refresh">重打</el-button>
+          </el-button-group>
+        </el-row>
+        <el-row :gutter="10" type="flex">
+          <el-col :span="24">
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <Article ref="article"/>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <Racing ref="racing"/>
+          </el-col>
+        </el-row>
+      </el-main>
+    </el-container>
   </div>
 </template>
 
