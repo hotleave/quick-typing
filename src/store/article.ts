@@ -19,14 +19,15 @@ const mergeEdge = (vertex: Map<number, Edge<Word>>, graph: Graph<Word>, setting:
 
     for (const prev of graph.vertices[edge.to].values()) {
       const { to } = prev
-      const { text, code, index, type, fourthSingle } = prev.value
+      const { text, type, codings } = prev.value
+      const { code, fourthSingle, index } = codings[0]
       if (alphaPattern.test(text)) {
         continue
       }
 
       if ((code.length < 4 || !fourthAutoSelect || !fourthSingle) && index === 0) {
-        const newCode = code + edge.value.code
-        const value = new Word(to, text + edge.value.text, type, newCode, code.length, '', 0, true)
+        const newCode = code + edge.value.codings[0].code
+        const value = new Word(to, text + edge.value.text, type, true, '', [new Coding(0, newCode, -1)])
         const exist = vertex.get(to)
         const newLength = newCode.length
         if (!exist || exist.length > newLength) {
@@ -37,32 +38,9 @@ const mergeEdge = (vertex: Map<number, Edge<Word>>, graph: Graph<Word>, setting:
   }
 }
 
-/**
- * 获取选重键
- * @param length 码长
- * @param index 候选词所在位置
- * @param selective 所有选重键
- * @param pageSize 每页候选词条数
- * @param nextPage 下一页按键
- */
-const getSelectChar = (length: number, index: number, selective: string, pageSize: number, nextPage: string): string => {
-  // index < 0 表示无须选重
-  if (index < 0 || (length === 4 && index === 0)) {
-    return ''
-  }
-
-  let alt = index
-  let select = ''
-  while (alt >= pageSize) {
-    select += nextPage
-    alt -= pageSize
-  }
-  return select + selective[alt]
-}
-
-const codingBeforeMaxIndex = (codings: Array<Coding>, maxIndex: number): Coding | null => {
+const codingsBeforeMaxIndex = (codings: Array<Coding>, maxIndex: number): Array<Coding> => {
   const filtered = codings.filter(v => v.index <= maxIndex)
-  return filtered && filtered.length > 0 ? filtered[0] : null
+  return filtered && filtered.length > 0 ? filtered : codings
 }
 
 /**
@@ -71,12 +49,12 @@ const codingBeforeMaxIndex = (codings: Array<Coding>, maxIndex: number): Coding 
  * @param codings 码表
  * @param setting 设置
  */
-const parse = (content: string, codings: TrieNode, setting: SettingState): ShortestPath<Word> | null => {
+const parse = (content: string, codings: TrieNode, setting: SettingState, getSelectChar: Function): ShortestPath<Word> | null => {
   if (!codings) {
     return null
   }
 
-  const { selective, pageSize, maxIndex, fourthAutoSelect, fifthAutoSelect, nextPage, selectiveText } = setting
+  const { selective, selectiveText, maxIndex, fourthAutoSelect, fifthAutoSelect } = setting
   const max = maxIndex === 0 ? Infinity : maxIndex
   const graph = new Graph<Word>()
   const contentLength = content.length
@@ -92,15 +70,12 @@ const parse = (content: string, codings: TrieNode, setting: SettingState): Short
 
       if (sub.value) {
         const { text, codings } = sub.value
-        const coding = codingBeforeMaxIndex(codings, max)
-        if (!coding) {
-          break
-        }
+        const matched = codingsBeforeMaxIndex(codings, max)
 
-        const { index, code, fourthSingle } = coding
+        const { index, code, fourthSingle } = matched[0]
         const next = j + 1
         const length = code.length
-        let select = getSelectChar(length, index, selective, pageSize, nextPage)
+        let select = getSelectChar(index, length)
         // 全码首选
         const fullCodeFirst = index === 0 && length === 4
         if (fullCodeFirst) {
@@ -114,7 +89,7 @@ const parse = (content: string, codings: TrieNode, setting: SettingState): Short
           }
         }
 
-        const value = new Word(i, text, `code${length}`, code, length, select, index, false, fourthSingle)
+        const value = new Word(i, text, `code${length}`, false, select, matched)
         graph.addEdge({ from: next, to: i, length: length + select.length, value })
       }
       node = sub
@@ -128,7 +103,7 @@ const parse = (content: string, codings: TrieNode, setting: SettingState): Short
     const vertex = vertices[i]
     if (!vertex || vertex.size === 0) {
       const text = content[i - 1]
-      graph.addEdge({ from: i, to: i - 1, length: 1, value: new Word(i - 1, text, 'pending', text) })
+      graph.addEdge({ from: i, to: i - 1, length: 1, value: new Word(i - 1, text, 'pending', false, '', [new Coding(0, '❓', -1)]) })
     }
   }
 
@@ -216,14 +191,16 @@ const mutations: MutationTree<ArticleState> = {
 }
 
 const actions: ActionTree<ArticleState, QuickTypingState> = {
-  loadArticle ({ commit, rootState }, content: string): void {
+  loadArticle ({ commit, rootState, rootGetters }, content: string): void {
     const { setting } = rootState
     const article = parseArticle(content, setting)
     commit('load', article)
 
     setTimeout(() => {
       const { codings, setting } = rootState
-      const shortest = parse(article.content, codings, setting)
+      const getSelectChar = rootGetters['setting/getSelectChar']
+      // console.log(getSelectChar)
+      const shortest = parse(article.content, codings, setting, getSelectChar)
       commit('shortest', shortest)
     })
 

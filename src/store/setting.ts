@@ -21,6 +21,25 @@ const getters: GetterTree<SettingState, QuickTypingState> = {
       '--code3': code3,
       '--code4': code4
     }
+  },
+
+  getSelectChar (): Function {
+    return (index: number, length: number): string => {
+      // index < 0 表示无须选重
+      // 四码首选暂时设置为无须选重
+      if (index < 0 || (length === 4 && index === 0)) {
+        return ''
+      }
+
+      const { selective, pageSize, nextPage } = state
+      let alt = index
+      let page = ''
+      while (alt >= pageSize) {
+        page += nextPage
+        alt -= pageSize
+      }
+      return page + selective[alt]
+    }
   }
 }
 

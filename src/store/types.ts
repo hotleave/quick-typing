@@ -59,21 +59,9 @@ export class Word {
    */
   text: string;
   /**
-   * 编码
-   */
-  code: string;
-  /**
-   * 码长
-   */
-  length: number;
-  /**
    * 选重
    */
   select: string;
-  /**
-   *  位置
-   */
-  index: number;
   /**
    * 类别
    */
@@ -83,20 +71,17 @@ export class Word {
    */
   autoSelect: boolean;
   /**
-   * 四码唯一
+   * 编码
    */
-  fourthSingle: boolean;
+  codings: Array<Coding>;
 
-  constructor (id: number, text: string, type = '', code = '', length = 0, select = '', index = -1, autoSelect = false, fourthSingle = false) {
+  constructor (id: number, text: string, type = '', autoSelect = false, select = '', codings: Array<Coding> = []) {
     this.id = id
     this.text = text
-    this.code = code
     this.select = select
-    this.length = length
-    this.index = index
     this.type = type
     this.autoSelect = autoSelect
-    this.fourthSingle = fourthSingle
+    this.codings = codings
   }
 }
 

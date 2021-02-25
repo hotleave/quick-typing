@@ -4,20 +4,16 @@
       <el-aside>
         <Indicator/>
       </el-aside>
-      <el-main>
-        <el-row>
+      <el-main class="main">
+        <el-row class="toolbar">
           <el-button-group>
-            <el-button type="primary" size="mini" icon="el-icon-document">载文</el-button>
-            <el-button type="primary" size="mini" icon="el-icon-video-pause">暂停</el-button>
-            <el-button type="primary" size="mini" icon="el-icon-video-play">继续</el-button>
-            <el-button type="primary" size="mini" icon="el-icon-refresh">重打</el-button>
+            <el-button size="mini" icon="el-icon-document">载文</el-button>
+            <el-button size="mini" icon="el-icon-video-pause">暂停</el-button>
+            <el-button size="mini" icon="el-icon-video-play">继续</el-button>
+            <el-button size="mini" icon="el-icon-refresh">重打</el-button>
           </el-button-group>
         </el-row>
-        <el-row :gutter="10" type="flex">
-          <el-col :span="24">
-          </el-col>
-        </el-row>
-        <el-row>
+        <el-row class="middle">
           <el-col :span="24">
             <Article ref="article"/>
           </el-col>
@@ -50,7 +46,7 @@ const racing = namespace('racing')
   }
 })
 export default class Home extends Vue {
-  @racing.Mutation('pause')
+  @racing.Action('pause')
   private pause!: Function
 
   @racing.Action('resume')

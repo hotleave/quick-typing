@@ -1,30 +1,29 @@
 <template>
-  <div id="app">
-    <el-container>
-      <el-header>
-        <el-menu
-          :router="true"
-          :default-active="pathname"
-          mode="horizontal">
-          <el-menu-item index="/">
-            <i class="el-icon-s-home"></i>
-            <span slot="title">主界面</span>
-          </el-menu-item>
-          <el-menu-item index="/setting">
-            <i class="el-icon-setting"></i>
-            <span slot="title">设置</span>
-          </el-menu-item>
-          <el-menu-item index="/about">
-            <i class="el-icon-question"></i>
-            <span slot="title">关于</span>
-          </el-menu-item>
-        </el-menu>
-      </el-header>
-      <el-main>
-        <router-view/>
-      </el-main>
-    </el-container>
-  </div>
+  <el-container id="app">
+    <el-header>
+      <el-menu
+        :router="true"
+        :default-active="pathname"
+        active-text-color="#409EFF"
+        mode="horizontal">
+        <el-menu-item index="/">
+          <i class="el-icon-s-home"></i>
+          <span slot="title">主界面</span>
+        </el-menu-item>
+        <el-menu-item index="/setting">
+          <i class="el-icon-setting"></i>
+          <span slot="title">设置</span>
+        </el-menu-item>
+        <el-menu-item index="/about">
+          <i class="el-icon-question"></i>
+          <span slot="title">关于</span>
+        </el-menu-item>
+      </el-menu>
+    </el-header>
+    <el-main>
+      <router-view/>
+    </el-main>
+  </el-container>
 </template>
 
 <script lang="ts">
@@ -67,7 +66,7 @@ export default class Setting extends Vue {
 
 <style lang="scss">
 :root {
-  font-size: 16px;
+  font-size: 12px;
   font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
 }
 
@@ -83,8 +82,24 @@ html,body {
   padding: 0;
 }
 
-#app{
+#app {
   width: 100%;
   height: 100%;
+}
+
+.main {
+  padding-top: 0;
+}
+
+.middle {
+  margin: 2rem auto;
+}
+
+.toolbar {
+  text-align: right;
+  padding: 1rem;
+  border: 1px solid #EBEEF5;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 </style>

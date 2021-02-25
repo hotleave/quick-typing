@@ -35,7 +35,7 @@ export default class Words extends Vue {
   }
 
   get hasCodeHint (): boolean {
-    return this.hintOptions.indexOf('code') >= 0 && !!this.word.code
+    return this.hintOptions.indexOf('code') >= 0 && !!this.word.codings[0].code
   }
 
   get hasAutoSelectHint (): boolean {
@@ -58,9 +58,9 @@ export default class Words extends Vue {
 
   get hintText (): string {
     let text = ''
-    const { code, select } = this.word
+    const { select, codings } = this.word
     if (this.hasCodeHint) {
-      text += code
+      text += codings[0].code
     }
     if (this.hasSelectHint) {
       text += select

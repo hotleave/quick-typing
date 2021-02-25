@@ -14,7 +14,6 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const racing = namespace('racing')
-// const article = namespace('article')
 
 @Component
 export default class Racing extends Vue {
@@ -77,7 +76,6 @@ export default class Racing extends Vue {
   border: 1px solid #EBEEF5;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  margin-top: 1rem;
 }
 
 .result {

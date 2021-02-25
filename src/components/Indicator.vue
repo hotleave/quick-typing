@@ -1,10 +1,8 @@
 <template>
-  <el-form class="indicator" :inline="true" label-suffix=":">
-    <el-card>
-      <p class="code-hint">{{ hint }}</p>
-    </el-card>
-    <el-card>
-      <span class="time">{{ passTime }}</span>
+  <div class="indicator">
+    <el-card class="time">
+      <el-progress type="dashboard" :percentage="percentage" :width="200"/>
+      <div>{{ passTime }}</div>
     </el-card>
     <el-card>
       <el-row>
@@ -13,9 +11,6 @@
         </el-col>
       </el-row>
       <el-row>
-        <!-- <el-col :span="8">
-          <el-tag type="info">{{ status }}</el-tag>
-        </el-col> -->
         <el-col :span="6">
           <div class="hint-block">
             <span class="number">{{ backspace }}</span>
@@ -42,7 +37,13 @@
         </el-col>
       </el-row>
     </el-card>
-  </el-form>
+    <el-card v-if="status === 'init' || status === 'typing'">
+      <dl class="code-hint" v-for="word in hint" :key="word.text">
+        <dt><el-tag>{{ word.text }}</el-tag></dt>
+        <dd v-for="coding in word.codings" :key="coding.code">{{ coding.code + getSelectChar(coding.index, coding.length) }}</dd>
+      </dl>
+    </el-card>
+  </div>
 </template>
 
 <script lang="ts">
@@ -50,14 +51,15 @@ import { Component, Vue } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const racing = namespace('racing')
+const setting = namespace('setting')
 
 @Component
 export default class Indicator extends Vue {
+  @racing.State('status')
+  private status!: string
+
   @racing.State('backspace')
   private backspace!: string
-
-  @racing.Getter('statusText')
-  private status!: string
 
   @racing.Getter('typeSpeed')
   private typeSpeed!: string
@@ -72,10 +74,20 @@ export default class Indicator extends Vue {
   private idealCodeLength!: string
 
   @racing.Getter('hint')
-  private hint!: string
+  private hint!: Array<string>
 
   @racing.Getter('passTime')
   private passTime!: string
+
+  @setting.Getter('getSelectChar')
+  private getSelectChar!: Function
+
+  @racing.Getter('progress')
+  private progress!: number
+
+  get percentage (): number {
+    return parseFloat(((this.progress || 0) * 100).toFixed(2))
+  }
 }
 </script>
 
@@ -86,25 +98,22 @@ export default class Indicator extends Vue {
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
   margin-bottom: 1rem;
-  color: #303133;
 
-  .el-form-item {
-    margin-bottom: auto;
-  }
-
-  .code-hint {
-    font-size: 2rem;
+  .el-card {
+    color: #909399;
+    margin-bottom: 1rem;
     text-align: center;
   }
 
   .time {
     font-family: 'Digital7 mono';
     font-size: 3rem;
+    text-align: center;
   }
 
   .speed {
     font-family: 'Digital7 mono';
-    font-size: 3rem;
+    font-size: 4rem;
     text-align: center;
     border-bottom: 1px dashed #E4E7ED;
     padding: 1rem;
@@ -118,11 +127,24 @@ export default class Indicator extends Vue {
     span.number {
       font-size: 1.5rem;
       display: block;
-      color: #606266;
+      color: #909399;
     }
     span.desc {
       font-size: 12px;
-      color: #909399;
+      color: #C0C4CC;
+    }
+  }
+
+  .code-hint {
+    text-align: left;
+    dd {
+      font-size: 1.2rem;
+      letter-spacing: 0.1rem;
+      margin-left: 1rem;
+    }
+    dd::before {
+      content: '-';
+      color: #DCDFE6;
     }
   }
 }

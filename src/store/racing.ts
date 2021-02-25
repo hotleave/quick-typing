@@ -1,6 +1,5 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
 import { QuickTypingState, RacingState, Word } from './types'
-import { Edge } from './util/Graph'
 
 const leftHandKeys = '`12345~!@#$%⇆qwertasdfgzxcvb'
 const statusMap = new Map<string, string>([
@@ -12,25 +11,22 @@ const statusMap = new Map<string, string>([
 ])
 
 const formatTime = (time: number, mill = 3): string => {
-  let total = time / 1000
+  const total = time / 1000
   if (total < 60) {
     return `${total.toFixed(mill)}`
   }
 
   const seconds = total % 60
-  total = (total - seconds) / 60
-  if (total < 60) {
-    return `${total.toFixed(0)}:${seconds.toFixed(mill)}`
-  }
-
-  const minutes = total % 60
-  total = (total - minutes) / 60
-  return `${total.toFixed(0)}:${minutes.toFixed(0)}:${seconds.toFixed(mill)}″`
+  const minutes = (total - seconds) / 60
+  return `${minutes.toFixed(0)}:${seconds.toFixed(mill)}`
 }
 
-const codeHint = (edge: Edge<Word>): string => {
-  const { code, text } = edge.value
-  return `${text}: ${code}`
+const padLeft = (input: string, length: number): string => {
+  if (input.length < length) {
+    return padLeft('0' + input, length)
+  }
+
+  return input
 }
 
 const init = {
@@ -109,21 +105,29 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
     return (100 - delta / total * 100).toFixed(2)
   },
 
-  // 已用时间
+  // 用时
   usedTime ({ status, time, start }): number {
     if (status !== 'typing') {
       return time / 1000
     } else {
-      return (time + new Date().getTime() - start) / 1000
+      return (time + Date.now() - start) / 1000
     }
   },
 
-  passTime ({ time }): string {
-    if (time === 0) {
+  // 计时显示
+  passTime ({ status, time }): string {
+    if (status !== 'typing' && time === 0) {
       return '--:--'
     }
 
-    return formatTime(time, 0)
+    const total = time / 1000
+    if (total < 60) {
+      return `00:${padLeft(total.toFixed(0), 2)}`
+    }
+
+    const seconds = total % 60
+    const minutes = (total - seconds) / 60
+    return `${padLeft(minutes.toFixed(0), 2)}:${padLeft(seconds.toFixed(0), 2)}`
   },
 
   // 进度
@@ -132,25 +136,25 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   },
 
   // 编码提示
-  hint ({ input }, getters, { article }): string {
+  hint ({ input }, getters, { article }): Array<Word> | null {
     const { shortest } = article
     const length = input.length
     if (!shortest || length >= shortest.path.length) {
-      return '-'
+      return null
     }
 
     const { path, vertices } = shortest
     const edge = vertices[path[length]].get(length)
     if (!edge) {
-      return '-'
+      return null
     }
 
     const single = vertices[length + 1].get(length)
     if (!single || edge.value.text.length === 1) {
-      return codeHint(edge)
+      return [edge.value]
     }
 
-    return `${codeHint(edge)} ${codeHint(single)}`
+    return [edge.value, single.value]
   },
 
   // 比赛结果
@@ -209,11 +213,12 @@ const mutations: MutationTree<RacingState> = {
   finish (state): void {
     state.status = 'finished'
     state.time += Date.now() - state.start
+    state.timer = 0
   },
 
   pause (state): void {
     state.status = 'pause'
-    state.time += new Date().getTime() - state.start
+    state.time += Date.now() - state.start
   },
 
   resume (state): void {
@@ -227,6 +232,7 @@ const mutations: MutationTree<RacingState> = {
     Object.assign(state, init)
     state.status = 'init'
     state.retry = retry
+    state.timer = 0
   },
 
   typing (state, { e, altSelectKey }: { e: KeyboardEvent; altSelectKey: string }): void {
@@ -357,7 +363,14 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
 
   retry ({ commit, state }) {
     if (state.status !== 'init') {
+      clearInterval(state.timer)
       commit('retry')
+    }
+  },
+
+  pause ({ commit, state }) {
+    if (state.status === 'typing') {
+      commit('pause')
     }
   },
 
@@ -368,8 +381,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
   },
 
   typing ({ commit, state, rootState }, e) {
-    if (state.status === 'init') {
-      commit('start')
+    if (state.status === 'init' && state.timer === 0) {
       const interval = 1000
       const id = setInterval(() => {
         if (state.status === 'typing') {
@@ -377,6 +389,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
         }
       }, interval)
       commit('timer', id)
+      commit('start')
     }
 
     const { altSelectKey } = rootState.setting
