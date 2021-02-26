@@ -217,6 +217,16 @@ const RESULT_OPTIONS = [
   { value: 'version', text: '版本' }
 ]
 
+/**
+ * 将ascii字符加入词库
+ */
+const addAscii = (trie: TrieTree, from: number, to: number) => {
+  for (let i = from; i <= to; i++) {
+    const char = String.fromCharCode(i)
+    trie.put(char, char, -1)
+  }
+}
+
 @Component
 export default class Setting extends Vue {
   private hintOptions = HINT_OPTIONS
@@ -342,12 +352,6 @@ export default class Setting extends Vue {
           trie.put(text, code, index)
         })
 
-      if (this.form.addToCodings) {
-        for (const [key, value] of this.form.punctuations) {
-          trie.put(key, value, -1)
-        }
-      }
-
       // 记录四码唯一词
       for (const [code, duplicate] of fullCodeMap.entries()) {
         if (duplicate.count > 1) {
@@ -362,7 +366,21 @@ export default class Setting extends Vue {
           })
         }
       }
+      // 0-9
+      addAscii(trie, 48, 57)
+      // a-z
+      addAscii(trie, 65, 90)
+      // A-Z
+      addAscii(trie, 97, 122)
 
+      // 将中文标点加入词库
+      if (this.form.addToCodings) {
+        for (const [key, value] of this.form.punctuations) {
+          trie.put(key, value, -1)
+        }
+      }
+
+      // 将同一个字的多个编码排序
       trie.sort()
 
       db.configs.put(trie.root).then(() => {

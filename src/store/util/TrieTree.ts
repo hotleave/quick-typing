@@ -74,7 +74,10 @@ export class TrieTree {
     const length = code.length
     const weight = (index === -1 || (index === 0 && length === 4) ? length + 0.05 : length + 1) * 10 + Math.max(index, 0)
     if (node.value) {
-      node.value.codings.push(new Coding(weight, code, index))
+      const { codings } = node.value
+      if (codings.findIndex(v => v.code === code) < 0) {
+        codings.push(new Coding(weight, code, index))
+      }
     } else {
       node.value = new Phrase(weight, text, code, index)
     }

@@ -1,8 +1,8 @@
 <template>
   <div class="indicator">
     <el-card class="time">
-      <el-progress type="dashboard" :percentage="percentage" :width="200"/>
-      <div>{{ passTime }}</div>
+      <el-progress type="dashboard" :percentage="percentage" :width="200" :status="progressStatus"/>
+      <span>{{ passTime }}</span>
     </el-card>
     <el-card>
       <el-row>
@@ -88,6 +88,10 @@ export default class Indicator extends Vue {
   get percentage (): number {
     return parseFloat(((this.progress || 0) * 100).toFixed(2))
   }
+
+  get progressStatus (): string | null {
+    return this.status === 'finished' ? 'success' : null
+  }
 }
 </script>
 
@@ -109,6 +113,14 @@ export default class Indicator extends Vue {
     font-family: 'Digital7 mono';
     font-size: 3rem;
     text-align: center;
+    padding-top: 20px;
+
+    span {
+      position: relative;
+      left: 70px;
+      top: -50px;
+      float: left;
+    }
   }
 
   .speed {

@@ -10,8 +10,7 @@ const statusMap = new Map<string, string>([
   ['finished', '结束']
 ])
 
-const formatTime = (time: number, mill = 3): string => {
-  const total = time / 1000
+const formatTime = (total: number, mill = 3): string => {
   if (total < 60) {
     return `${total.toFixed(mill)}`
   }

@@ -89,7 +89,8 @@ const parse = (content: string, codings: TrieNode, setting: SettingState, getSel
           }
         }
 
-        const value = new Word(i, text, `code${length}`, false, select, matched)
+        const type = length === 1 && index === -1 ? 'pending' : `code${length}`
+        const value = new Word(i, text, type, false, select, matched)
         graph.addEdge({ from: next, to: i, length: length + select.length, value })
       }
       node = sub
@@ -181,8 +182,9 @@ const mutations: MutationTree<ArticleState> = {
       if (!edge) {
         break
       }
-      const { code, select } = edge.value
-      codes += code + select
+      const { codings, select, text } = edge.value
+      const code = codings ? codings[0].code : text
+      codes += (code === '❓' ? text + code : code) + select
       i = path[i]
     }
 
