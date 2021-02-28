@@ -32,6 +32,7 @@ const init = {
   status: 'wait',
   input: '',
   keys: '',
+  idealKeys: '',
   time: 0,
   start: 0,
   backspace: 0,
@@ -348,6 +349,10 @@ const mutations: MutationTree<RacingState> = {
 
   timer (state, id): void {
     state.timer = id
+  },
+
+  idealKeys (state, idealKeys): void {
+    state.idealKeys = idealKeys
   }
 }
 
@@ -415,6 +420,10 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
       commit('finish')
       console.log('Input', state.keys)
     }
+  },
+
+  setIdealKeys ({ commit }, idealKeys: string): void {
+    commit('idealKeys', idealKeys)
   }
 }
 

@@ -126,6 +126,10 @@ export interface RacingState {
    */
   keys: string;
   /**
+   * 理想按键序列
+   */
+  idealKeys: string;
+  /**
    * 退格
    */
   backspace: number;

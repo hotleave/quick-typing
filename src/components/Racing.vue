@@ -2,6 +2,7 @@
   <div>
     <el-input class="textarea" type="textarea" rows="6" ref="textarea"
       @keydown.native="typing"
+      @blur="pause"
       @input="accept(input)"
       :disabled="status !== 'typing' && status !== 'init'"
       v-model="input">
@@ -28,6 +29,9 @@ export default class Racing extends Vue {
 
   @racing.Action('accept')
   private accept!: Function
+
+  @racing.Action('pause')
+  private pause!: Function
 
   /**
    * 输入的内容

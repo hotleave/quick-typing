@@ -169,26 +169,7 @@ const mutations: MutationTree<ArticleState> = {
   },
 
   shortest (state, shortest) {
-    if (!shortest) {
-      return
-    }
     state.shortest = shortest
-
-    const { path, vertices } = shortest
-    const length = path.length
-    let codes = ''
-    for (let i = 0; i < length;) {
-      const edge = vertices[path[i]].get(i)
-      if (!edge) {
-        break
-      }
-      const { codings, select, text } = edge.value
-      const code = codings ? codings[0].code : text
-      codes += (code === '❓' ? text + code : code) + select
-      i = path[i]
-    }
-
-    console.log('Shortest codes: ', codes)
   }
 }
 
@@ -201,9 +182,27 @@ const actions: ActionTree<ArticleState, QuickTypingState> = {
     setTimeout(() => {
       const { codings, setting } = rootState
       const getSelectChar = rootGetters['setting/getSelectChar']
-      // console.log(getSelectChar)
       const shortest = parse(article.content, codings, setting, getSelectChar)
-      commit('shortest', shortest)
+      if (shortest) {
+        commit('shortest', shortest)
+
+        const { path, vertices } = shortest
+        const length = path.length
+        let codes = ''
+        for (let i = 0; i < length;) {
+          const edge = vertices[path[i]].get(i)
+          if (!edge) {
+            break
+          }
+          const { codings, select, text } = edge.value
+          const code = codings ? codings[0].code : text
+          codes += (code === '❓' ? text + code : code) + select
+          i = path[i]
+        }
+
+        // console.log('Shortest codes: ', codes)
+        this.dispatch('racing/setIdealKeys', codes)
+      }
     })
 
     // 初始化

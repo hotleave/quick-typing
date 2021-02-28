@@ -7,10 +7,9 @@
       <el-main class="main">
         <el-row class="toolbar">
           <el-button-group>
-            <el-button size="mini" icon="el-icon-document">载文</el-button>
-            <el-button size="mini" icon="el-icon-video-pause">暂停</el-button>
-            <el-button size="mini" icon="el-icon-video-play">继续</el-button>
-            <el-button size="mini" icon="el-icon-refresh">重打</el-button>
+            <el-button size="mini" icon="el-icon-document" @click="loadFromClipboard">载文</el-button>
+            <el-button size="mini" :icon="triggerIcon" @click="trigger">{{ triggerText }}</el-button>
+            <el-button size="mini" icon="el-icon-refresh" @click="retry">重打</el-button>
           </el-button-group>
         </el-row>
         <el-row class="middle">
@@ -46,6 +45,9 @@ const racing = namespace('racing')
   }
 })
 export default class Home extends Vue {
+  @racing.State('status')
+  private status!: string
+
   @racing.Action('pause')
   private pause!: Function
 
@@ -58,12 +60,23 @@ export default class Home extends Vue {
   @article.Action('loadArticle')
   private loadArticle!: Function
 
+  get triggerText (): string {
+    return this.status === 'pause' ? '继续' : '暂停'
+  }
+
+  get triggerIcon (): string {
+    return this.status === 'pause' ? 'el-icon-video-play' : 'el-icon-video-pause'
+  }
+
   created () {
     // 监听快捷键
     document.addEventListener('keydown', this.handleShortCut)
 
     // 监听粘贴事件
     document.addEventListener('paste', this.paste)
+
+    // 切换页面自动暂停
+    window.addEventListener('blur', () => this.pause())
   }
 
   destroyed () {
@@ -77,12 +90,29 @@ export default class Home extends Vue {
   paste (e: ClipboardEvent) {
     e.preventDefault()
 
-    const clipboardData = e.clipboardData
+    const { clipboardData } = e
     if (clipboardData) {
       const pasteContent = clipboardData.getData('text/plain')
       if (pasteContent) {
         this.loadArticle(pasteContent)
       }
+    }
+  }
+
+  async loadFromClipboard () {
+    try {
+      const text = await navigator.clipboard.readText()
+      this.loadArticle(text)
+    } catch (err) {
+      console.error('Failed to read clipboard contents: ', err)
+    }
+  }
+
+  trigger () {
+    if (this.status === 'pause') {
+      this.resume()
+    } else {
+      this.pause()
     }
   }
 
