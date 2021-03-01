@@ -1,7 +1,7 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { QuickTypingState, RacingState, Word } from './types'
+import { LooseObject, QuickTypingState, RacingState, Word } from './types'
+import { keyboard } from './util/keyboard'
 
-const leftHandKeys = '`12345~!@#$%⇆qwertasdfgzxcvb'
 const statusMap = new Map<string, string>([
   ['init', '初始化'],
   ['wait', '等待开始'],
@@ -28,25 +28,13 @@ const padLeft = (input: string, length: number): string => {
   return input
 }
 
-const init = {
-  status: 'wait',
-  input: '',
-  keys: '',
-  idealKeys: '',
-  time: 0,
-  start: 0,
-  backspace: 0,
-  leftHand: 0,
-  rightHand: 0,
-  enter: 0,
-  replace: 0,
-  selective: 0,
-  phrase: 0,
-  retry: 1,
-  timer: 0
+const increaseCount = (map: LooseObject, key: string): LooseObject => {
+  const count = map[key]
+  map[key] = (count || 0) + 1
+  return map
 }
 
-const state: RacingState = Object.assign({}, init)
+const state = new RacingState()
 
 const getters: GetterTree<RacingState, QuickTypingState> = {
   statusText ({ status }): string {
@@ -89,20 +77,38 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   },
 
   // 键准
-  accuracy ({ keys, backspace, replace }, getters): string {
+  accuracy ({ keys, keyCount, replace }, getters): string {
     // 总键数
     const total = keys.length
     // 有效键数 = 总数 - 退格数 - (回改数 * 码长)
+    const backspace = keyCount.Backspace || 0
     const correct = total - backspace - (replace * parseFloat(getters.codeLength))
     return (correct / total * 100).toFixed(2)
   },
 
+  leftHand ({ keys }): number {
+    return keys.map(v => keyboard.get(v)).filter(v => v && v.finger <= 3).length
+  },
+
+  rightHand ({ keys }): number {
+    return keys.map(v => keyboard.get(v)).filter(v => v && v.finger >= 4 && v.finger <= 7).length
+  },
+
   // 键法
-  balance ({ leftHand, rightHand }): string {
+  balance (state, getters): string {
+    const { leftHand, rightHand } = getters
     const total = leftHand + rightHand
     const delta = Math.abs(leftHand - rightHand)
 
     return (100 - delta / total * 100).toFixed(2)
+  },
+
+  enterCount ({ keyCount }): number {
+    return keyCount.Enter || 0
+  },
+
+  backspaceCount ({ keyCount }): number {
+    return keyCount.Backspace || 0
   },
 
   // 用时
@@ -168,16 +174,16 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       ['usedTime', `用时${formatTime(getters.usedTime)}`],
       ['accuracy', `键准${getters.accuracy}%`],
       ['balance', `键法${getters.balance}%`],
-      ['leftHand', `左${state.leftHand}`],
-      ['rightHand', `右${state.rightHand}`],
+      ['leftHand', `左${getters.leftHand}`],
+      ['rightHand', `右${getters.rightHand}`],
       ['idealCodeLength', `理论码长${getters.idealCodeLength}`],
       ['phrase', `打词${state.phrase}`],
       ['phraseRate', `打词率${getters.phraseRate}%`],
       ['selective', `选重${state.selective}`],
       ['replace', `回改${state.replace}`],
       ['keys', `键数${state.keys.length}`],
-      ['backspace', `退格${state.backspace}`],
-      ['enter', `回车${state.enter}`],
+      ['backspace', `退格${getters.backspaceCount}`],
+      ['enter', `回车${getters.enterCount}`],
       ['retry', `重打${state.retry}`],
       ['version', `QuickTyping-${process.env.VUE_APP_VERSION}`]
     ])
@@ -200,7 +206,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
 
 const mutations: MutationTree<RacingState> = {
   init (state): void {
-    Object.assign(state, init)
+    Object.assign(state, new RacingState())
     state.status = 'init'
   },
 
@@ -229,100 +235,18 @@ const mutations: MutationTree<RacingState> = {
   // 重打
   retry (state): void {
     const retry = state.retry + 1
-    Object.assign(state, init)
+    Object.assign(state, new RacingState())
     state.status = 'init'
     state.retry = retry
     state.timer = 0
   },
 
   typing (state, { e, altSelectKey }: { e: KeyboardEvent; altSelectKey: string }): void {
-    let typed = e.key
-    switch (typed) {
-      case 'Shift':
-        typed = '⇧'
-        break
-      case 'Enter':
-        typed = '⏎'
-        state.enter++
-        break
-      case 'Backspace':
-        typed = '⌫'
-        state.backspace++
-        break
-      case 'Delete':
-        typed = '⌦'
-        state.backspace++
-        break
-      case ' ':
-        typed = '␣'
-        break
-      case 'Escape':
-      case 'F1':
-      case 'F2':
-      case 'F3':
-      case 'F4':
-      case 'F5':
-      case 'F6':
-      case 'F7':
-      case 'F8':
-      case 'F9':
-      case 'F10':
-      case 'F11':
-      case 'F12':
-      case 'F13':
-      case 'Insert':
-      case 'Help':
-        typed = ''
-        break
-      case 'Control':
-        typed = '⌃'
-        break
-      case 'Alt':
-        typed = '⌥'
-        break
-      case 'Meta':
-        typed = '⌘'
-        break
-      case 'CapsLock':
-        typed = '⇪'
-        break
-      case 'ArrowUp':
-        typed = '↑'
-        break
-      case 'ArrowRight':
-        typed = '→'
-        break
-      case 'ArrowDown':
-        typed = '↓'
-        break
-      case 'ArrowLeft':
-        typed = '←'
-        break
-      case 'Home':
-        typed = '⇤'
-        break
-      case 'End':
-        typed = '⇥'
-        break
-      case 'Tab':
-        typed = '⇆'
-        break
-      case 'PageUp':
-        typed = '«'
-        break
-      case 'PageDown':
-        typed = '»'
-        break
-    }
-
-    state.keys += typed
-    // console.log(typed)
-
-    if (leftHandKeys.indexOf(typed) >= 0) {
-      state.leftHand++
-    } else {
-      state.rightHand++
-    }
+    const { code } = e
+    const { keyCount, overallCount, keys } = state
+    state.keyCount = increaseCount(keyCount, code)
+    state.overallCount = increaseCount(overallCount, code)
+    keys.push(code)
 
     // 判断选重
     if (e.isComposing && altSelectKey.indexOf(e.key) >= 0) {
@@ -384,7 +308,8 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     }
   },
 
-  typing ({ commit, state, rootState }, e) {
+  typing ({ commit, state, getters, rootState }, e) {
+    console.log(getters.backspaceCount)
     if (state.status === 'init' && state.timer === 0) {
       const interval = 1000
       const id = setInterval(() => {

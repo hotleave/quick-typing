@@ -82,6 +82,7 @@
 </template>
 
 <script lang="ts">
+import { keyboard } from '@/store/util/keyboard'
 import { Component, Vue } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
@@ -92,9 +93,6 @@ const setting = namespace('setting')
 export default class Indicator extends Vue {
   @racing.State('status')
   private status!: string
-
-  @racing.State('backspace')
-  private backspace!: string
 
   @racing.Getter('typeSpeed')
   private typeSpeed!: string
@@ -120,8 +118,14 @@ export default class Indicator extends Vue {
   @racing.State('selective')
   private selective!: number
 
-  @racing.State('enter')
+  @racing.Getter('enterCount')
   private enter!: number
+
+  @racing.Getter('backspaceCount')
+  private backspace!: string
+
+  @racing.State('keyCount')
+  private keyCount!: Map<string, number>
 
   @racing.State('replace')
   private replace!: number
@@ -139,7 +143,7 @@ export default class Indicator extends Vue {
   private progress!: number
 
   @racing.State('keys')
-  private keys!: string
+  private keys!: Array<string>
 
   @racing.State('idealKeys')
   private idealKeys!: string
@@ -167,7 +171,7 @@ export default class Indicator extends Vue {
   showInputKeys () {
     Object.assign(this.drawer, {
       title: '输入编码',
-      text: this.keys
+      text: this.keys.map(v => keyboard.get(v)).map(v => (v && v.key) || '❓').join('')
     })
     this.drawerVisiable = true
   }

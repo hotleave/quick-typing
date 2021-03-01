@@ -104,67 +104,63 @@ export interface ArticleState {
   shortest: ShortestPath<Word> | null;
 }
 
-export interface RacingState {
+export interface LooseObject {
+  [key: string]: any;
+}
+
+export class RacingState {
   /**
    * 状态
    */
-  status: string;
+  status = 'wait';
   /**
    * 输入内容
    */
-  input: string;
+  input = '';
   /**
    * 用时
    */
-  time: number;
+  time = 0;
   /**
    * 开始时间
    */
-  start: number;
+  start = 0;
   /**
    * 按键序列
    */
-  keys: string;
+  keys: Array<string> = [];
   /**
    * 理想按键序列
    */
-  idealKeys: string;
-  /**
-   * 退格
-   */
-  backspace: number;
-  /**
-   * 回车
-   */
-  enter: number;
+  idealKeys = '';
   /**
    * 回改
    */
-  replace: number;
+  replace = 0;
   /**
    * 选重
    */
-  selective: number;
+  selective = 0;
   /**
    * 打词字数
    */
-  phrase: number;
+  phrase = 0;
   /**
    * 重打
    */
-  retry: number;
+  retry = 1;
   /**
    * 计时器
    */
-  timer: number;
+  timer = 0;
   /**
-   * 左手
+   * 键数
    */
-  leftHand: number;
+  keyCount: LooseObject = {};
   /**
-   * 右手
+   * 总键数
    */
-  rightHand: number;
+  overallCount: LooseObject = {};
 }
 
 export interface QuickTypingState {
