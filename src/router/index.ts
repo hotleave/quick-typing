@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import Home from '../views/Home.vue'
-import Setting from '../views/Setting.vue'
 
 Vue.use(VueRouter)
 
@@ -22,7 +21,12 @@ const routes: Array<RouteConfig> = [
   {
     path: '/setting',
     name: 'Setting',
-    component: Setting
+    component: () => import(/* webpackChunkName: "setting" */ '../views/Setting.vue')
+  },
+  {
+    path: '/summary',
+    name: 'Summary',
+    component: () => import(/* webpackChunkName: "summary" */'../views/Summary.vue')
   }
 ]
 

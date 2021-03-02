@@ -14,6 +14,10 @@
           <i class="el-icon-setting"></i>
           <span slot="title">设置</span>
         </el-menu-item>
+        <el-menu-item index="/summary">
+          <i class="el-icon-s-data"></i>
+          <span slot="title">统计</span>
+        </el-menu-item>
         <el-menu-item index="/about">
           <i class="el-icon-question"></i>
           <span slot="title">关于</span>
@@ -31,6 +35,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import { TrieNode } from './store/util/TrieTree'
 import db from './store/util/Database'
 import { Action, namespace } from 'vuex-class'
+import { LooseObject } from './store/types'
 
 const setting = namespace('setting')
 
@@ -38,6 +43,9 @@ const setting = namespace('setting')
 export default class Setting extends Vue {
   @Action('updateCodings')
   private updateCodings!: Function
+
+  @Action('summaryKeyCount')
+  private summaryKeyCount!: Function
 
   @setting.Action('load')
   private loadSetting!: Function
@@ -58,6 +66,14 @@ export default class Setting extends Vue {
         const node = TrieNode.convert(root)
         this.updateCodings(node)
         console.log('Trie tree loaded')
+      }
+    })
+    // 读取按键统计信息
+    db.summary.get('keyCount').then(keyCount => {
+      if (keyCount) {
+        delete keyCount.id
+        this.summaryKeyCount(keyCount as LooseObject<number>)
+        console.log('Key count summary loaded')
       }
     })
   }

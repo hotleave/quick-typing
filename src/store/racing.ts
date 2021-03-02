@@ -1,5 +1,5 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { LooseObject, QuickTypingState, RacingState, Word } from './types'
+import { QuickTypingState, RacingState, Word } from './types'
 import { keyboard } from './util/keyboard'
 
 const statusMap = new Map<string, string>([
@@ -26,12 +26,6 @@ const padLeft = (input: string, length: number): string => {
   }
 
   return input
-}
-
-const increaseCount = (map: LooseObject, key: string): LooseObject => {
-  const count = map[key]
-  map[key] = (count || 0) + 1
-  return map
 }
 
 const state = new RacingState()
@@ -243,9 +237,9 @@ const mutations: MutationTree<RacingState> = {
 
   typing (state, { e, altSelectKey }: { e: KeyboardEvent; altSelectKey: string }): void {
     const { code } = e
-    const { keyCount, overallCount, keys } = state
-    state.keyCount = increaseCount(keyCount, code)
-    state.overallCount = increaseCount(overallCount, code)
+    const { keyCount, keys } = state
+    const count = keyCount[code]
+    keyCount[code] = (count || 0) + 1
     keys.push(code)
 
     // 判断选重
@@ -308,8 +302,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     }
   },
 
-  typing ({ commit, state, getters, rootState }, e) {
-    console.log(getters.backspaceCount)
+  typing ({ commit, state, rootState }, e) {
     if (state.status === 'init' && state.timer === 0) {
       const interval = 1000
       const id = setInterval(() => {
@@ -343,7 +336,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     if (content === article.content) {
       clearInterval(state.timer)
       commit('finish')
-      console.log('Input', state.keys)
+      this.dispatch('summaryKeyCount', state.keyCount)
     }
   },
 

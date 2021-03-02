@@ -11,25 +11,19 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="6">
-          <div class="hint-block">
-            <span class="number">{{ backspace }}</span>
-            <span class="desc">退格</span>
-          </div>
-        </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <div class="hint-block">
             <span class="number">{{ hitSpeed }}</span>
             <span class="desc"><el-button type="text">击键</el-button></span>
           </div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <div class="hint-block">
             <span class="number">{{ codeLength }}</span>
             <span class="desc"><el-button type="text" @click="showInputKeys">码长</el-button></span>
           </div>
         </el-col>
-        <el-col :span="6">
+        <el-col :span="8">
           <div class="hint-block">
             <span class="number">{{ idealCodeLength }}</span>
             <span class="desc"><el-button type="text" @click="showIdealCodes">理想</el-button></span>
@@ -49,24 +43,24 @@
         <span>{{ backspace }}</span>
       </div>
       <div class="key-count">
-        <span>回改</span>
-        <span>{{ replace }}</span>
-      </div>
-      <div class="key-count">
         <span>回车</span>
         <span>{{ enter }}</span>
       </div>
       <div class="key-count">
-        <span>选重</span>
-        <span>{{ selective }}</span>
+        <span>回改</span>
+        <span>{{ replace }}</span>
       </div>
       <div class="key-count">
         <span>打词</span>
         <span>{{ phrase }}</span>
       </div>
       <div class="key-count">
+        <span>选重</span>
+        <span>{{ selective }}</span>
+      </div>
+      <div class="key-count">
         <span>均横</span>
-        <span>{{ rightHand }}/{{ leftHand }}</span>
+        <span>{{ leftHand }}/{{ rightHand }}</span>
       </div>
     </el-card>
 
@@ -130,10 +124,10 @@ export default class Indicator extends Vue {
   @racing.State('replace')
   private replace!: number
 
-  @racing.State('leftHand')
+  @racing.Getter('leftHand')
   private leftHand!: number
 
-  @racing.State('rightHand')
+  @racing.Getter('rightHand')
   private rightHand!: number
 
   @setting.Getter('getSelectChar')

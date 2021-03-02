@@ -20,12 +20,3 @@ export default class Setting extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.about {
-  color: #606266;
-  h1 {
-    color: #303133;
-  }
-}
-</style>

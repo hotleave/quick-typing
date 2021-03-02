@@ -1,9 +1,14 @@
 import { ShortestPath } from './util/Graph'
 import { TrieNode } from './util/TrieTree'
 import { punctuations } from './util/punctuation'
+import { emptyKeyCount } from './util/keyboard'
 
 export interface Identity {
   id?: string;
+}
+
+export interface LooseObject<v> {
+  [key: string]: v;
 }
 
 export class Coding {
@@ -104,10 +109,6 @@ export interface ArticleState {
   shortest: ShortestPath<Word> | null;
 }
 
-export interface LooseObject {
-  [key: string]: any;
-}
-
 export class RacingState {
   /**
    * 状态
@@ -156,11 +157,7 @@ export class RacingState {
   /**
    * 键数
    */
-  keyCount: LooseObject = {};
-  /**
-   * 总键数
-   */
-  overallCount: LooseObject = {};
+  keyCount: LooseObject<number> = emptyKeyCount()
 }
 
 export interface QuickTypingState {
@@ -171,6 +168,10 @@ export interface QuickTypingState {
    */
   codings: TrieNode;
   setting: SettingState;
+  /**
+   * 总键数
+   */
+  overallKeyCount: LooseObject<number>;
 }
 
 export interface InterfaceStyle {
