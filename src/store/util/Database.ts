@@ -13,7 +13,7 @@ class QuickTypingDatabase extends Dexie {
 
   constructor (databaseName: string) {
     super(databaseName)
-    this.version(2).stores({ configs: 'id', summary: 'id' })
+    this.version(1).stores({ configs: 'id', summary: 'id' })
     this.configs = this.table('configs')
     this.summary = this.table('summary')
   }

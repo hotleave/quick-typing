@@ -47,7 +47,7 @@ echarts.use([TitleComponent, TooltipComponent, GridComponent, BarChart, PieChart
 type DataPoints = Array<{ x: number; y: number; value: number }>
 
 type StatisticData = {
-  hands: Array<number>;
+  hands: PieSeriesOption['data'];
   fingers: Array<number>;
   rows: Array<number>;
 }
@@ -87,9 +87,12 @@ export default class Summary extends Vue {
   private keyCount!: LooseObject<number>
 
   get statisticData (): StatisticData {
-    const hands = [0, 0]
-    const rows: Array<number> = [0, 0, 0, 0, 0, 0]
-    const fingers: Array<number> = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    const hands = [
+      { name: '右手按键', value: 0 },
+      { name: '左手按键', value: 0 }
+    ]
+    const rows: Array<number> = new Array(4).fill(0)
+    const fingers: Array<number> = new Array(9).fill(0)
 
     for (const key in this.keyCount) {
       const node = keyboard.get(key)
@@ -99,22 +102,24 @@ export default class Summary extends Vue {
 
       const { finger, row } = node
       const value = this.keyCount[key]
-      rows[row] += value
-      fingers[finger] += value
+      if (row > 0 && row < 5) {
+        rows[4 - row] += value
+      }
+      if (finger < 9) {
+        fingers[finger] += value
+      }
       if (finger <= 3) {
-        hands[0] += value
-      } else if (finger >= 4 && finger <= 7) {
-        hands[1] += value
+        hands[1].value += value
+      } else if (finger >= 5 && finger <= 8) {
+        hands[0].value += value
       }
     }
 
-    return { hands, rows, fingers }
+    return { rows, hands, fingers }
   }
 
   mounted () {
     const { hands, rows, fingers } = this.statisticData
-    fingers.splice(8, 1)
-    console.log(rows)
 
     const config = {
       container: document.getElementById('keyboard')
@@ -124,13 +129,23 @@ export default class Summary extends Vue {
     heatmap.setData(data)
 
     const balanceOption: ECOption = {
+      title: {
+        text: '左右手均衡情况'
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
+      },
       series: [
         {
           type: 'pie',
-          data: [
-            { name: '左手', value: hands[0] },
-            { name: '左手', value: hands[1] }
-          ]
+          name: '均衡度',
+          selectedMode: 'single',
+          label: { position: 'inner', formatter: '{d}%' },
+          labelLine: {
+            show: false
+          },
+          data: hands
         }
       ]
     }
@@ -138,17 +153,26 @@ export default class Summary extends Vue {
     balanceChart.setOption(balanceOption)
 
     const rowsOption: ECOption = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
       xAxis: {
         type: 'value'
       },
       yAxis: {
         type: 'category',
-        data: ['下排', '中排', '上排', '数字']
+        data: ['下排', '中排', '上排', '数字'],
+        axisTick: {
+          alignWithLabel: true
+        }
       },
       series: [
         {
           type: 'bar',
-          data: rows.slice(1, 5).reverse()
+          data: rows
         }
       ]
     }
@@ -156,9 +180,18 @@ export default class Summary extends Vue {
     rowsChart.setOption(rowsOption)
 
     const fingersOption: ECOption = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
       xAxis: {
         type: 'category',
-        data: ['小指', '无名指', '中指', '食指', '拇指', '食指', '中指', '无名指', '小指']
+        data: ['小指(左)', '无名指', '中指', '食指', '拇指', '食指', '中指', '无名指', '小指(右)'],
+        axisTick: {
+          alignWithLabel: true
+        }
       },
       yAxis: { type: 'value' },
       series: [
@@ -188,16 +221,16 @@ export default class Summary extends Vue {
 
 #balance-chart {
   width: 100%;
-  height: 200px;
+  height: 300px;
 }
 
 #rows-chart {
   width: 100%;
-  height: 200px;
+  height: 300px;
 }
 
 #fingers-chart {
   width: 100%;
-  height: 300px;
+  height: 400px;
 }
 </style>

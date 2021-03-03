@@ -164,7 +164,7 @@ import { TrieTree } from '../store/util/TrieTree'
 import db from '../store/util/Database'
 import { SettingState } from '../store/types'
 import { Action, namespace } from 'vuex-class'
-import { Form, Table } from 'element-ui'
+import { Form, Loading, Table } from 'element-ui'
 
 class Duplicate {
   text: string;
@@ -199,7 +199,7 @@ const RESULT_OPTIONS = [
   { value: 'typeSpeed', text: '速度', disabled: true },
   { value: 'hitSpeed', text: '击键', disabled: true },
   { value: 'codeLength', text: '码长', disabled: true },
-  { value: 'idealCodeLength', text: '理论码长' },
+  { value: 'idealCodeLength', text: '理想码长' },
   { value: 'contentLength', text: '字数' },
   { value: 'usedTime', text: '用时' },
   { value: 'accuracy', text: '键准' },
@@ -319,6 +319,12 @@ export default class Setting extends Vue {
    * @param file 码表文件
    */
   loadCodings (file: { raw: File }): void {
+    const loading = Loading.service({
+      lock: true,
+      text: '正在处理词库，需要一些时间，请耐心等待……',
+      spinner: 'el-icon-loading',
+      background: 'rgba(0, 0, 0, 0.7)'
+    })
     const reader = new FileReader()
     // Fixme 候选词条数限制，需要将所有编码加入， 如：叁 -> df5, lnd, lndb
     reader.onload = () => {
@@ -385,6 +391,7 @@ export default class Setting extends Vue {
 
       db.configs.put(trie.root).then(() => {
         this.updateCodings(trie.root)
+        loading.close()
         this.$message({ message: '码表处理完成', type: 'success', showClose: true })
       })
     }
