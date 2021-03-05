@@ -2,6 +2,20 @@
 
 QuickTyping，中式英语，直译快打，快来打，打得快，越来越快……
 
+程序设计上借鉴了以下产品，在此表示感谢（排名不分先后）：
+
+- [长流跟打器](https://cl.tyu.wiki/)
+- [玫枫跟打器](https://kylebing.cn/tools/typepad/)
+- [三码郑码](https://www.yuque.com/smzm/zhengma/el4l0a)
+
+## 声明
+
+1. 本程序系私人用途，非商业产品，即不提供相应的服务
+1. 本程序所有数据均保存在用户浏览器的[IndexedDB](https://developer.mozilla.org/zh-CN/docs/Web/API/IndexedDB_API)中，**不会上传到任何服务器**
+1. 如果有侵权行为，请联系：hotleave@gmail.com，会在看到后第一时间取消
+1. 用户使用本程序所引发的一切问题，由用户自己承担，本程序概不负责
+1. **使用本程序则旨在接受本条及以上条款**
+
 ## 主要功能
 
 - [x] 赛文根打
