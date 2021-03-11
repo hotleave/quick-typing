@@ -8,6 +8,12 @@ QuickTyping，中式英语，直译快打，快来打，打得快，越来越快
 - [玫枫跟打器](https://kylebing.cn/tools/typepad/)
 - [三码郑码](https://www.yuque.com/smzm/zhengma/el4l0a)
 
+## Contributing
+
+- 有问题，提个[Issue](https://gitee.com/hotleave/quick-typing/issues)
+- 有想法，提个[Issue](https://gitee.com/hotleave/quick-typing/issues)
+- 有能力，提个[PR](https://gitee.com/hotleave/quick-typing/pulls)
+
 ## 声明
 
 1. 本程序系私人用途，非商业产品，即不提供相应的服务
@@ -25,6 +31,15 @@ QuickTyping，中式英语，直译快打，快来打，打得快，越来越快
 - [ ] 速度练习
 - [ ] 词库练习
 - [ ] 看打模式
+
+## 浏览器要求
+
+> 在`Chrome`及`Safari`最新版本下测试通过，`Edge`未经过测试
+> **不支持`IE`**
+
+- 支持[IndexedDB](https://caniuse.com/indexeddb)
+- 支持[clipboard.writeText](https://caniuse.com/mdn-api_clipboard_writetext)
+- 支持[clipboard.readText](https://caniuse.com/mdn-api_clipboard_readtext)
 
 ## 快速上手
 

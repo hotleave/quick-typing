@@ -47,11 +47,15 @@ export default class Racing extends Vue {
       case 'typing':
         setTimeout(this.focus, 50)
         break
-      case 'finished':
-        document.addEventListener('copy', this.copy, true)
-        document.execCommand('copy')
-        this.$notify({ title: '成功', message: this.result, type: 'success', duration: 10000, showClose: true })
+      case 'finished': {
+        const result = this.result
+        navigator.clipboard.writeText(result).then(() => result, () => {
+          document.addEventListener('copy', this.copy, true)
+          document.execCommand('copy')
+        })
+        this.$notify({ title: '成功', message: result, type: 'success', duration: 10000, showClose: true })
         break
+      }
     }
   }
 

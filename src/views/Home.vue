@@ -99,10 +99,9 @@ export default class Home extends Vue {
     }
   }
 
-  async loadFromClipboard () {
+  loadFromClipboard () {
     try {
-      const text = await navigator.clipboard.readText()
-      this.loadArticle(text)
+      navigator.clipboard.readText().then(text => { this.loadArticle(text) })
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err)
     }
