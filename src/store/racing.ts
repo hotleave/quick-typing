@@ -1,6 +1,9 @@
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
 import { QuickTypingState, RacingState, Word } from './types'
 import { keyboard } from './util/keyboard'
+import * as crypto from 'crypto'
+
+const HASH_KEY = '3198f2e6892d5bdd0630505e20acfc849a12e03c5a1da4c5c41a180c44c67eeb85ef0bc6992d9b0c3926da22ebaa55346bcd76d8556321e044530eff3d868e2636514072'
 
 const statusMap = new Map<string, string>([
   ['init', '初始化'],
@@ -9,6 +12,26 @@ const statusMap = new Map<string, string>([
   ['typing', '进行中'],
   ['finished', '结束']
 ])
+
+const parseHashKey = (): Array<string> => {
+  const keys = []
+  const ivs = []
+  const encrypteds = []
+  const indices = HASH_KEY.substr(-8).split('').map(s => parseInt(s))
+  for (let i = 0; i < indices.length; i++) {
+    const s = indices[i]
+    const segment = HASH_KEY.substr(i * 16, 16)
+    if (s < 4) {
+      keys[s] = segment
+    } else if (s > 5) {
+      encrypteds[s - 6] = segment
+    } else {
+      ivs[s - 4] = segment
+    }
+  }
+
+  return [keys.join(''), ivs.join(''), encrypteds.join('')]
+}
 
 const formatTime = (total: number, mill = 3): string => {
   if (total < 60) {
@@ -135,6 +158,23 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
     return input.length / article.content.length
   },
 
+  hash (state, getters, { article }): string {
+    const { identity } = article
+    const { typeSpeed, hitSpeed, codeLength } = getters
+    const [key, iv, encrypted] = parseHashKey()
+    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key, 'hex'), Buffer.from(iv, 'hex'))
+    decipher.update(encrypted, 'hex')
+    const decrypted = decipher.final()
+
+    const hmac = crypto.createHmac('sha1', decrypted.readInt32BE(0) + '')
+    // should be b16c915e
+    // const input = '999-123.12-7.23-3.22'
+    const input = `${identity}-${typeSpeed}-${hitSpeed}-${codeLength}`
+    const hash = hmac.update(input).digest('hex')
+
+    return hash.substr(-8)
+  },
+
   // 编码提示
   hint ({ input }, getters, { article }): Array<Word> | null {
     const { shortest } = article
@@ -159,6 +199,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
 
   // 比赛结果
   result (state, getters, { article, setting }): string {
+    const { inputMethod, inputMethodName, signature, signatureText } = setting
     const statistics: Map<string, string> = new Map([
       ['identity', `第${article.identity || 1}段`],
       ['typeSpeed', `速度${getters.typeSpeed}`],
@@ -179,22 +220,28 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       ['backspace', `退格${getters.backspaceCount}`],
       ['enter', `回车${getters.enterCount}`],
       ['retry', `重打${state.retry}`],
+      ['hash', `哈希${getters.hash}`],
+      ['inputMethod', `输入法:${inputMethodName}`],
+      ['signature', `个性签名:${signatureText}`],
       ['version', `QuickTyping-${process.env.VUE_APP_VERSION}`]
     ])
 
     const options = setting.resultOptions.slice(0)
-    const versionIndex = options.indexOf('version')
-    const { inputMethod, inputMethodName, signature, signatureText } = setting
     if (inputMethod && inputMethodName) {
-      versionIndex > 0 ? options.splice(versionIndex, 0, 'inputMethod') : options.push('inputMethod')
-      statistics.set('inputMethod', `输入法:${inputMethodName}`)
+      options.push('inputMethod')
     }
     if (signature && signatureText) {
-      versionIndex > 0 ? options.splice(versionIndex, 0, 'signature') : options.push('signature')
-      statistics.set('signature', `个性签名:${signatureText}`)
+      options.push('signature')
     }
+    const keys = new Set(options)
+    const result: Array<string> = []
+    statistics.forEach((value, key) => {
+      if (keys.has(key)) {
+        result.push(value)
+      }
+    })
 
-    return options.map(v => statistics.get(v)).join(' ')
+    return result.join(' ')
   }
 }
 

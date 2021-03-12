@@ -1130,6 +1130,11 @@
   version "14.14.20"
   resolved "https://registry.npm.taobao.org/@types/node/download/@types/node-14.14.20.tgz?cache=0&sync_timestamp=1609794271748&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fnode%2Fdownload%2F%40types%2Fnode-14.14.20.tgz"
 
+"@types/node@^14.14.33":
+  version "14.14.33"
+  resolved "https://registry.npm.taobao.org/@types/node/download/@types/node-14.14.33.tgz?cache=0&sync_timestamp=1615307197617&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fnode%2Fdownload%2F%40types%2Fnode-14.14.33.tgz#9e4f8c64345522e4e8ce77b334a8aaa64e2b6c78"
+  integrity sha1-nk+MZDRVIuToznezNKiqpk4rbHg=
+
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
   resolved "https://registry.npm.taobao.org/@types/normalize-package-data/download/@types/normalize-package-data-2.4.0.tgz?cache=0&sync_timestamp=1605054731394&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40types%2Fnormalize-package-data%2Fdownload%2F%40types%2Fnormalize-package-data-2.4.0.tgz"

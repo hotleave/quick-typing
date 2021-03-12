@@ -214,6 +214,7 @@ const RESULT_OPTIONS = [
   { value: 'backspace', text: '退格' },
   { value: 'enter', text: '回车' },
   { value: 'retry', text: '重打' },
+  { value: 'hash', text: '哈希' },
   { value: 'version', text: '版本' }
 ]
 

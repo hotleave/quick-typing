@@ -1,5 +1,7 @@
 # quick-typing
 
+[版本变更历史](src/docs/changelog.md)
+
 ## Project setup
 ```
 yarn install
