@@ -202,6 +202,7 @@ const RESULT_OPTIONS = [
   { value: 'idealCodeLength', text: '理想码长' },
   { value: 'contentLength', text: '字数' },
   { value: 'usedTime', text: '用时' },
+  { value: 'pauseTime', text: '暂停时间' },
   { value: 'accuracy', text: '键准' },
   { value: 'balance', text: '键法' },
   { value: 'leftHand', text: '左' },
@@ -214,7 +215,7 @@ const RESULT_OPTIONS = [
   { value: 'backspace', text: '退格' },
   { value: 'enter', text: '回车' },
   { value: 'retry', text: '重打' },
-  { value: 'hash', text: '哈希' },
+  { value: 'hash', text: '哈希码' },
   { value: 'version', text: '版本' }
 ]
 

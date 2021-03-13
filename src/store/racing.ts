@@ -180,6 +180,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       ['codeLength', `码长${getters.codeLength}`],
       ['contentLength', `字数${article.content.length}`],
       ['usedTime', `用时${formatTime(getters.usedTime)}`],
+      ['pauseTime', `暂停${state.pauseCount}次${formatTime(state.pauseTime / 1000)}秒`],
       ['accuracy', `键准${getters.accuracy}%`],
       ['balance', `键法${getters.balance}%`],
       ['leftHand', `左${getters.leftHand}`],
@@ -237,13 +238,18 @@ const mutations: MutationTree<RacingState> = {
   },
 
   pause (state): void {
+    const now = Date.now()
     state.status = 'pause'
-    state.time += Date.now() - state.start
+    state.time += now - state.start
+    state.start = now
+    state.pauseCount++
   },
 
   resume (state): void {
+    const now = Date.now()
     state.status = 'typing'
-    state.start = Date.now()
+    state.pauseTime += now - state.start
+    state.start = now
   },
 
   // 重打

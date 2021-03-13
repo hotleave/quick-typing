@@ -155,6 +155,14 @@ export class RacingState {
    */
   timer = 0;
   /**
+   * 暂停次数
+   */
+  pauseCount = 0;
+  /**
+   * 暂停时长
+   */
+  pauseTime = 0;
+  /**
    * 键数
    */
   keyCount: LooseObject<number> = emptyKeyCount()
