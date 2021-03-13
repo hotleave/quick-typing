@@ -1,9 +1,7 @@
+import xcapi from '@/api/xc.cool'
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
 import { QuickTypingState, RacingState, Word } from './types'
 import { keyboard } from './util/keyboard'
-import * as crypto from 'crypto'
-
-const HASH_KEY = '3198f2e6892d5bdd0630505e20acfc849a12e03c5a1da4c5c41a180c44c67eeb85ef0bc6992d9b0c3926da22ebaa55346bcd76d8556321e044530eff3d868e2636514072'
 
 const statusMap = new Map<string, string>([
   ['init', '初始化'],
@@ -12,26 +10,6 @@ const statusMap = new Map<string, string>([
   ['typing', '进行中'],
   ['finished', '结束']
 ])
-
-const parseHashKey = (): Array<string> => {
-  const keys = []
-  const ivs = []
-  const encrypteds = []
-  const indices = HASH_KEY.substr(-8).split('').map(s => parseInt(s))
-  for (let i = 0; i < indices.length; i++) {
-    const s = indices[i]
-    const segment = HASH_KEY.substr(i * 16, 16)
-    if (s < 4) {
-      keys[s] = segment
-    } else if (s > 5) {
-      encrypteds[s - 6] = segment
-    } else {
-      ivs[s - 4] = segment
-    }
-  }
-
-  return [keys.join(''), ivs.join(''), encrypteds.join('')]
-}
 
 const formatTime = (total: number, mill = 3): string => {
   if (total < 60) {
@@ -56,6 +34,11 @@ const state = new RacingState()
 const getters: GetterTree<RacingState, QuickTypingState> = {
   statusText ({ status }): string {
     return statusMap.get(status) || '未知'
+  },
+
+  // 已输入文字数量
+  typed ({ input }): number {
+    return input.length
   },
 
   // 击键速度
@@ -161,18 +144,8 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   hash (state, getters, { article }): string {
     const { identity } = article
     const { typeSpeed, hitSpeed, codeLength } = getters
-    const [key, iv, encrypted] = parseHashKey()
-    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(key, 'hex'), Buffer.from(iv, 'hex'))
-    decipher.update(encrypted, 'hex')
-    const decrypted = decipher.final()
-
-    const hmac = crypto.createHmac('sha1', decrypted.readInt32BE(0) + '')
-    // should be b16c915e
-    // const input = '999-123.12-7.23-3.22'
     const input = `${identity}-${typeSpeed}-${hitSpeed}-${codeLength}`
-    const hash = hmac.update(input).digest('hex')
-
-    return hash.substr(-8)
+    return xcapi.sha1Hmac(input)
   },
 
   // 编码提示

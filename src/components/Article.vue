@@ -1,6 +1,16 @@
 <template>
-  <div :class="articleStyle" :style="styles">
-    <Words v-for="word in words" :key="word.id" :word="word"/>
+  <div class="article-main">
+    <el-row ref="board" :class="articleStyle" :style="styles">
+      <Words v-for="word in words" :key="word.id" :word="word"/>
+    </el-row>
+    <el-divider/>
+    <el-row v-if="content" class="article-info">
+      <el-col :span="24">
+        <span class="id">第{{ identity }}段</span>
+        <span class="title">{{ title || '未知' }}</span>
+        <span class="length">共{{ length }}字</span>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -21,6 +31,15 @@ const setting = namespace('setting')
 export default class Article extends Vue {
   @article.State('content')
   private content!: string
+
+  @article.State('identity')
+  private identity!: string
+
+  @article.State('title')
+  private title!: string
+
+  @article.Getter('length')
+  private length!: number
 
   @racing.State('input')
   private input!: string
@@ -94,20 +113,24 @@ export default class Article extends Vue {
    */
   @Watch('progress')
   autoScroll (progress: number) {
-    const el = this.$el
-    const { scrollHeight, clientHeight } = el
-    const fixed = 150
-    if (scrollHeight > clientHeight) {
-      let scrollTop = scrollHeight * progress
-      if (scrollTop <= fixed) {
-        scrollTop = 0
-      } else if (scrollHeight - scrollTop > clientHeight) {
-        scrollTop -= fixed
-      } else {
-        scrollTop -= fixed * progress
-      }
+    const el = (this.$refs.board as Vue).$el
+    const { clientHeight, scrollHeight } = el
+    const scrollDistance = scrollHeight - clientHeight
+    if (scrollDistance <= 0) {
+      return
+    }
 
-      el.scrollTop = scrollTop
+    if (progress === 0) {
+      el.scrollTop = 0
+      return
+    }
+
+    const fixed = 80
+    const pending = document.querySelector('.code1,.code2,.code3,.code4,.pending') as HTMLElement
+    if (pending) {
+      el.scrollTop = Math.max(0, pending.offsetTop - fixed)
+    } else {
+      el.scrollTop = Math.min(progress * scrollDistance, scrollDistance)
     }
   }
 
@@ -158,11 +181,13 @@ export default class Article extends Vue {
 </script>
 
 <style lang="scss">
-.article {
-  padding: 5px 15px;
+.article-main {
   border: 1px solid #EBEEF5;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+.article {
+  padding: 5px 15px;
   font-size: 2rem;
   height: 15rem;
   overflow: auto;
@@ -224,6 +249,18 @@ export default class Article extends Vue {
 .article.inline {
   div {
     display: inline;
+  }
+}
+
+.article-info {
+  font-size: 1rem;
+  color: #909399;
+  text-align: right;
+  margin-top: -2rem;
+  padding: 1rem;
+
+  .title {
+    margin: auto 1rem;
   }
 }
 </style>

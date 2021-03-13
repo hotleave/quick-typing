@@ -6,11 +6,13 @@
       </el-aside>
       <el-main class="main">
         <el-row class="toolbar">
-          <el-button-group>
-            <el-button size="mini" icon="el-icon-document" @click="loadFromClipboard">载文</el-button>
-            <el-button size="mini" :icon="triggerIcon" @click="trigger">{{ triggerText }}</el-button>
-            <el-button size="mini" icon="el-icon-refresh" @click="retry">重打</el-button>
-          </el-button-group>
+          <el-col :span="12" :offset="12">
+            <el-button-group>
+              <el-button size="mini" icon="el-icon-document" @click="loadFromClipboard">载文</el-button>
+              <el-button size="mini" :icon="triggerIcon" @click="trigger">{{ triggerText }}</el-button>
+              <el-button size="mini" icon="el-icon-refresh" @click="retry">重打</el-button>
+            </el-button-group>
+          </el-col>
         </el-row>
         <el-row class="middle">
           <el-col :span="24">
@@ -94,7 +96,11 @@ export default class Home extends Vue {
     if (clipboardData) {
       const pasteContent = clipboardData.getData('text/plain')
       if (pasteContent) {
-        this.loadArticle(pasteContent)
+        try {
+          this.loadArticle(pasteContent)
+        } catch (error) {
+          this.$message.error(error.message)
+        }
       }
     }
   }

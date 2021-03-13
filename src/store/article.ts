@@ -1,3 +1,4 @@
+import xcapi from '@/api/xc.cool'
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
 import { ArticleState, Coding, QuickTypingState, SettingState, Word } from './types'
 import { Edge, Graph, ShortestPath } from './util/Graph'
@@ -128,8 +129,9 @@ const parseArticle = (content: string, setting: SettingState): ArticleState => {
 
   if (totalLines > 1) {
     // 超过一行时尝试解析
-    const id = parseIdentity(lines[totalLines - 1])
-    if (id !== lines[totalLines - 1]) {
+    const sign = lines[totalLines - 1]
+    const id = parseIdentity(sign)
+    if (id !== sign) {
       identity = id
 
       if (totalLines === 2) {
@@ -137,6 +139,10 @@ const parseArticle = (content: string, setting: SettingState): ArticleState => {
       } else {
         title = lines[0]
         content = lines.slice(1, totalLines - 1).join('')
+
+        if (!xcapi.verify(content, sign)) {
+          throw Error('赛文被篡改，请重新载文')
+        }
       }
     }
   }

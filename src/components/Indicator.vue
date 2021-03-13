@@ -147,7 +147,8 @@ export default class Indicator extends Vue {
   private drawer = { title: '', text: '' }
 
   get percentage (): number {
-    return parseFloat(((this.progress || 0) * 100).toFixed(2))
+    const percentage = Math.min(this.progress || 0, 1) * 100
+    return parseFloat(percentage.toFixed(2))
   }
 
   get progressStatus (): string | null {
@@ -271,7 +272,9 @@ export default class Indicator extends Vue {
     letter-spacing: .5rem;
     overflow: auto;
     padding: 1rem;
-    color: #909399
+    color: #909399;
+    min-height: 100px;
+    max-height: 200px;
   }
 }
 </style>
