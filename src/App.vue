@@ -18,6 +18,10 @@
           <i class="el-icon-s-data"></i>
           <span slot="title">统计</span>
         </el-menu-item>
+        <el-menu-item index="/changelog">
+          <i class="el-icon-time"></i>
+          <span slot="title">版本历史</span>
+        </el-menu-item>
         <el-menu-item index="/about">
           <i class="el-icon-question"></i>
           <span slot="title">关于</span>
