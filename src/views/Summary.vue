@@ -8,14 +8,19 @@
       </el-col>
     </el-row>
     <el-row :gutter="20">
-      <el-col :span="12">
+      <el-col :span="8">
         <el-card>
           <div id="balance-chart"></div>
         </el-card>
       </el-col>
-      <el-col :span="12">
+      <el-col :span="8">
         <el-card>
           <div id="rows-chart"></div>
+        </el-card>
+      </el-col>
+      <el-col :span="8">
+        <el-card>
+          <div id="mixed-fingers-chart"></div>
         </el-card>
       </el-col>
     </el-row>
@@ -63,7 +68,7 @@ const getHeatmapData = (keyCount: LooseObject<number>): HeatmapData => {
   let max = 0
   const data: DataPoints = []
   for (const key in keyCount) {
-    if (key === 'Space') {
+    if (key === 'Space' || key === 'Backspace') {
       continue
     }
 
@@ -88,8 +93,8 @@ export default class Summary extends Vue {
 
   get statisticData (): StatisticData {
     const hands = [
-      { name: '右手按键', value: 0 },
-      { name: '左手按键', value: 0 }
+      { name: '右手', value: 0 },
+      { name: '左手', value: 0 }
     ]
     const rows: Array<number> = new Array(4).fill(0)
     const fingers: Array<number> = new Array(9).fill(0)
@@ -130,7 +135,8 @@ export default class Summary extends Vue {
 
     const balanceOption: ECOption = {
       title: {
-        text: '左右手均衡情况'
+        text: '左右手均衡情况',
+        left: 'center'
       },
       tooltip: {
         trigger: 'item',
@@ -141,7 +147,7 @@ export default class Summary extends Vue {
           type: 'pie',
           name: '均衡度',
           selectedMode: 'single',
-          label: { position: 'inner', formatter: '{d}%' },
+          label: { position: 'inner', formatter: '{b}: {d}%' },
           labelLine: {
             show: false
           },
@@ -153,6 +159,10 @@ export default class Summary extends Vue {
     balanceChart.setOption(balanceOption)
 
     const rowsOption: ECOption = {
+      title: {
+        text: '不同位置按键使用率',
+        left: 'center'
+      },
       tooltip: {
         trigger: 'axis',
         axisPointer: {
@@ -172,14 +182,66 @@ export default class Summary extends Vue {
       series: [
         {
           type: 'bar',
-          data: rows
+          data: rows,
+          label: {
+            show: true
+          }
         }
       ]
     }
     const rowsChart = echarts.init(document.getElementById('rows-chart') as HTMLElement)
     rowsChart.setOption(rowsOption)
 
+    const mixedFingersOption = {
+      title: {
+        text: '手指使用率',
+        left: 'center'
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow'
+        }
+      },
+      xAxis: {
+        type: 'value'
+      },
+      yAxis: {
+        type: 'category',
+        data: ['小指', '无名指', '中指', '食指'],
+        axisTick: {
+          alignWithLabel: true
+        }
+      },
+      series: [
+        {
+          type: 'bar',
+          stack: 'total',
+          name: '左手',
+          data: fingers.slice(0, 4),
+          label: {
+            show: true
+          }
+        },
+        {
+          type: 'bar',
+          stack: 'total',
+          name: '右手',
+          data: fingers.slice(5).reverse(),
+          label: {
+            show: true
+          }
+        }
+      ]
+    }
+    const mixedFingersChart = echarts.init(document.getElementById('mixed-fingers-chart') as HTMLElement)
+    mixedFingersChart.setOption(mixedFingersOption)
+
     const fingersOption: ECOption = {
+      title: {
+        text: '手指使用率（分区）',
+        left: 'center'
+      },
       tooltip: {
         trigger: 'axis',
         axisPointer: {
@@ -197,7 +259,10 @@ export default class Summary extends Vue {
       series: [
         {
           type: 'bar',
-          data: fingers
+          data: fingers,
+          label: {
+            show: true
+          }
         }
       ]
     }
@@ -219,12 +284,7 @@ export default class Summary extends Vue {
   margin: auto;
 }
 
-#balance-chart {
-  width: 100%;
-  height: 300px;
-}
-
-#rows-chart {
+#balance-chart, #rows-chart, #mixed-fingers-chart {
   width: 100%;
   height: 300px;
 }

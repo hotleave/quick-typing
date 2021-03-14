@@ -8,12 +8,6 @@ export interface KeyNode {
   /**
    * 手指位置
    * 0 - 3: 左手，4: 拇指 5 - 8: 右手, 9：待定
-   * 9 => 4
-   * 4 => 5
-   * 5 => 6
-   * 6 => 7
-   * 7 => 8
-   * 8 => 9
    */
   finger: number;
   /**
@@ -63,7 +57,7 @@ export const keyboard = new Map<string, KeyNode>([
   ['Digit0', { key: '0', finger: 8, row: 1, coord: [579, 120] }],
   ['Minus', { key: '-', finger: 8, row: 1, coord: [630, 120] }],
   ['Equal', { key: '=', finger: 8, row: 1, coord: [685, 120] }],
-  ['Backspace', { key: '⌫', fn: true, finger: 8, row: 1, coord: [751, 120] }],
+  ['Backspace', { key: '⌫', fn: true, finger: 9, row: 1, coord: [751, 120] }],
   ['Insert', { key: '', fn: true, finger: 9, row: 1 }],
   ['Home', { key: '⇤', fn: true, finger: 9, row: 1 }],
   ['PageUp', { key: '«', fn: true, finger: 9, row: 1 }],
@@ -73,11 +67,11 @@ export const keyboard = new Map<string, KeyNode>([
   ['KeyE', { key: 'e', finger: 2, row: 2, coord: [224, 174] }],
   ['KeyR', { key: 'r', finger: 3, row: 2, coord: [278, 174] }],
   ['KeyT', { key: 't', finger: 3, row: 2, coord: [332, 174] }],
-  ['KeyY', { key: 'y', finger: 3, row: 2, coord: [386, 174] }],
-  ['KeyU', { key: 'u', finger: 3, row: 2, coord: [440, 174] }],
-  ['KeyI', { key: 'i', finger: 5, row: 2, coord: [494, 174] }],
-  ['KeyO', { key: 'o', finger: 6, row: 2, coord: [548, 174] }],
-  ['KeyP', { key: 'p', finger: 7, row: 2, coord: [602, 174] }],
+  ['KeyY', { key: 'y', finger: 5, row: 2, coord: [386, 174] }],
+  ['KeyU', { key: 'u', finger: 5, row: 2, coord: [440, 174] }],
+  ['KeyI', { key: 'i', finger: 6, row: 2, coord: [494, 174] }],
+  ['KeyO', { key: 'o', finger: 7, row: 2, coord: [548, 174] }],
+  ['KeyP', { key: 'p', finger: 8, row: 2, coord: [602, 174] }],
   ['BracketLeft', { key: '[', finger: 8, row: 2, coord: [656, 174] }],
   ['BracketRight', { key: ']', finger: 8, row: 2, coord: [710, 174] }],
   ['Backslash', { key: '\\', finger: 8, row: 2, coord: [764, 174] }],
@@ -100,8 +94,8 @@ export const keyboard = new Map<string, KeyNode>([
   ['ShiftLeft', { key: '⇧', fn: true, finger: 0, row: 4, coord: [69, 275] }],
   ['KeyZ', { key: 'z', finger: 0, row: 4, coord: [158, 275] }],
   ['KeyX', { key: 'x', finger: 1, row: 4, coord: [212, 275] }],
-  ['KeyC', { key: 'c', finger: 3, row: 4, coord: [266, 275] }],
-  ['KeyV', { key: 'v', finger: 2, row: 4, coord: [320, 275] }],
+  ['KeyC', { key: 'c', finger: 2, row: 4, coord: [266, 275] }],
+  ['KeyV', { key: 'v', finger: 3, row: 4, coord: [320, 275] }],
   ['KeyB', { key: 'b', finger: 3, row: 4, coord: [374, 275] }],
   ['KeyN', { key: 'n', finger: 5, row: 4, coord: [428, 275] }],
   ['KeyM', { key: 'm', finger: 5, row: 4, coord: [482, 275] }],
