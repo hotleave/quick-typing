@@ -6,7 +6,16 @@
       </el-aside>
       <el-main class="main">
         <el-row class="toolbar">
-          <el-col :span="12" :offset="12">
+          <el-col :span="3" id="groups">
+            <el-select v-model="group" placeholder="请选择" @change="onGroupChange">
+              <el-option v-for="item in groups"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+          </el-col>
+          <el-col :span="12" :offset="9">
             <el-button-group>
               <el-button size="mini" icon="el-icon-document" @click="loadFromClipboard">载文</el-button>
               <el-button size="mini" :icon="triggerIcon" @click="trigger">{{ triggerText }}</el-button>
@@ -30,14 +39,16 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import Indicator from '@/components/Indicator.vue'
 import Article from '@/components/Article.vue'
 import Racing from '@/components/Racing.vue'
 import { namespace } from 'vuex-class'
+import xcapi from '@/api/xc.cool'
 
 const article = namespace('article')
 const racing = namespace('racing')
+const login = namespace('login')
 
 @Component({
   components: {
@@ -59,8 +70,17 @@ export default class Home extends Vue {
   @racing.Action('retry')
   private retry!: Function
 
-  @article.Action('loadArticle')
-  private loadArticle!: Function
+  @article.Action('loadText')
+  private loadText!: Function
+
+  @article.Action('loadMatch')
+  private loadMatch!: Function
+
+  @login.State('authenticated')
+  private authenticated!: boolean
+
+  private groups: Array<{ value: number; label: string }> = []
+  private group = ''
 
   get triggerText (): string {
     return this.status === 'pause' ? '继续' : '暂停'
@@ -70,7 +90,26 @@ export default class Home extends Vue {
     return this.status === 'pause' ? 'el-icon-video-play' : 'el-icon-video-pause'
   }
 
+  @Watch('authenticated')
+  authChange (authenticated: boolean) {
+    console.log('auth change', authenticated)
+    if (authenticated) {
+      xcapi.groups().then(data => {
+        if (data) {
+          this.groups = data.map(v => {
+            return { value: v.guid, label: v.name }
+          })
+        }
+      })
+    } else {
+      this.groups = []
+    }
+  }
+
   created () {
+    console.log('auth', this.authenticated)
+    this.authChange(this.authenticated)
+
     // 监听快捷键
     document.addEventListener('keydown', this.handleShortCut)
 
@@ -97,7 +136,7 @@ export default class Home extends Vue {
       const pasteContent = clipboardData.getData('text/plain')
       if (pasteContent) {
         try {
-          this.loadArticle(pasteContent)
+          this.loadText(pasteContent)
         } catch (error) {
           this.$message.error(error.message)
         }
@@ -105,9 +144,25 @@ export default class Home extends Vue {
     }
   }
 
+  onGroupChange () {
+    if (!this.group) {
+      return
+    }
+
+    xcapi.matches(this.group).then(match => {
+      if (!match) {
+        return
+      }
+
+      this.loadMatch(match)
+    }, error => {
+      this.$message.warning(error.message)
+    })
+  }
+
   loadFromClipboard () {
     try {
-      navigator.clipboard.readText().then(text => { this.loadArticle(text) })
+      navigator.clipboard.readText().then(text => { this.loadText(text) })
     } catch (err) {
       console.error('Failed to read clipboard contents: ', err)
     }

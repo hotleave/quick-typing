@@ -175,7 +175,14 @@ export interface QuickTypingState {
    * 编码
    */
   codings: TrieNode;
+  /**
+   * 设置
+   */
   setting: SettingState;
+  /**
+   * 登录状态
+   */
+  login: LoginState;
   /**
    * 总键数
    */
@@ -350,4 +357,20 @@ export class SettingState implements Identity {
    * 将标点加入码表中
    */
   addPunctuationToCodings = false
+}
+
+export interface LoginUser {
+  id: number;
+  quid: number;
+  name: string;
+  nickname: string;
+  grading: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export class LoginState {
+  authenticated = false;
+  token = '';
+  user: LoginUser | null = null;
 }

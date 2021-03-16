@@ -1,4 +1,78 @@
 import * as crypto from 'crypto'
+import axios, { AxiosResponse } from 'axios'
+import { LoginState } from '@/store/types'
+
+axios.defaults.baseURL = 'https://api.xc.cool/api'
+axios.defaults.responseType = 'json'
+axios.interceptors.response.use(response => {
+  const { data } = response
+  if (data.success && data.code === 0) {
+    return response.data.data
+  } else {
+    return Promise.reject(new Error(data.msg))
+  }
+}, error => Promise.reject(error))
+
+export interface Group {
+  id: number;
+  guid: number;
+  name: string;
+  role: string;
+  member_count: number;
+  max_member_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Match {
+  id: number;
+  status: number;
+  type: number;
+  started_at: string;
+  limited_at: string;
+  ended_at: string;
+  mode: number;
+  title: string;
+  subtitle: string;
+  content: string;
+  number: string;
+  period: string;
+  hash: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const updateToken = (token: string) => {
+  if (token) {
+    axios.defaults.headers.common.Authorization = `Bearer ${token}`
+  }
+}
+
+const login = (data: { username: string; password: string }): Promise<LoginState> => {
+  return axios.post('/login', data)
+}
+
+const logout = (): Promise<AxiosResponse> => {
+  return axios.post('/logout')
+}
+
+const groups = (): Promise<Array<Group>> => {
+  return axios.get('/groups').then(response => {
+    return (response.data as Array<Group>).filter(v => v.role !== 'unjoined')
+  })
+}
+
+const matches = (guid: string): Promise<Match> => {
+  return axios.get('/matches', {
+    params: { guid, status: 1 }
+  }).then(response => {
+    if (!response || !response.data || response.data.length === 0) {
+      return Promise.reject(new Error('没有赛文'))
+    }
+
+    return response.data[0]
+  })
+}
 
 const HASH_KEY = '3198f2e6892d5bdd0630505e20acfc849a12e03c5a1da4c5c41a180c44c67eeb85ef0bc6992d9b0c3926da22ebaa55346bcd76d8556321e044530eff3d868e2636514072'
 const HASH_ALG = 'sha1'
@@ -49,8 +123,13 @@ const verify = (content: string, sign: string): boolean => {
 }
 
 export const xcapi = {
+  updateToken,
+  login,
+  logout,
   sha1Hmac,
-  verify
+  verify,
+  groups,
+  matches
 }
 
 export default xcapi

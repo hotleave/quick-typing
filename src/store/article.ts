@@ -1,4 +1,4 @@
-import xcapi from '@/api/xc.cool'
+import { xcapi, Match } from '@/api/xc.cool'
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
 import { ArticleState, Coding, QuickTypingState, SettingState, Word } from './types'
 import { Edge, Graph, ShortestPath } from './util/Graph'
@@ -180,9 +180,24 @@ const mutations: MutationTree<ArticleState> = {
 }
 
 const actions: ActionTree<ArticleState, QuickTypingState> = {
-  loadArticle ({ commit, rootState, rootGetters }, content: string): void {
+  loadText ({ rootState }, content: string): void {
     const { setting } = rootState
     const article = parseArticle(content, setting)
+    this.dispatch('article/loadArticle', article)
+  },
+
+  loadMatch (context, match: Match): void {
+    const { title, number, content } = match
+    const article = {
+      title,
+      content,
+      identity: number,
+      shortest: null
+    }
+    this.dispatch('article/loadArticle', article)
+  },
+
+  loadArticle ({ commit, rootState, rootGetters }, article: ArticleState) {
     commit('load', article)
 
     setTimeout(() => {

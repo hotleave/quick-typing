@@ -27,6 +27,29 @@
           <span slot="title">关于</span>
         </el-menu-item>
       </el-menu>
+      <div class="profile">
+        <el-button v-if="!authenticated" type="text" @click="loginFormVisible = true">登录</el-button>
+        <el-dialog title="用户登录" :visible.sync="loginFormVisible">
+          <el-form :model="auth" label-width="80">
+            <el-form-item label="用户名">
+              <el-input v-model="auth.username" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="密码">
+              <el-input v-model="auth.password" autocomplete="off" show-password></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="loginFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="doLogin">确 定</el-button>
+          </div>
+        </el-dialog>
+        <el-dropdown v-if="authenticated">
+          <el-avatar :size="30" :src="loginUser.avatar"></el-avatar>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item icon="el-icon-lock" @click.native="doLogout">退出</el-dropdown-item>
+          </el-dropdown-menu>
+        </el-dropdown>
+      </div>
     </el-header>
     <el-main>
       <router-view/>
@@ -39,9 +62,11 @@ import { Component, Vue } from 'vue-property-decorator'
 import { TrieNode } from './store/util/TrieTree'
 import db from './store/util/Database'
 import { Action, namespace } from 'vuex-class'
-import { LooseObject } from './store/types'
+import { LoginUser, LooseObject } from './store/types'
+import xcapi from './api/xc.cool'
 
 const setting = namespace('setting')
+const login = namespace('login')
 
 @Component
 export default class Setting extends Vue {
@@ -56,7 +81,53 @@ export default class Setting extends Vue {
 
   private pathname = location.pathname
 
+  private loginFormVisible = false
+
+  @login.State('user')
+  private loginUser!: LoginUser | null
+
+  @login.State('authenticated')
+  private authenticated!: boolean
+
+  @login.Action('login')
+  private login!: Function
+
+  @login.Action('logout')
+  private logout!: Function
+
+  private auth = {
+    username: '',
+    password: ''
+  }
+
+  doLogin () {
+    xcapi.login(this.auth).then(data => {
+      const { token, user } = data
+      localStorage.token = token
+      localStorage.user = JSON.stringify(user)
+
+      this.login(data)
+      this.loginFormVisible = false
+    }, error => {
+      this.$message.error(error.message)
+    })
+  }
+
+  doLogout () {
+    xcapi.logout().then(() => {
+      this.logout()
+      this.$message.success('注销成功')
+    }, error => {
+      this.$message.error(error.message)
+    })
+  }
+
   created () {
+    if (localStorage.user && localStorage.token) {
+      const { token, user } = localStorage
+      this.login({ token, user: JSON.parse(user) })
+    }
+
     // 读取配置
     db.configs.get('setting').then(setting => {
       if (setting) {
@@ -121,5 +192,15 @@ html,body {
   border: 1px solid #EBEEF5;
   border-radius: 4px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+#groups {
+  text-align: left;
+}
+
+.profile {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
 }
 </style>
