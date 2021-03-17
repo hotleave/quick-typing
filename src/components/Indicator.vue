@@ -32,35 +32,49 @@
       </el-row>
     </el-card>
     <el-card v-if="status === 'init' || status === 'typing'">
-      <dl class="code-hint" v-for="word in hint" :key="word.text">
+      <dl class="code-hint" v-for="word in wordsHint" :key="word.text">
         <dt><el-tag>{{ word.text }}</el-tag></dt>
         <dd v-for="coding in word.codings" :key="coding.code">{{ coding.code + getSelectChar(coding.index, coding.length) }}</dd>
       </dl>
     </el-card>
     <el-card>
-      <div class="key-count">
+      <div class="key-value">
         <span>退格</span>
         <span>{{ backspace }}</span>
       </div>
-      <div class="key-count">
+      <div class="key-value">
         <span>回车</span>
         <span>{{ enter }}</span>
       </div>
-      <div class="key-count">
+      <div class="key-value">
         <span>回改</span>
         <span>{{ replace }}</span>
       </div>
-      <div class="key-count">
+      <div class="key-value">
         <span>打词</span>
         <span>{{ phrase }}</span>
       </div>
-      <div class="key-count">
+      <div class="key-value">
         <span>选重</span>
         <span>{{ selective }}</span>
       </div>
-      <div class="key-count">
+      <div class="key-value">
         <span>均横</span>
         <span>{{ leftHand }}/{{ rightHand }}</span>
+      </div>
+    </el-card>
+    <el-card>
+      <div class="key-value">
+        <span>词提</span>
+        <span>
+          <el-switch v-model="tempHint" @change="toggleHint(tempHint)"/>
+        </span>
+      </div>
+      <div class="key-value">
+        <span>替换空格</span>
+        <span>
+          <el-switch v-model="tempReplaceSpace" @change="toggleReplaceSpace(tempReplaceSpace)"/>
+        </span>
       </div>
     </el-card>
 
@@ -77,7 +91,7 @@
 
 <script lang="ts">
 import { keyboard } from '@/store/util/keyboard'
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
 
 const racing = namespace('racing')
@@ -101,7 +115,7 @@ export default class Indicator extends Vue {
   private idealCodeLength!: string
 
   @racing.Getter('hint')
-  private hint!: Array<string>
+  private wordsHint!: Array<string>
 
   @racing.Getter('passTime')
   private passTime!: string
@@ -130,9 +144,6 @@ export default class Indicator extends Vue {
   @racing.Getter('rightHand')
   private rightHand!: number
 
-  @setting.Getter('getSelectChar')
-  private getSelectChar!: Function
-
   @racing.Getter('progress')
   private progress!: number
 
@@ -141,6 +152,25 @@ export default class Indicator extends Vue {
 
   @racing.State('idealKeys')
   private idealKeys!: string
+
+  @setting.Getter('hint')
+  private hint!: boolean
+
+  @setting.Getter('replaceSpace')
+  private replaceSpace!: boolean
+
+  @setting.Getter('getSelectChar')
+  private getSelectChar!: Function
+
+  @setting.Mutation('toggleHint')
+  private toggleHint!: Function
+
+  @setting.Mutation('toggleReplaceSpace')
+  private toggleReplaceSpace!: Function
+
+  private tempHint = false
+
+  private tempReplaceSpace = false
 
   private drawerVisiable = false
 
@@ -153,6 +183,24 @@ export default class Indicator extends Vue {
 
   get progressStatus (): string | null {
     return this.status === 'finished' ? 'success' : null
+  }
+
+  get version (): string | undefined {
+    return process.env.VUE_APP_VERSION
+  }
+
+  @Watch('hint')
+  hintChange (hint: boolean) {
+    if (this.tempHint !== hint) {
+      this.tempHint = hint
+    }
+  }
+
+  @Watch('replaceSpace')
+  replaceSpaceChange (replaceSpace: boolean) {
+    if (this.tempReplaceSpace !== replaceSpace) {
+      this.tempReplaceSpace = replaceSpace
+    }
   }
 
   showIdealCodes () {
@@ -169,6 +217,11 @@ export default class Indicator extends Vue {
       text: this.keys.map(v => keyboard.get(v)).map(v => (v && v.key) || '❓').join('')
     })
     this.drawerVisiable = true
+  }
+
+  created () {
+    this.hintChange(this.hint)
+    this.replaceSpaceChange(this.replaceSpace)
   }
 }
 </script>
@@ -242,10 +295,11 @@ export default class Indicator extends Vue {
     }
   }
 
-  .key-count {
+  .key-value {
     position: relative;
     display: flex;
     justify-content: space-between;
+    margin: .5rem auto;
     span {
       z-index: 10;
       background-color: white;
@@ -258,7 +312,7 @@ export default class Indicator extends Vue {
       padding-left: .5rem;
     }
   }
-  .key-count::before {
+  .key-value::before {
     z-index: 1;
     content: '';
     border-bottom: 1px dashed #E4E7ED;

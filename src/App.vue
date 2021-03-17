@@ -156,14 +156,28 @@ export default class Setting extends Vue {
 </script>
 
 <style lang="scss">
-:root {
-  font-size: 12px;
-  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
-}
-
 @font-face {
   font-family: "Digital7 mono";
   src: url("/font/digital-7-mono.ttf") format("truetype");
+}
+
+// @media (prefers-color-scheme: dark) {
+//   body {
+//     background: rgb(53, 54, 58);
+//     color: rgba(238,238,238,1);
+//   }
+// }
+
+// @media (prefers-color-scheme: light) {
+//   body {
+//     background: rgb(255,255,255);
+//     color: rgba(51,51,51,1);
+//   }
+// }
+
+:root {
+  font-size: 12px;
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
 }
 
 html,body {

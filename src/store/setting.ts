@@ -8,6 +8,14 @@ const getters: GetterTree<SettingState, QuickTypingState> = {
     return state
   },
 
+  hint (): boolean {
+    return state.hint
+  },
+
+  replaceSpace (): boolean {
+    return state.replaceSpace
+  },
+
   styles (): InterfaceStyle {
     const { pending, typed, correct, error, hintColor, code1, code2, code3, code4 } = state
     return {
@@ -52,6 +60,14 @@ const mutations: MutationTree<SettingState> = {
 
   loaded (state) {
     state.loaded = true
+  },
+
+  toggleHint (state, hint) {
+    state.hint = hint
+  },
+
+  toggleReplaceSpace (state, replaceSpace) {
+    state.replaceSpace = replaceSpace
   }
 }
 

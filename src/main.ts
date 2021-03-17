@@ -6,6 +6,7 @@ import './registerServiceWorker'
 import router from './router'
 import store from './store'
 import 'github-markdown-css'
+// import 'element-theme-dark'
 
 Vue.use(ElementUI)
 

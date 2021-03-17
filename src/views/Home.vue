@@ -92,7 +92,6 @@ export default class Home extends Vue {
 
   @Watch('authenticated')
   authChange (authenticated: boolean) {
-    console.log('auth change', authenticated)
     if (authenticated) {
       xcapi.groups().then(data => {
         if (data) {
@@ -107,7 +106,6 @@ export default class Home extends Vue {
   }
 
   created () {
-    console.log('auth', this.authenticated)
     this.authChange(this.authenticated)
 
     // 监听快捷键
