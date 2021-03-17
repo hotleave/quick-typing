@@ -1,5 +1,5 @@
 <template>
-  <div class="summary">
+  <div id="summary">
     <el-row>
       <el-col :span="24">
         <el-card>
@@ -271,26 +271,3 @@ export default class Summary extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.summary .el-row {
-  margin: 2rem auto;
-}
-
-#keyboard {
-  background-image: url(/img/layouts/QWERTY.png);
-  width: 800px;
-  height: 373px;
-  margin: auto;
-}
-
-#balance-chart, #rows-chart, #mixed-fingers-chart {
-  width: 100%;
-  height: 300px;
-}
-
-#fingers-chart {
-  width: 100%;
-  height: 400px;
-}
-</style>

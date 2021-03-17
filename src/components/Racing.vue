@@ -1,6 +1,6 @@
 <template>
   <div>
-    <el-input class="textarea" type="textarea" rows="6" ref="textarea"
+    <el-input id="racing-textarea" type="textarea" rows="6" ref="textarea"
       @keydown.native="typing"
       @blur="pause"
       @input="accept(input)"
@@ -77,17 +77,3 @@ export default class Racing extends Vue {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.textarea {
-  font-size: 2rem;
-  border: 1px solid #EBEEF5;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-
-.result {
-  margin: 1rem;
-  color: #606266;
-}
-</style>

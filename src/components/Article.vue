@@ -1,5 +1,5 @@
 <template>
-  <div class="article-main">
+  <div id="article-main">
     <el-row ref="board" :class="articleStyle" :style="styles">
       <Words v-for="word in words" :key="word.id" :word="word"/>
     </el-row>
@@ -181,86 +181,4 @@ export default class Article extends Vue {
 </script>
 
 <style lang="scss">
-.article-main {
-  border: 1px solid #EBEEF5;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-.article {
-  padding: 5px 15px;
-  font-size: 2rem;
-  height: 15rem;
-  overflow: auto;
-  color: var(--pending, #909399);
-
-  :nth-child(2n) {
-    font-weight: bold;
-  }
-
-  .correct, .error, .pending {
-    font-weight: normal;
-  }
-  .correct, .error {
-    color: var(--typed, #fff);
-  }
-  .correct {
-    background-color: var(--correct, #C0C4CC);
-  }
-  .error {
-    background-color: var(--error, #F56C6C);
-  }
-
-  .code1 {
-    color: var(--code1, #F56C6C);
-  }
-  .code2 {
-    color: var(--code2, #E6A23C);
-  }
-  .code3 {
-    color: var(--code3, #409EFF);
-  }
-  .code4 {
-    color: var(--code4, #909399);
-  }
-}
-
-.article.grid {
-  div {
-    display: inline-grid;
-  }
-
-  label {
-    display: inline-block;
-    width: 90%;
-    margin: 0 auto;
-    text-align: center;
-    font-size: 12px;
-    font-weight: normal;
-    color: var(--hint, #909399);
-    letter-spacing: 1px;
-    border-top: 1px solid var(--hint, #909399);
-  }
-
-  span:last-child {
-    height: 4rem;
-  }
-}
-
-.article.inline {
-  div {
-    display: inline;
-  }
-}
-
-.article-info {
-  font-size: 1rem;
-  color: #909399;
-  text-align: right;
-  margin-top: -2rem;
-  padding: 1rem;
-
-  .title {
-    margin: auto 1rem;
-  }
-}
 </style>

@@ -27,7 +27,7 @@
           <span slot="title">关于</span>
         </el-menu-item>
       </el-menu>
-      <div class="profile">
+      <div id="profile">
         <el-button v-if="!authenticated" type="text" @click="loginFormVisible = true">登录</el-button>
         <el-dialog title="用户登录" :visible.sync="loginFormVisible">
           <el-form :model="auth" label-width="80">
@@ -155,66 +155,4 @@ export default class Setting extends Vue {
 }
 </script>
 
-<style lang="scss">
-@font-face {
-  font-family: "Digital7 mono";
-  src: url("/font/digital-7-mono.ttf") format("truetype");
-}
-
-// @media (prefers-color-scheme: dark) {
-//   body {
-//     background: rgb(53, 54, 58);
-//     color: rgba(238,238,238,1);
-//   }
-// }
-
-// @media (prefers-color-scheme: light) {
-//   body {
-//     background: rgb(255,255,255);
-//     color: rgba(51,51,51,1);
-//   }
-// }
-
-:root {
-  font-size: 12px;
-  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
-}
-
-html,body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-#app {
-  width: 100%;
-  height: 100%;
-}
-
-.main {
-  padding-top: 0;
-}
-
-.middle {
-  margin: 2rem auto;
-}
-
-.toolbar {
-  text-align: right;
-  padding: 1rem;
-  border: 1px solid #EBEEF5;
-  border-radius: 4px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-
-#groups {
-  text-align: left;
-}
-
-.profile {
-  position: absolute;
-  right: 1rem;
-  top: 1rem;
-}
-</style>
+<style lang="scss" src="./assets/styles/main.scss"></style>

@@ -1,0 +1,289 @@
+$level1-border-color: #DCDFE6;
+$level2-border-color: #E4E7ED;
+$level3-border-color: #EBEEF5;
+$level4-border-color: #F2F6FC;
+
+$main-color: #303133;
+$normal-color: #606266;
+$secondary-color: #909399;
+$placeholder-color: #C0C4CC;
+
+@font-face {
+  font-family: "Digital7 mono";
+  src: url("/font/digital-7-mono.ttf") format("truetype");
+}
+
+// @media (prefers-color-scheme: dark) {
+//   body {
+//     background-color: #35363A;
+//     color: #EEEEEE;
+//   }
+// }
+
+// @media (prefers-color-scheme: light) {
+//   body {
+//     background-color: #FFFFFF;
+//     color: #35363A;
+//   }
+// }
+
+@mixin shadow-border($color: $level3-border-color, $width: 1px) {
+  border: $width solid $color;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+}
+
+:root {
+  font-size: 12px;
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;}
+
+html,body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  // 头像
+  #profile {
+    position: absolute;
+    right: 3rem;
+    top: 1rem;
+  }
+}
+
+#home {
+  // 群组
+  #groups {
+    text-align: left;
+  }
+
+  // 工具条
+  #toolbar {
+    text-align: right;
+    padding: 1rem;
+    @include shadow-border;
+  }
+
+  // 文章看板
+  #article-container {
+    margin: 2rem auto;
+  }
+}
+
+// 统计
+#summary {
+  .el-row {
+    margin: 2rem auto;
+  }
+
+  #keyboard {
+    background-image: url(/img/layouts/QWERTY.png);
+    width: 800px;
+    height: 373px;
+    margin: auto;
+  }
+
+  #balance-chart, #rows-chart, #mixed-fingers-chart {
+    width: 100%;
+    height: 300px;
+  }
+
+  #fingers-chart {
+    width: 100%;
+    height: 400px;
+  }
+}
+
+// 左侧面板
+#indicator {
+  @include shadow-border($level1-border-color);
+  padding: 5px 15px;
+  margin-bottom: 1rem;
+
+  .el-card {
+    color: $secondary-color;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .time {
+    font-family: 'Digital7 mono';
+    font-size: 3rem;
+    text-align: center;
+    padding-top: 20px;
+
+    &>span {
+      position: relative;
+      left: 70px;
+      top: -50px;
+      float: left;
+    }
+  }
+
+  .speed {
+    font-family: 'Digital7 mono';
+    font-size: 4rem;
+    text-align: center;
+    border-bottom: 1px dashed $level2-border-color;
+    padding: 1rem;
+  }
+
+  .hint-block {
+    text-align: center;
+    // font-family: 'Digital7 mono';
+    padding-top: 1rem;
+
+    span.number {
+      font-size: 1.5rem;
+      display: block;
+      color: $secondary-color;
+    }
+    span.desc {
+      font-size: 12px;
+      color: $placeholder-color;
+    }
+    .el-button {
+      padding: 2px 0;
+      font-size: 1rem;
+    }
+  }
+
+  .code-hint {
+    text-align: left;
+    dd {
+      font-size: 1.2rem;
+      letter-spacing: 0.1rem;
+      margin-left: 1rem;
+
+      &::before {
+        content: '-';
+        color: $placeholder-color;
+      }
+    }
+  }
+
+  .key-value {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin: .5rem auto;
+
+    &::before {
+      z-index: 1;
+      content: '';
+      border-bottom: 1px dashed $level2-border-color;
+      position: absolute;
+      top: 50%;
+      width: 100%;
+    }
+
+    &>span {
+      z-index: 10;
+      background-color: white;
+
+      &:first-child {
+        padding-right: .5rem;
+      }
+      &:last-child {
+        padding-left: .5rem;
+      }
+    }
+  }
+  .codes {
+    font-size: 2rem;
+    word-break: break-all;
+    letter-spacing: .5rem;
+    overflow: auto;
+    padding: 1rem;
+    color: $secondary-color;
+    min-height: 100px;
+    max-height: 200px;
+  }
+}
+
+#article-main {
+  @include shadow-border;
+
+  .article {
+    padding: 5px 15px;
+    font-size: 2rem;
+    height: 15rem;
+    overflow: auto;
+    color: var(--pending, $secondary-color);
+
+    &:nth-child(2n) {
+      font-weight: bold;
+    }
+    &.grid {
+      div {
+        display: inline-grid;
+      }
+
+      label {
+        display: inline-block;
+        width: 90%;
+        margin: 0 auto;
+        text-align: center;
+        font-size: 12px;
+        font-weight: normal;
+        color: var(--hint, $secondary-color);
+        letter-spacing: 1px;
+        border-top: 1px solid var(--hint, $secondary-color);
+      }
+
+      span:last-child {
+        height: 4rem;
+      }
+    }
+    &.inline {
+      div {
+        display: inline;
+      }
+    }
+
+    .correct, .error, .pending {
+      font-weight: normal;
+    }
+    .correct, .error {
+      color: var(--typed, #fff);
+    }
+    .correct {
+      background-color: var(--correct, $placeholder-color);
+    }
+    .error {
+      background-color: var(--error, #F56C6C);
+    }
+
+    .code1 {
+      color: var(--code1, #F56C6C);
+    }
+    .code2 {
+      color: var(--code2, #E6A23C);
+    }
+    .code3 {
+      color: var(--code3, #409EFF);
+    }
+    .code4 {
+      color: var(--code4, $secondary-color);
+    }
+  }
+
+  .article-info {
+    font-size: 1rem;
+    color: $secondary-color;
+    text-align: right;
+    margin-top: -2rem;
+    padding: 1rem;
+
+    .title {
+      margin: auto 1rem;
+    }
+  }
+}
+
+#racing-textarea {
+  font-size: 2rem;
+  @include shadow-border;
+}

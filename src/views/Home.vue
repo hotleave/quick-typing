@@ -1,11 +1,11 @@
 <template>
-  <div>
+  <div id="home">
     <el-container>
       <el-aside>
         <Indicator/>
       </el-aside>
-      <el-main class="main">
-        <el-row class="toolbar">
+      <el-main>
+        <el-row id="toolbar">
           <el-col :span="3" id="groups">
             <el-select v-model="group" placeholder="请选择" @change="onGroupChange">
               <el-option v-for="item in groups"
@@ -17,13 +17,13 @@
           </el-col>
           <el-col :span="12" :offset="9">
             <el-button-group>
-              <el-button size="mini" icon="el-icon-document" @click="loadFromClipboard">载文</el-button>
-              <el-button size="mini" :icon="triggerIcon" @click="trigger">{{ triggerText }}</el-button>
-              <el-button size="mini" icon="el-icon-refresh" @click="retry">重打</el-button>
+              <el-button icon="el-icon-document" @click="loadFromClipboard">载文</el-button>
+              <el-button :icon="triggerIcon" @click="trigger">{{ triggerText }}</el-button>
+              <el-button icon="el-icon-refresh" @click="retry">重打</el-button>
             </el-button-group>
           </el-col>
         </el-row>
-        <el-row class="middle">
+        <el-row id="article-container">
           <el-col :span="24">
             <Article ref="article"/>
           </el-col>
