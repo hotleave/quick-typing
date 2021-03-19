@@ -1,60 +1,64 @@
 <template>
-  <el-container id="app">
-    <el-header>
-      <el-menu
-        :router="true"
-        :default-active="pathname"
-        active-text-color="#409EFF"
-        mode="horizontal">
-        <el-menu-item index="/">
-          <i class="el-icon-s-home"></i>
-          <span slot="title">主界面</span>
-        </el-menu-item>
-        <el-menu-item index="/setting">
-          <i class="el-icon-setting"></i>
-          <span slot="title">设置</span>
-        </el-menu-item>
-        <el-menu-item index="/summary">
-          <i class="el-icon-s-data"></i>
-          <span slot="title">统计</span>
-        </el-menu-item>
-        <el-menu-item index="/changelog">
-          <i class="el-icon-time"></i>
-          <span slot="title">版本历史</span>
-        </el-menu-item>
-        <el-menu-item index="/about">
-          <i class="el-icon-question"></i>
-          <span slot="title">关于</span>
-        </el-menu-item>
-      </el-menu>
-      <div id="profile">
-        <el-button v-if="!authenticated" type="text" @click="loginFormVisible = true">登录</el-button>
-        <el-dialog title="用户登录" :visible.sync="loginFormVisible">
-          <el-form :model="auth" label-width="80">
-            <el-form-item label="用户名">
-              <el-input v-model="auth.username" autocomplete="off"></el-input>
-            </el-form-item>
-            <el-form-item label="密码">
-              <el-input v-model="auth.password" autocomplete="off" show-password></el-input>
-            </el-form-item>
-          </el-form>
-          <div slot="footer" class="dialog-footer">
-            <el-button @click="loginFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="doLogin">确 定</el-button>
-          </div>
-        </el-dialog>
-        <el-dropdown v-if="authenticated">
-          <el-avatar :size="30" :src="loginUser.avatar"></el-avatar>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item icon="el-icon-lock" @click.native="doLogout">退出</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-      </div>
-    </el-header>
-    <el-main>
-      <router-view/>
-    </el-main>
-  </el-container>
+  <div id="app">
+    <el-row>
+      <el-col :span="24">
+        <el-menu
+          :router="true"
+          :default-active="pathname"
+          active-text-color="#409EFF"
+          mode="horizontal">
+          <el-menu-item index="/">
+            <i class="el-icon-s-home"></i>
+            <span slot="title">主界面</span>
+          </el-menu-item>
+          <el-menu-item index="/setting">
+            <i class="el-icon-setting"></i>
+            <span slot="title">设置</span>
+          </el-menu-item>
+          <el-menu-item index="/summary">
+            <i class="el-icon-s-data"></i>
+            <span slot="title">统计</span>
+          </el-menu-item>
+          <el-menu-item index="/changelog">
+            <i class="el-icon-time"></i>
+            <span slot="title">版本历史</span>
+          </el-menu-item>
+          <el-menu-item index="/about">
+            <i class="el-icon-question"></i>
+            <span slot="title">关于</span>
+          </el-menu-item>
+        </el-menu>
+        <div id="profile">
+          <el-button v-if="!authenticated" type="text" @click="loginFormVisible = true">登录</el-button>
+          <el-dialog title="用户登录" :visible.sync="loginFormVisible">
+            <el-form :model="auth" label-width="80">
+              <el-form-item label="用户名">
+                <el-input v-model="auth.username" autocomplete="off"></el-input>
+              </el-form-item>
+              <el-form-item label="密码">
+                <el-input v-model="auth.password" autocomplete="off" show-password></el-input>
+              </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+              <el-button @click="loginFormVisible = false">取 消</el-button>
+              <el-button type="primary" @click="doLogin">确 定</el-button>
+            </div>
+          </el-dialog>
+          <el-dropdown v-if="authenticated">
+            <el-avatar :size="30" :src="loginUser.avatar"></el-avatar>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item icon="el-icon-lock" @click.native="doLogout">退出</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </div>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="24">
+        <router-view/>
+      </el-col>
+    </el-row>
+  </div>
 </template>
 
 <script lang="ts">

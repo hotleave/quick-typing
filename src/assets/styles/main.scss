@@ -61,6 +61,10 @@
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
+@mixin mono-font {
+  font-family: 'Lucida Console', Monaco, monospace;
+}
+
 :root {
   font-size: 12px;
   font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
@@ -100,6 +104,7 @@ html, body {
 #app {
   width: 80%;
   max-width: 1440px;
+  min-width: 960px;
   margin: 0 auto;
   @include shadow-border(var(--level1-border-color));
   // background-color: var(--level4-border-color);
@@ -109,8 +114,8 @@ html, body {
     right: 3rem;
     top: 1rem;
   }
-  .el-main, .el-aside {
-    padding: 8px;
+  .el-main {
+    padding: 0;
   }
 }
 
@@ -123,6 +128,7 @@ html, body {
   // 工具条
   #toolbar {
     text-align: right;
+    padding: 8px;
   }
 
   // 文章看板
@@ -162,6 +168,7 @@ html, body {
     color: var(--secondary-color);
     margin-bottom: 1rem;
     text-align: center;
+    margin: 8px;
   }
 
   .time {
@@ -207,14 +214,20 @@ html, body {
 
   .code-hint {
     text-align: left;
-    dd {
-      font-size: 1.2rem;
-      letter-spacing: 0.1rem;
-      margin-left: 1rem;
-
-      &::before {
-        content: '-';
-        color: var(--placeholder-color);
+    font-size: 1.2rem;
+    height: 150px;
+    div {
+      margin: .5rem auto 0 auto;
+      &:first-child {
+        margin-top: 0; 
+      }
+      span {
+        @include mono-font;
+        letter-spacing: 0.1rem;
+        margin-right: .5rem;
+        &:last-child {
+          margin-right: auto;
+        }
       }
     }
   }
@@ -247,9 +260,10 @@ html, body {
     }
   }
   .codes {
+    @include mono-font;
     font-size: 2rem;
     word-break: break-all;
-    letter-spacing: .5rem;
+    letter-spacing: .2rem;
     overflow: auto;
     padding: 1rem;
     color: var(--secondary-color);
@@ -341,7 +355,8 @@ html, body {
 }
 
 #racing-textarea {
-  @include radius-border;
+  border: none;
+  border-bottom: 1px solid var(--level3-border-color);
   font-size: var(--font-size);
   line-height: calc(var(--font-size) + 1rem);
   height: calc((var(--font-size) + 2rem + 5px) * var(--line-count));

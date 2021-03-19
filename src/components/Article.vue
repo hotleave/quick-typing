@@ -3,14 +3,11 @@
     <el-row ref="board" :class="articleStyle" :style="styles">
       <Words v-for="word in words" :key="word.id" :word="word"/>
     </el-row>
-    <el-divider/>
-    <el-row v-if="content" class="article-info">
-      <el-col :span="24">
-        <span class="id">第{{ identity }}段</span>
-        <span class="title">{{ title || '未知' }}</span>
-        <span class="length">共{{ length }}字</span>
-      </el-col>
-    </el-row>
+    <el-divider class="article-info" content-position="right">
+      <span>第{{ identity }}段</span>
+      <span>{{ title || '未知' }}</span>
+      <span>共{{ length }}字</span>
+    </el-divider>
   </div>
 </template>
 

@@ -157,17 +157,22 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
     }
 
     const { path, vertices } = shortest
-    const edge = vertices[path[length]].get(length)
-    if (!edge) {
-      return null
+    const result: Array<Word> = []
+    for (let i = Math.min(10, article.content.length); i > 0; i--) {
+      const start = length + i
+      const alt = vertices[start].get(length)
+      if (!alt) {
+        continue
+      }
+
+      if (start === path[length]) {
+        result.splice(0, 0, alt.value)
+      } else {
+        result.push(alt.value)
+      }
     }
 
-    const single = vertices[length + 1].get(length)
-    if (!single || edge.value.text.length === 1) {
-      return [edge.value]
-    }
-
-    return [edge.value, single.value]
+    return result
   },
 
   // 比赛结果

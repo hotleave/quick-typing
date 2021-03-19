@@ -4,9 +4,9 @@
       <el-aside>
         <Indicator/>
       </el-aside>
-      <el-main>
+      <el-main id="home-main">
         <el-row id="toolbar">
-          <el-col :span="3" id="groups">
+          <el-col :span="9" id="groups">
             <el-select v-model="group" placeholder="请选择" @change="onGroupChange">
               <el-option v-for="item in groups"
                 :key="item.value"
@@ -15,7 +15,7 @@
               </el-option>
             </el-select>
           </el-col>
-          <el-col :span="12" :offset="9">
+          <el-col :span="15">
             <el-button-group>
               <el-button icon="el-icon-document" @click="loadFromClipboard">载文</el-button>
               <el-button :icon="triggerIcon" @click="trigger">{{ triggerText }}</el-button>
@@ -23,16 +23,19 @@
             </el-button-group>
           </el-col>
         </el-row>
-        <el-row id="article-container">
-          <el-col :span="24">
-            <Article ref="article"/>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24">
-            <Racing ref="racing"/>
-          </el-col>
-        </el-row>
+        <el-divider/>
+        <div>
+          <el-row>
+            <el-col :span="24">
+              <Article ref="article"/>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <Racing ref="racing"/>
+            </el-col>
+          </el-row>
+        </div>
       </el-main>
     </el-container>
   </div>

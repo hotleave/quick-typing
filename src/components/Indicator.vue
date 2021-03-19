@@ -1,10 +1,10 @@
 <template>
   <div id="indicator">
-    <el-card class="time">
+    <el-card class="time" shadow="never">
       <el-progress type="dashboard" :percentage="percentage" :width="200" :status="progressStatus"/>
       <span>{{ passTime }}</span>
     </el-card>
-    <el-card>
+    <el-card shadow="never">
       <el-row>
         <el-col :span="24" class="speed">
           {{ typeSpeed }}
@@ -31,13 +31,13 @@
         </el-col>
       </el-row>
     </el-card>
-    <el-card v-if="status === 'init' || status === 'typing'">
-      <dl class="code-hint" v-for="word in wordsHint" :key="word.text">
-        <dt><el-tag>{{ word.text }}</el-tag></dt>
-        <dd v-for="coding in word.codings" :key="coding.code">{{ coding.code + getSelectChar(coding.index, coding.length) }}</dd>
-      </dl>
+    <el-card class="code-hint" v-if="status !== 'waiting' && status !== 'finished'" shadow="never">
+      <div v-for="word in wordsHint" :key="word.text">
+        <span type="info">{{ word.text }}：</span>
+        <span v-for="coding in word.codings" :key="coding.code">{{ coding.code + getSelectChar(coding.index, coding.length) }}</span>
+      </div>
     </el-card>
-    <el-card>
+    <el-card shadow="never">
       <div class="key-value">
         <span>退格</span>
         <span>{{ backspace }}</span>
@@ -63,7 +63,7 @@
         <span>{{ leftHand }}/{{ rightHand }}</span>
       </div>
     </el-card>
-    <el-card>
+    <el-card shadow="never">
       <div class="key-value">
         <span>词提</span>
         <span>

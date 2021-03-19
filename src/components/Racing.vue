@@ -1,10 +1,11 @@
 <template>
   <div>
-    <el-input id="racing-textarea" type="textarea" rows="6" ref="textarea"
+    <el-input id="racing-textarea" type="textarea" ref="textarea"
       @keydown.native="typing"
       @blur="pause"
       @input="accept(input)"
       :disabled="status !== 'typing' && status !== 'init'"
+      placeholder="在这里输入赛文..."
       v-model="input">
     </el-input>
   </div>
