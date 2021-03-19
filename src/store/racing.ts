@@ -158,7 +158,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
 
     const { path, vertices } = shortest
     const result: Array<Word> = []
-    for (let i = Math.min(10, article.content.length); i > 0; i--) {
+    for (let i = Math.min(10, article.content.length - length); i > 0; i--) {
       const start = length + i
       const alt = vertices[start].get(length)
       if (!alt) {
