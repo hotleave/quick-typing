@@ -14,6 +14,7 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
+import Clipboard from '@/store/util/Clipboard'
 
 const racing = namespace('racing')
 
@@ -49,12 +50,11 @@ export default class Racing extends Vue {
         setTimeout(this.focus, 50)
         break
       case 'finished': {
-        const result = this.result
-        navigator.clipboard.writeText(result).then(() => result, () => {
-          document.addEventListener('copy', this.copy, true)
-          document.execCommand('copy')
+        const text = this.result
+        Clipboard.copy(text, () => null, () => {
+          this.$message.warning('你的浏览器不支持自动复制，需要手动操作')
         })
-        this.$notify({ title: '成功', message: result, type: 'success', duration: 10000, showClose: true })
+        this.$notify({ title: '成功', message: text, type: 'success', duration: 10000, showClose: true })
         break
       }
     }
@@ -65,16 +65,6 @@ export default class Racing extends Vue {
    */
   focus () {
     (this.$refs.textarea as HTMLElement).focus()
-  }
-
-  /**
-   * 复制结果到剪切板
-   */
-  copy (event: ClipboardEvent) {
-    const { clipboardData } = event
-    clipboardData && clipboardData.setData('text/plain', this.result)
-    document.removeEventListener('copy', this.copy, true)
-    event.preventDefault()
   }
 }
 </script>

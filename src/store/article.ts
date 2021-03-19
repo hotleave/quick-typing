@@ -39,9 +39,9 @@ const mergeEdge = (vertex: Map<number, Edge<Word>>, graph: Graph<Word>, setting:
   }
 }
 
-const codingsBeforeMaxIndex = (codings: Array<Coding>, maxIndex: number): Array<Coding> => {
-  const filtered = codings.filter(v => v.index <= maxIndex)
-  return filtered && filtered.length > 0 ? filtered : codings
+const codingsBeforeMaxIndex = (codings: Array<Coding>, maxIndex: number, phrase: boolean): Array<Coding> => {
+  const matched = codings.filter(v => v.index < maxIndex)
+  return phrase ? matched : (matched && matched.length > 0 ? matched : codings)
 }
 
 /**
@@ -71,7 +71,10 @@ const parse = (content: string, codings: TrieNode, setting: SettingState, getSel
 
       if (sub.value) {
         const { text, codings } = sub.value
-        const matched = codingsBeforeMaxIndex(codings, max)
+        const matched = codingsBeforeMaxIndex(codings, max, text.length > 1)
+        if (!matched || matched.length < 1) {
+          continue
+        }
 
         const { index, code, fourthSingle } = matched[0]
         const next = j + 1
