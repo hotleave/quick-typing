@@ -179,7 +179,7 @@ html, body {
 
     span {
       position: relative;
-      left: 70px;
+      left: 78px;
       top: -50px;
       float: left;
     }
@@ -269,6 +269,13 @@ html, body {
     color: var(--secondary-color);
     min-height: 100px;
     max-height: 200px;
+  }
+  .contribute {
+    text-align: left;
+    color: var(--secondary-color);
+    a, a:visited {
+      color: var(--secondary-color);
+    }
   }
 }
 

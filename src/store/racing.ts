@@ -350,6 +350,11 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
   },
 
   accept ({ commit, state, rootState }, content: string): void {
+    if (content.length === 0 && rootState.setting.retryWhenEmpty) {
+      this.dispatch('racing/retry')
+      return
+    }
+
     const { article } = rootState
     if (state.input !== content) {
       const delta = content.length - state.input.length

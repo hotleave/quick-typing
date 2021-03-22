@@ -3,6 +3,9 @@
     <el-form ref="settingForm" :model="form" :rules="rules" label-suffix=":" label-width="16rem">
       <el-tabs v-model="activeTab" tab-position="left">
         <el-tab-pane label="基本设置" name="basic">
+          <el-form-item label="自动重新开始">
+            <el-switch v-model="form.retryWhenEmpty"/>
+          </el-form-item>
           <el-form-item label="未打颜色">
             <el-color-picker v-model="form.pending"></el-color-picker>
           </el-form-item>

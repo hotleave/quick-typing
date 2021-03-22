@@ -237,6 +237,10 @@ export class SettingState implements Identity {
   loaded = false
 
   /**
+   * 在删除输入框的所有文字后自动重新开始
+   */
+  retryWhenEmpty = false
+  /**
    * 未打文字颜色
    */
   pending = '#909399'
