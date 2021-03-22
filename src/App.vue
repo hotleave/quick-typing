@@ -65,7 +65,7 @@
 import { Component, Vue } from 'vue-property-decorator'
 import { TrieNode } from './store/util/TrieTree'
 import db from './store/util/Database'
-import { Action, namespace } from 'vuex-class'
+import { Action, Mutation, namespace } from 'vuex-class'
 import { LoginUser, LooseObject } from './store/types'
 import xcapi from './api/xc.cool'
 
@@ -98,6 +98,9 @@ export default class Setting extends Vue {
 
   @login.Action('logout')
   private logout!: Function
+
+  @Mutation('updateAchievements')
+  private updateAchievements!: Function
 
   private auth = {
     username: '',
@@ -154,6 +157,12 @@ export default class Setting extends Vue {
         this.summaryKeyCount(keyCount as LooseObject<number>)
         console.log('Key count summary loaded')
       }
+    })
+    // 读取比赛成绩
+    db.achievement.reverse().limit(10).toArray().then(achievements => {
+      this.updateAchievements(achievements)
+    }, (error) => {
+      console.log(error)
     })
   }
 }

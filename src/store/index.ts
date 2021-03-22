@@ -10,7 +10,10 @@ import { TrieNode } from './util/TrieTree'
 
 Vue.use(Vuex)
 
+const state: QuickTypingState = new QuickTypingState()
+
 const store: StoreOptions<QuickTypingState> = {
+  state,
   modules: {
     article,
     racing,
@@ -30,6 +33,14 @@ const store: StoreOptions<QuickTypingState> = {
       } else {
         state.overallKeyCount = keyCount
       }
+    },
+
+    updateAchievements (state, achievements): void {
+      state.achievements = achievements
+    },
+
+    addAchievements (state, achievement): void {
+      state.achievements.unshift(achievement)
     }
   },
 
@@ -42,6 +53,9 @@ const store: StoreOptions<QuickTypingState> = {
 
       const data: Identity = { id: 'keyCount', ...state.overallKeyCount }
       db.summary.put(data)
+    },
+    addAchievements ({ commit }, achievement) {
+      commit('addAchievements', achievement)
     }
   }
 }

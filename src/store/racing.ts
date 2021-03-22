@@ -1,6 +1,7 @@
 import xcapi from '@/api/xc.cool'
 import { ActionTree, GetterTree, Module, MutationTree } from 'vuex'
-import { QuickTypingState, RacingState, Word } from './types'
+import { Achievement, QuickTypingState, RacingState, Word } from './types'
+import db from './util/Database'
 import { keyboard } from './util/keyboard'
 
 const statusMap = new Map<string, string>([
@@ -171,6 +172,35 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
         result.push(alt.value)
       }
     }
+
+    return result
+  },
+
+  achievement (state, getters, { article }): Achievement {
+    const result = new Achievement()
+    Object.assign(result, {
+      identity: article.identity || '1',
+      title: article.title,
+      typeSpeed: parseFloat(getters.typeSpeed),
+      hitSpeed: parseFloat(getters.hitSpeed),
+      codeLength: parseFloat(getters.codeLength),
+      contentLength: article.content.length,
+      usedTime: state.time,
+      pauseCount: state.pauseCount,
+      pauseTime: state.pauseTime,
+      accuracy: parseFloat(getters.accuracy),
+      balance: parseFloat(getters.balance),
+      leftHand: getters.leftHand,
+      rightHand: getters.rightHand,
+      idealCodeLength: parseFloat(getters.idealCodeLength),
+      phrase: state.phrase,
+      phraseRate: parseFloat(getters.phraseRate),
+      selective: state.selective,
+      replace: state.phrase,
+      keys: state.keys.length,
+      backspace: getters.backspaceCount,
+      enter: getters.enterCount
+    })
 
     return result
   },
@@ -349,7 +379,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     commit('typing', { e, altSelectKey })
   },
 
-  accept ({ commit, state, rootState }, content: string): void {
+  accept ({ commit, state, rootState, getters }, content: string): void {
     if (content.length === 0 && rootState.setting.retryWhenEmpty) {
       this.dispatch('racing/retry')
       return
@@ -373,6 +403,11 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
       clearInterval(state.timer)
       commit('finish')
       this.dispatch('summaryKeyCount', state.keyCount)
+      setTimeout(() => {
+        const achievement = getters.achievement
+        this.dispatch('addAchievements', achievement, { root: true })
+        db.achievement.add(achievement)
+      })
     }
   },
 

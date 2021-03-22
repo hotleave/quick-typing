@@ -12,6 +12,7 @@ QuickTyping，中式英语，直译快打，快来打，打得快，越来越快
 
 - 有问题，提个[Issue](https://gitee.com/hotleave/quick-typing/issues)
 - 有想法，提个[Issue](https://gitee.com/hotleave/quick-typing/issues)
+- 或[QQ联系我](tencent://Message/?Uin=81493192&websiteName=hotleave.gitee.io&Menu=yes)
 - 有能力，提个[PR](https://gitee.com/hotleave/quick-typing/pulls)
 
 ## 声明

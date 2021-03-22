@@ -54,7 +54,7 @@ export default class Racing extends Vue {
         Clipboard.copy(text, () => null, () => {
           this.$message.warning('你的浏览器不支持自动复制，需要手动操作')
         })
-        this.$notify({ title: '成功', message: text, type: 'success', duration: 10000, showClose: true })
+        this.$message.success(text)
         break
       }
     }

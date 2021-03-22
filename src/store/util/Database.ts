@@ -1,5 +1,5 @@
 import Dexie from 'dexie'
-import { Identity } from '../types'
+import { Achievement, Identity } from '../types'
 
 class QuickTypingDatabase extends Dexie {
   /**
@@ -11,11 +11,18 @@ class QuickTypingDatabase extends Dexie {
    */
   summary: Dexie.Table<Identity, string>
 
+  achievement: Dexie.Table<Achievement, number>
+
   constructor (databaseName: string) {
     super(databaseName)
-    this.version(1).stores({ configs: 'id', summary: 'id' })
+    this.version(2).stores({
+      configs: 'id',
+      summary: 'id',
+      achievement: '++'
+    })
     this.configs = this.table('configs')
     this.summary = this.table('summary')
+    this.achievement = this.table('achievement')
   }
 }
 

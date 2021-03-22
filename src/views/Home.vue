@@ -35,6 +35,11 @@
               <Racing ref="racing"/>
             </el-col>
           </el-row>
+          <el-row>
+            <el-col :span="24">
+              <Achievements/>
+            </el-col>
+          </el-row>
         </div>
       </el-main>
     </el-container>
@@ -46,6 +51,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import Indicator from '@/components/Indicator.vue'
 import Article from '@/components/Article.vue'
 import Racing from '@/components/Racing.vue'
+import Achievements from '@/components/Achievements.vue'
 import { namespace } from 'vuex-class'
 import xcapi from '@/api/xc.cool'
 
@@ -57,7 +63,8 @@ const login = namespace('login')
   components: {
     Article,
     Indicator,
-    Racing
+    Racing,
+    Achievements
   }
 })
 export default class Home extends Vue {

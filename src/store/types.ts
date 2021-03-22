@@ -165,28 +165,32 @@ export class RacingState {
   /**
    * 键数
    */
-  keyCount: LooseObject<number> = emptyKeyCount()
+  keyCount: LooseObject<number> = emptyKeyCount();
 }
 
-export interface QuickTypingState {
-  article: ArticleState;
-  racing: RacingState;
+export class QuickTypingState {
+  article!: ArticleState;
+  racing!: RacingState;
   /**
    * 编码
    */
-  codings: TrieNode;
+  codings!: TrieNode;
   /**
    * 设置
    */
-  setting: SettingState;
+  setting!: SettingState;
   /**
    * 登录状态
    */
-  login: LoginState;
+  login!: LoginState;
   /**
    * 总键数
    */
-  overallKeyCount: LooseObject<number>;
+  overallKeyCount!: LooseObject<number>;
+  /**
+   * 成绩
+   */
+  achievements: Array<Achievement> = [];
 }
 
 export interface InterfaceStyle {
@@ -377,4 +381,52 @@ export class LoginState {
   authenticated = false;
   token = '';
   user: LoginUser | null = null;
+}
+
+export class Achievement {
+  id: number | null = null;
+  /**
+   * 标识
+   */
+  identity = '';
+  title = '';
+  typeSpeed = 0;
+  hitSpeed = 0;
+  codeLength = 0;
+  contentLength = 0;
+  accuracy = 0;
+  balance = 0;
+  leftHand = 0;
+  rightHand = 0;
+  idealCodeLength = 0;
+  keys = 0;
+  backspace = 0;
+  enter = 0;
+
+  /**
+   * 用时
+   */
+  usedTime = 0;
+  /**
+   * 回改
+   */
+   replace = 0;
+   /**
+    * 选重
+    */
+   selective = 0;
+   /**
+    * 打词字数
+    */
+   phrase = 0;
+   phraseRate = 0;
+   /**
+    * 暂停次数
+    */
+   pauseCount = 0;
+   /**
+    * 暂停时长
+    */
+   pauseTime = 0;
+   finishedTime = Date.now();
 }
