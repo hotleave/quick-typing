@@ -174,7 +174,7 @@ export class QuickTypingState {
   /**
    * 编码
    */
-  codings!: TrieNode;
+  codings = new TrieNode();
   /**
    * 设置
    */
