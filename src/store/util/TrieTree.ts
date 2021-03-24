@@ -1,9 +1,8 @@
-import { Coding, Identity, Phrase } from '../types'
+import { Coding, Phrase } from '../types'
 
 const compareFn = (a: Coding, b: Coding) => a.weight - b.weight
 
-export class TrieNode implements Identity {
-  public id?: string
+export class TrieNode {
   /**
    * 子节点
    */
@@ -13,9 +12,8 @@ export class TrieNode implements Identity {
    */
   public value?: Phrase
 
-  static convert (from: { id?: string; children?: Map<string, object>; value?: Phrase}): TrieNode {
+  static convert (from: { children?: Map<string, object>; value?: Phrase }): TrieNode {
     const node = new TrieNode()
-    node.id = from.id
     node.value = from.value
 
     if (from.children) {
@@ -50,10 +48,6 @@ export class TrieNode implements Identity {
 
 export class TrieTree {
   public root: TrieNode = new TrieNode()
-
-  constructor () {
-    this.root.id = 'codings'
-  }
 
   /**
    * 加词

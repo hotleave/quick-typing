@@ -8,24 +8,28 @@
           </el-card>
           <el-card shadow="never">
             <el-row>
-              <el-col :span="24" class="speed">
-                66.66
-              </el-col>
+              <el-col :span="24" class="speed">{{ typeSpeed }}</el-col>
             </el-row>
             <el-row>
-              <el-col :span="8">
+              <el-col :span="6">
                 <div class="hint-block">
-                  <span class="number">5.00</span>
+                  <span class="number">{{ lastTypeSpeed.toFixed(2) }}</span>
+                  <span class="desc"><el-button type="text">瞬时</el-button></span>
+                </div>
+              </el-col>
+              <el-col :span="6">
+                <div class="hint-block">
+                  <span class="number">{{ hitSpeed }}</span>
                   <span class="desc"><el-button type="text">击键</el-button></span>
                 </div>
               </el-col>
-              <el-col :span="8">
+              <el-col :span="6">
                 <div class="hint-block">
                   <span class="number">{{ current }}</span>
                   <span class="desc"><el-button type="text">已打</el-button></span>
                 </div>
               </el-col>
-              <el-col :span="8">
+              <el-col :span="6">
                 <div class="hint-block">
                   <span class="number">{{ phrases.length }}</span>
                   <span class="desc"><el-button type="text">总数</el-button></span>
@@ -45,20 +49,21 @@
         <el-row>
           <el-col :span="24" class="toolbar">
             <el-button-group>
-              <el-button icon="el-icon-search" @click="drawer = true">抽取</el-button>
+              <el-button icon="el-icon-odometer" @click="reset">重置速度</el-button>
               <el-button icon="el-icon-refresh" @click="shuffleAndSave(true)">乱序</el-button>
               <el-button icon="el-icon-upload" @click="save">保存进度</el-button>
+              <el-button icon="el-icon-set-up" @click="drawer = true">设置</el-button>
             </el-button-group>
           </el-col>
         </el-row>
         <el-row class="stage">
-          <el-col class="phrase active" :span="6" :offset="3" v-if="phrases.length > current">{{ this.option.phrases[current].text }}</el-col>
+          <el-col class="phrase active" :span="6" :offset="3" v-if="phrases.length > current">{{ phrases[current].text }}</el-col>
           <el-col class="phrase" :span="6" v-if="phrases.length > current + 1">{{ phrases[current + 1].text }}</el-col>
           <el-col class="phrase" :span="6" v-if="phrases.length > current + 2">{{ phrases[current + 2].text }}</el-col>
         </el-row>
         <el-row>
           <el-col :span="6" :offset="9">
-            <input class="el-input__inner" v-model="input" @input="checkInput" :placeholder="placeholder"/>
+            <input class="el-input__inner" v-model="input" @input="checkInput" @keydown="keydown" @blur="start = -1" :placeholder="placeholder"/>
           </el-col>
         </el-row>
       </el-main>
@@ -96,6 +101,7 @@
 
 <script lang="ts">
 import { Phrase, Word } from '@/store/types'
+import db from '@/store/util/Database'
 import { TrieNode } from '@/store/util/TrieTree'
 import { Component, Vue } from 'vue-property-decorator'
 import { namespace, State } from 'vuex-class'
@@ -127,13 +133,18 @@ class PracticeOption {
   phraseRange = [2, 10]
   positionRange = [1, 3]
   random = true
-  phrases: Array<Phrase> = []
   current = 0
+  autoRemove = false
+  logic = 'and'
+  targetHitSpeed = 0
+  targetTypeSpeed = 5
 }
 
 @Component
 export default class Practice extends Vue {
   private option = new PracticeOption()
+
+  private phrases: Array<Phrase> = []
 
   @State('codings')
   private codings!: TrieNode
@@ -145,9 +156,29 @@ export default class Practice extends Vue {
 
   private input = ''
 
+  // 开始时间
+  private start = -1
+
+  // 总用时
+  private usedTime = 0
+
+  // 已打字数
+  private typedWordCount = 0
+
+  // 击键数
+  private keyCount = 0
+
+  // 瞬时速度
+  private lastTypeSpeed = 0
+
+  // 瞬时击键
+  private lastHitSpeed = 0
+
+  private keys = 0
+
   get percentage (): number {
-    const { current, phrases } = this.option
-    const total = phrases.length
+    const { current } = this.option
+    const total = this.phrases.length
     if (total < 1) {
       return 0
     }
@@ -155,17 +186,13 @@ export default class Practice extends Vue {
     return parseFloat((current / total * 100).toFixed(2))
   }
 
-  get phrases (): Array<Phrase> {
-    return this.option.phrases
-  }
-
   get current (): number {
     return this.option.current
   }
 
   get wordsHint (): Array<Word> {
-    const { phrases, current } = this.option
-    const phrase = phrases[current]
+    const { current } = this.option
+    const phrase = this.phrases[current]
     if (!phrase) {
       return []
     }
@@ -174,23 +201,33 @@ export default class Practice extends Vue {
   }
 
   get placeholder (): string {
-    const { phrases, current } = this.option
+    const { current } = this.option
+    const phrases = this.phrases
     return phrases && phrases[current] && phrases[current].codings[0].code
+  }
+
+  get typeSpeed (): string {
+    return (this.typedWordCount / (this.usedTime || 1) * 1000 * 60).toFixed(2)
+  }
+
+  get hitSpeed (): string {
+    return (this.keyCount / (this.usedTime || 1) * 1000).toFixed(2)
   }
 
   chooseFromCodings () {
     if (this.codings) {
-      this.option.phrases = []
+      this.phrases = []
 
       this.filter(this.codings)
       this.shuffleAndSave(this.option.random)
     }
 
     this.drawer = false
+    this.save()
   }
 
   shuffleAndSave (random: boolean) {
-    const { phrases } = this.option
+    const phrases = this.phrases
 
     this.option.current = -1
     this.input = ''
@@ -201,10 +238,12 @@ export default class Practice extends Vue {
 
     this.option.current = 0
     this.save()
+    this.reset()
   }
 
   save () {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(this.option))
+    db.configs.put(this.phrases, 'practice')
   }
 
   codeLengthFormatter (value: number): string {
@@ -240,7 +279,7 @@ export default class Practice extends Vue {
           .filter(v => this.checkCodeLength(v.code.length) && this.checkPosition(v.index + 1))
           .sort((a, b) => a.code.length - b.code.length)
         if (matched.length > 0) {
-          this.option.phrases.push(value)
+          this.phrases.push(value)
         }
       }
     }
@@ -249,11 +288,21 @@ export default class Practice extends Vue {
     }
   }
 
-  checkInput () {
-    const { phrases, current, random } = this.option
+  checkInput (e: Event) {
+    const { current, random } = this.option
+    const phrases = this.phrases
     if (phrases[current].text === this.input) {
+      const count = this.input.length
       this.input = ''
       this.option.current++
+
+      const passTime = e.timeStamp - this.start
+      this.start = e.timeStamp
+      this.usedTime += passTime
+      this.typedWordCount += count
+      this.lastTypeSpeed = count / passTime * 1000 * 60
+      this.lastHitSpeed = this.keys / passTime * 1000
+      this.keys = 0
     }
 
     if (current === phrases.length) {
@@ -261,11 +310,37 @@ export default class Practice extends Vue {
     }
   }
 
+  keydown (e: KeyboardEvent) {
+    this.keyCount++
+    this.keys++
+
+    if (this.start < 0) {
+      this.start = e.timeStamp
+    }
+  }
+
+  reset () {
+    this.usedTime = 0
+    this.keyCount = 0
+    this.typedWordCount = 0
+    this.lastTypeSpeed = 0
+    this.lastHitSpeed = 0
+    this.keys = 0
+    this.start = -1
+  }
+
   mounted () {
     const json = localStorage.getItem(STORAGE_KEY)
     if (json) {
       this.option = JSON.parse(json)
     }
+    db.configs.get('practice').then(phrases => {
+      if (phrases) {
+        this.phrases = phrases as Array<Phrase>
+      } else {
+        this.drawer = true
+      }
+    })
   }
 
   beforeDestroy () {

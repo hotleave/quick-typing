@@ -152,7 +152,7 @@ export default class Setting extends Vue {
     // 读取数据库中的码表
     db.configs.get('codings').then(root => {
       if (root) {
-        const node = TrieNode.convert(root)
+        const node = TrieNode.convert(root as TrieNode)
         this.updateCodings(node)
         console.log('Trie tree loaded')
       }

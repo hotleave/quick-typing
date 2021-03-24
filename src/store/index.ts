@@ -4,7 +4,7 @@ import { article } from './article'
 import { racing } from './racing'
 import { setting } from './setting'
 import { login } from './login'
-import { Identity, LooseObject, QuickTypingState } from './types'
+import { LooseObject, QuickTypingState } from './types'
 import db from './util/Database'
 import { TrieNode } from './util/TrieTree'
 
@@ -51,8 +51,7 @@ const store: StoreOptions<QuickTypingState> = {
     summaryKeyCount ({ commit, state }, keyCount: LooseObject<number>) {
       commit('overallKeyCount', keyCount)
 
-      const data: Identity = { id: 'keyCount', ...state.overallKeyCount }
-      db.summary.put(data)
+      db.summary.put(state.overallKeyCount, 'keyCount')
     },
     addAchievements ({ commit }, achievement) {
       commit('addAchievements', achievement)

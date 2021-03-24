@@ -394,7 +394,7 @@ export default class Setting extends Vue {
       // 将同一个字的多个编码排序
       trie.sort()
 
-      db.configs.put(trie.root).then(() => {
+      db.configs.put(trie.root, 'codings').then(() => {
         this.updateCodings(trie.root)
         loading.close()
         this.$message({ message: '码表处理完成', type: 'success', showClose: true })
@@ -424,7 +424,7 @@ export default class Setting extends Vue {
   submitForm (): void {
     (this.$refs.settingForm as Form).validate((valid: boolean) => {
       if (valid) {
-        db.configs.put(this.form).then(() => {
+        db.configs.put(this.form, 'setting').then(() => {
           this.$message({ message: '保存成功', type: 'success', showClose: true })
           this.updateSetting(this.form)
         })

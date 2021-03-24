@@ -233,8 +233,7 @@ export interface InterfaceStyle {
   '--code4': string;
 }
 
-export class SettingState implements Identity {
-  id = 'setting'
+export class SettingState {
   /**
    * 是否已从DB中加载
    */
