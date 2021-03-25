@@ -19,10 +19,7 @@
             <el-color-picker v-model="form.error"></el-color-picker>
           </el-form-item>
         </el-tab-pane>
-        <el-tab-pane label="词语提示设置">
-          <el-form-item label="词语提示">
-            <el-switch v-model="form.hint"/>
-          </el-form-item>
+        <el-tab-pane label="码表设置">
           <el-form-item v-if="form.hint" label="码表文件">
             <el-upload drag action="#"
               accept=".tsv,.txt"
@@ -33,6 +30,11 @@
               <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
               <div class="el-upload__tip" slot="tip">文本格式文件，UTF8编码，多多格式，即`字  编码`，每行一条记录</div>
             </el-upload>
+          </el-form-item>
+        </el-tab-pane>
+        <el-tab-pane label="词语提示设置">
+          <el-form-item label="词语提示">
+            <el-switch v-model="form.hint"/>
           </el-form-item>
           <el-form-item v-if="form.hint" label="提示选项">
             <el-checkbox-group v-model="form.hintOptions">
