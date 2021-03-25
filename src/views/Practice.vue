@@ -11,31 +11,35 @@
               <el-col :span="24" class="speed">{{ typeSpeed }}</el-col>
             </el-row>
             <el-row>
-              <el-col :span="6">
+              <el-col :span="8">
                 <div class="hint-block">
                   <span class="number">{{ lastTypeSpeed.toFixed(2) }}</span>
-                  <span class="desc"><el-button type="text">瞬时</el-button></span>
+                  <span class="desc"><el-button type="text">瞬速度</el-button></span>
                 </div>
               </el-col>
-              <el-col :span="6">
+              <el-col :span="8">
+                <div class="hint-block">
+                  <span class="number">{{ lastHitSpeed.toFixed(2) }}</span>
+                  <span class="desc"><el-button type="text">瞬击键</el-button></span>
+                </div>
+              </el-col>
+              <el-col :span="8">
                 <div class="hint-block">
                   <span class="number">{{ hitSpeed }}</span>
-                  <span class="desc"><el-button type="text">击键</el-button></span>
-                </div>
-              </el-col>
-              <el-col :span="6">
-                <div class="hint-block">
-                  <span class="number">{{ current }}</span>
-                  <span class="desc"><el-button type="text">已打</el-button></span>
-                </div>
-              </el-col>
-              <el-col :span="6">
-                <div class="hint-block">
-                  <span class="number">{{ phrases.length }}</span>
-                  <span class="desc"><el-button type="text">总数</el-button></span>
+                  <span class="desc"><el-button type="text">总击键</el-button></span>
                 </div>
               </el-col>
             </el-row>
+          </el-card>
+          <el-card shadow="never">
+            <div class="key-value">
+              <span>已打</span>
+              <span>{{ current }} / {{ phrases.length }}</span>
+            </div>
+            <div class="key-value">
+              <span>已掌握</span>
+              <span>{{ option.removed }} / {{ option.total }}</span>
+            </div>
           </el-card>
           <el-card class="code-hint" shadow="never">
             <div v-for="word in wordsHint" :key="word.text">
@@ -49,7 +53,7 @@
         <el-row>
           <el-col :span="24" class="toolbar">
             <el-button-group>
-              <el-button icon="el-icon-odometer" @click="reset">重置速度</el-button>
+              <el-button icon="el-icon-odometer" @click="reset">重置</el-button>
               <el-button icon="el-icon-refresh" @click="shuffleAndSave(true)">乱序</el-button>
               <el-button icon="el-icon-upload" @click="save">保存进度</el-button>
               <el-button icon="el-icon-set-up" @click="drawer = true">设置</el-button>
@@ -63,7 +67,12 @@
         </el-row>
         <el-row>
           <el-col :span="6" :offset="9">
-            <input class="el-input__inner" v-model="input" @input="checkInput" @keydown="keydown" @blur="start = -1" :placeholder="placeholder"/>
+            <input class="input el-input__inner"
+              v-model="input" @input="checkInput"
+              @keydown="keydown" @focus="start = Date.now()"
+              @blur="start = -1"
+              :placeholder="placeholder"
+              :disabled="phrases.length <= 0"/>
           </el-col>
         </el-row>
       </el-main>
@@ -91,6 +100,31 @@
         <el-form-item label="乱序">
           <el-switch v-model="option.random"/>
         </el-form-item>
+        <el-form-item label="自动移除">
+          <el-switch v-model="option.autoRemove"/>
+        </el-form-item>
+        <el-form-item label="移除条件" v-if="option.autoRemove">
+          <el-row>
+            <el-col :span="4">
+              击键大于
+            </el-col>
+            <el-col :span="6">
+              <el-input v-model="option.targetHitSpeed" type="number"/>
+            </el-col>
+            <el-col :span="4">
+              <el-select v-model="option.logic">
+                <el-option value="and" label="且"/>
+                <el-option value="or" label="或"/>
+              </el-select>
+            </el-col>
+            <el-col :span="4">
+              速度大于
+            </el-col>
+            <el-col :span="6">
+              <el-input v-model="option.targetTypeSpeed" type="number"/>
+            </el-col>
+          </el-row>
+        </el-form-item>
         <el-form-item>
           <el-button @click="chooseFromCodings">确定</el-button>
         </el-form-item>
@@ -107,7 +141,8 @@ import { Component, Vue } from 'vue-property-decorator'
 import { namespace, State } from 'vuex-class'
 
 const codeLengthText = ['一简', '二简', '三简', '全码']
-const STORAGE_KEY = 'practice'
+const OPTION_KEY = 'practice.option'
+const PROGRESS_KEY = 'practice.progress'
 const setting = namespace('setting')
 
 const shuffle = (array: Array<Phrase>) => {
@@ -128,16 +163,46 @@ const shuffle = (array: Array<Phrase>) => {
 }
 
 class PracticeOption {
-  // 一二简
+  /**
+   * 码长范围
+   */
   codeRange = [1, 2]
+  /**
+   * 词语长度范围
+   */
   phraseRange = [2, 10]
+  /**
+   * 词条位置范围
+   */
   positionRange = [1, 3]
+  /**
+   * 是否乱序
+   */
   random = true
-  current = 0
+  /**
+   * 总数
+   */
+  total = 0
+  /**
+   * 已掌握
+   */
+  removed = 0
+  /**
+   * 是否自动移除已掌握的词语
+   */
   autoRemove = false
+  /**
+   * 目标逻辑
+   */
   logic = 'and'
-  targetHitSpeed = 0
-  targetTypeSpeed = 5
+  /**
+   * 目标击键速度
+   */
+  targetHitSpeed = 5
+  /**
+   * 目标速度
+   */
+  targetTypeSpeed = 0
 }
 
 @Component
@@ -156,43 +221,56 @@ export default class Practice extends Vue {
 
   private input = ''
 
-  // 开始时间
+  /**
+   * 已打个数
+   */
+  private typed = 0
+  /**
+   * 开始时间
+   */
   private start = -1
-
-  // 总用时
+  /**
+   * 总用时
+   */
   private usedTime = 0
-
-  // 已打字数
+  /**
+   * 已打字数
+   */
   private typedWordCount = 0
-
-  // 击键数
+  /**
+   * 总击键数
+   */
   private keyCount = 0
-
-  // 瞬时速度
+  /**
+   * 上次速度
+   */
   private lastTypeSpeed = 0
-
-  // 瞬时击键
+  /**
+   * 上次击键
+   */
   private lastHitSpeed = 0
-
-  private keys = 0
+  /**
+   * 上次键数
+   */
+  private lastKeyCount = 0
 
   get percentage (): number {
-    const { current } = this.option
     const total = this.phrases.length
     if (total < 1) {
       return 0
     }
 
-    return parseFloat((current / total * 100).toFixed(2))
+    return parseFloat((this.current / total * 100).toFixed(2))
   }
 
   get current (): number {
-    return this.option.current
+    const { removed } = this.option
+    return this.typed - removed
   }
 
   get wordsHint (): Array<Word> {
-    const { current } = this.option
-    const phrase = this.phrases[current]
+    const { current, phrases } = this
+    const phrase = phrases[current]
     if (!phrase) {
       return []
     }
@@ -201,8 +279,7 @@ export default class Practice extends Vue {
   }
 
   get placeholder (): string {
-    const { current } = this.option
-    const phrases = this.phrases
+    const { current, phrases } = this
     return phrases && phrases[current] && phrases[current].codings[0].code
   }
 
@@ -215,34 +292,35 @@ export default class Practice extends Vue {
   }
 
   chooseFromCodings () {
-    if (this.codings) {
+    if (this.codings && this.codings.children) {
       this.phrases = []
 
       this.filter(this.codings)
+      this.option.total = this.phrases.length
+      this.option.removed = 0
       this.shuffleAndSave(this.option.random)
+    } else {
+      this.$alert('词库练习需要先导入码表文件', '提示', { type: 'error' })
     }
 
     this.drawer = false
-    this.save()
   }
 
   shuffleAndSave (random: boolean) {
-    const phrases = this.phrases
-
-    this.option.current = -1
-    this.input = ''
+    const { phrases } = this
 
     if (random) {
       shuffle(phrases)
+      phrases.splice(0, 0)
     }
 
-    this.option.current = 0
-    this.save()
     this.reset()
+    this.save()
   }
 
   save () {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.option))
+    localStorage.setItem(OPTION_KEY, JSON.stringify(this.option))
+    localStorage.setItem(PROGRESS_KEY, this.typed.toFixed(0))
     db.configs.put(this.phrases, 'practice')
   }
 
@@ -288,52 +366,88 @@ export default class Practice extends Vue {
     }
   }
 
-  checkInput (e: Event) {
-    const { current, random } = this.option
-    const phrases = this.phrases
+  checkInput () {
+    const { current, phrases, option } = this
     if (phrases[current].text === this.input) {
+      const now = Date.now()
+      const passTime = now - this.start
       const count = this.input.length
-      this.input = ''
-      this.option.current++
 
-      const passTime = e.timeStamp - this.start
-      this.start = e.timeStamp
+      this.removePhraseByTarget(count, passTime / 1000)
+
+      this.input = ''
+      this.start = now
       this.usedTime += passTime
       this.typedWordCount += count
-      this.lastTypeSpeed = count / passTime * 1000 * 60
-      this.lastHitSpeed = this.keys / passTime * 1000
-      this.keys = 0
+      this.lastKeyCount = 0
+      this.typed++
     }
 
-    if (current === phrases.length) {
-      this.shuffleAndSave(random)
+    if (this.current >= phrases.length) {
+      this.$confirm('词语已全部打完，是否重新开始？', '提示').then(() => {
+        this.shuffleAndSave(option.random)
+        this.start = Date.now()
+      }).catch(() => {
+        // do nothing
+      })
     }
   }
 
-  keydown (e: KeyboardEvent) {
+  /**
+   * 移除符合速度标准的词语
+   */
+  removePhraseByTarget (count: number, passTimeSecond: number) {
+    this.lastTypeSpeed = count / passTimeSecond * 60
+    this.lastHitSpeed = this.lastKeyCount / passTimeSecond
+
+    if (this.option.autoRemove) {
+      const { targetHitSpeed, targetTypeSpeed, logic } = this.option
+      const hitSpeedExceed = this.lastHitSpeed > targetHitSpeed
+      const typeSpeedExceed = this.lastTypeSpeed > targetTypeSpeed
+      if (logic === 'and' ? hitSpeedExceed && typeSpeedExceed : hitSpeedExceed || typeSpeedExceed) {
+        const phrase = this.phrases.splice(this.current, 1)
+        this.$notify.success({ title: '提示', message: `词语/字 “${phrase[0].text}” 已掌握，已从练习队列中移除`, duration: 1500, position: 'bottom-right' })
+        // 符合条件，移除该词语
+        this.option.removed++
+        this.save()
+      }
+    }
+  }
+
+  /**
+   * 按键统计
+   */
+  keydown () {
     this.keyCount++
-    this.keys++
-
-    if (this.start < 0) {
-      this.start = e.timeStamp
-    }
+    this.lastKeyCount++
   }
 
+  /**
+   * 重置
+   */
   reset () {
+    this.typed = this.option.removed
     this.usedTime = 0
     this.keyCount = 0
     this.typedWordCount = 0
     this.lastTypeSpeed = 0
     this.lastHitSpeed = 0
-    this.keys = 0
+    this.lastKeyCount = 0
     this.start = -1
+    this.input = ''
   }
 
   mounted () {
-    const json = localStorage.getItem(STORAGE_KEY)
+    const json = localStorage.getItem(OPTION_KEY)
     if (json) {
-      this.option = JSON.parse(json)
+      Object.assign(this.option, JSON.parse(json))
     }
+
+    const typed = localStorage.getItem(PROGRESS_KEY)
+    if (typed) {
+      this.typed = parseInt(typed)
+    }
+
     db.configs.get('practice').then(phrases => {
       if (phrases) {
         this.phrases = phrases as Array<Phrase>
@@ -376,7 +490,7 @@ export default class Practice extends Vue {
       }
     }
   }
-  .el-input__inner {
+  .input.el-input__inner {
     margin-bottom: 1rem;
     height: 5rem;
     font-size: 4rem;
