@@ -20,7 +20,7 @@
           </el-form-item>
         </el-tab-pane>
         <el-tab-pane label="码表设置">
-          <el-form-item v-if="form.hint" label="码表文件">
+          <el-form-item label="码表文件">
             <el-upload drag action="#"
               accept=".tsv,.txt"
               :auto-upload="false"
