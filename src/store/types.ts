@@ -135,6 +135,10 @@ export class RacingState {
    */
   idealKeys = '';
   /**
+   * 错字
+   */
+  error = 0;
+  /**
    * 回改
    */
   replace = 0;
@@ -243,6 +247,14 @@ export class SettingState {
    * 在删除输入框的所有文字后自动重新开始
    */
   retryWhenEmpty = false
+  /**
+   * 赛文结束策略
+   *
+   * NO_ERROR - 无错字
+   * LENGTH_MATCH - 打完
+   */
+  finishStrategy = 'NO_ERROR'
+
   /**
    * 未打文字颜色
    */

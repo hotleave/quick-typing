@@ -6,6 +6,12 @@
           <el-form-item label="自动重新开始">
             <el-switch v-model="form.retryWhenEmpty"/>
           </el-form-item>
+          <el-form-item label="结束条件">
+            <el-select v-model="form.finishStrategy">
+              <el-option value="NO_ERROR" label="无错字"/>
+              <el-option value="LENGTH_MATCH" label="打完"/>
+            </el-select>
+          </el-form-item>
           <el-form-item label="未打颜色">
             <el-color-picker v-model="form.pending"></el-color-picker>
           </el-form-item>
@@ -206,6 +212,7 @@ const RESULT_OPTIONS = [
   { value: 'codeLength', text: '码长', disabled: true },
   { value: 'idealCodeLength', text: '理想码长' },
   { value: 'contentLength', text: '字数' },
+  { value: 'error', text: '错字' },
   { value: 'usedTime', text: '用时' },
   { value: 'pauseTime', text: '暂停时间' },
   { value: 'accuracy', text: '键准' },

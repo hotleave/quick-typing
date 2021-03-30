@@ -30,6 +30,28 @@ const padLeft = (input: string, length: number): string => {
   return input
 }
 
+const finished = (strategy: string, input: string, content: string): { finished: boolean; error: number } => {
+  let finished = false
+  let error = 0
+  if (strategy === 'LENGTH_MATCH') {
+    finished = input.length === content.length
+    if (finished) {
+      const inputs = input.split('')
+      const targets = content.split('')
+
+      for (let i = 0; i < inputs.length; i++) {
+        if (inputs[i] !== targets[i]) {
+          error++
+        }
+      }
+    }
+  } else {
+    finished = input === content
+  }
+
+  return { finished, error }
+}
+
 const state = new RacingState()
 
 const getters: GetterTree<RacingState, QuickTypingState> = {
@@ -59,7 +81,9 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       return (0).toFixed(2)
     }
 
-    return (state.input.length / used * 60).toFixed(2)
+    const { input, error } = state
+    // 错一罚五
+    return (Math.max(input.length - error * 5, 0) / used * 60).toFixed(2)
   },
 
   // 码长
@@ -214,6 +238,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       ['hitSpeed', `击键${getters.hitSpeed}`],
       ['codeLength', `码长${getters.codeLength}`],
       ['contentLength', `字数${article.content.length}`],
+      ['error', `错字${state.error}`],
       ['usedTime', `用时${formatTime(getters.usedTime)}`],
       ['pauseTime', `暂停${state.pauseCount}次${formatTime(state.pauseTime / 1000)}秒`],
       ['accuracy', `键准${getters.accuracy}%`],
@@ -266,7 +291,8 @@ const mutations: MutationTree<RacingState> = {
     state.time = 0
   },
 
-  finish (state): void {
+  finish (state, payload): void {
+    state.error = payload.error
     state.status = 'finished'
     state.time += Date.now() - state.start
     state.timer = 0
@@ -385,7 +411,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
       return
     }
 
-    const { article } = rootState
+    const { article, setting } = rootState
     if (state.input !== content) {
       const delta = content.length - state.input.length
       if (delta < 0) {
@@ -399,9 +425,10 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
 
     commit('accept', content)
 
-    if (content === article.content) {
+    const finishState = finished(setting.finishStrategy, content, article.content)
+    if (finishState.finished) {
       clearInterval(state.timer)
-      commit('finish')
+      commit('finish', finishState)
       this.dispatch('summaryKeyCount', state.keyCount)
       setTimeout(() => {
         const achievement = getters.achievement

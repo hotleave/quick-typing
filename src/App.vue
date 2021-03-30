@@ -73,7 +73,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import { TrieNode } from './store/util/TrieTree'
 import db from './store/util/Database'
 import { Action, Mutation, namespace } from 'vuex-class'
-import { LoginUser, LooseObject } from './store/types'
+import { LoginUser, LooseObject, SettingState } from './store/types'
 import xcapi from './api/xc.cool'
 
 const setting = namespace('setting')
