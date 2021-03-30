@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import h337 from 'heatmap.js'
 import { keyboard } from '@/store/util/keyboard'
 import { LooseObject } from '@/store/types'
@@ -83,7 +83,11 @@ const getHeatmapData = (keyCount: LooseObject<number>): HeatmapData => {
     }
   }
 
-  return { min, max, data }
+  if (max === 0) {
+    return { min: 0, max: 0, data: [] }
+  } else {
+    return { min, max, data }
+  }
 }
 
 @Component
@@ -123,7 +127,16 @@ export default class Summary extends Vue {
     return { rows, hands, fingers }
   }
 
+  @Watch('keyCount.KeyE')
+  keyCountChange () {
+    this.buildCharts()
+  }
+
   mounted () {
+    this.buildCharts()
+  }
+
+  buildCharts () {
     const { hands, rows, fingers } = this.statisticData
 
     const config = {

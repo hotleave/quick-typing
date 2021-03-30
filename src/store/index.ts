@@ -24,14 +24,11 @@ const store: StoreOptions<QuickTypingState> = {
     codings (state, codings: TrieNode) {
       state.codings = codings
     },
+
     overallKeyCount (state, keyCount: LooseObject<number>) {
       const { overallKeyCount } = state
-      if (overallKeyCount) {
-        for (const key in keyCount) {
-          overallKeyCount[key] += keyCount[key]
-        }
-      } else {
-        state.overallKeyCount = keyCount
+      for (const key in keyCount) {
+        overallKeyCount[key] += keyCount[key]
       }
     },
 

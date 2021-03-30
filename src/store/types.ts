@@ -190,7 +190,7 @@ export class QuickTypingState {
   /**
    * 总键数
    */
-  overallKeyCount!: LooseObject<number>;
+  overallKeyCount = emptyKeyCount();
   /**
    * 成绩
    */

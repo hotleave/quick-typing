@@ -17,13 +17,14 @@
 
 ### Added
 
-- 增加赛文结束方式设置，默认为“无错误”[I3CIS2](https://gitee.com/hotleave/quick-typing/issues/I3CIS2)
+- 增加赛文结束方式设置，默认为“无错误” [#I3CIS2](https://gitee.com/hotleave/quick-typing/issues/I3CIS2)
 - 成绩中增加`错字`选项，默认不选
 
 ### Fixed
 
 - 码表设置在未开启词语提示时不显示问题
-- 载文中带有额外的换行导致无法解析问题[I3CJFQ](https://gitee.com/hotleave/quick-typing/issues/I3CJFQ)
+- 载文中带有额外的换行导致无法解析问题 [#I3CJFQ](https://gitee.com/hotleave/quick-typing/issues/I3CJFQ)
+- 统计页面刷新后无数据问题 [#I3E7YY](https://gitee.com/hotleave/quick-typing/issues/I3E7YY)
 
 ## [1.2.0] - 2021-03-25
 
