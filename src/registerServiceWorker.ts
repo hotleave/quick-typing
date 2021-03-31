@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 
+import { Notification } from 'element-ui'
 import { register } from 'register-service-worker'
 
 if (process.env.NODE_ENV === 'production') {
@@ -17,10 +18,10 @@ if (process.env.NODE_ENV === 'production') {
       console.log('Content has been cached for offline use.')
     },
     updatefound () {
-      console.log('New content is downloading.')
+      Notification.info('发现新版本，正在下载...')
     },
     updated () {
-      console.log('New content is available; please refresh.')
+      Notification.info('新版本下载完成，刷新开始使用')
     },
     offline () {
       console.log('No internet connection found. App is running in offline mode.')

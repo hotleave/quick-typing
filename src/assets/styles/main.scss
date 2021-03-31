@@ -67,7 +67,7 @@
 
 :root {
   font-size: 12px;
-  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  font-family: "Noto Sans SC","Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
 
   --background-color: #FFF;
   --level1-border-color: #DCDFE6;
@@ -362,6 +362,7 @@ html, body {
 }
 
 #racing-textarea {
+  font-family: "Noto Sans SC","Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
   border: none;
   border-bottom: 1px solid var(--level3-border-color);
   font-size: var(--font-size);
