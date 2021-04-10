@@ -13,6 +13,10 @@
 - [ ] 速度练习
 - [ ] 成绩统计
 
+### Fixed
+
+- [x] 解决`ligature`导致的错误信息无法显示问题[#I3F3WE](https://gitee.com/hotleave/quick-typing/issues/I3F3WE)
+
 ## [1.2.2] - 2021-03-31
 
 ### Changed
