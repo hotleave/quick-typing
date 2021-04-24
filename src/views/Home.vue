@@ -187,14 +187,17 @@ export default class Home extends Vue {
   handleShortCut (e: KeyboardEvent) {
     switch (e.key) {
       case 'F3':
+        e.preventDefault()
         // 重打
         this.retry()
         break
       case 'Escape':
+        e.preventDefault()
         // 暂停
         this.pause()
         break
       case 'Enter':
+        e.preventDefault()
         // 恢复
         this.resume()
         break

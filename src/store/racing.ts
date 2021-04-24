@@ -414,6 +414,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     const { article, setting } = rootState
     if (state.input !== content) {
       const delta = content.length - state.input.length
+      this.dispatch('summary/typeWords', delta, { root: true })
       if (delta < 0) {
         // 字数变少，回改
         commit('replace', -delta)
@@ -429,8 +430,10 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     if (finishState.finished) {
       clearInterval(state.timer)
       commit('finish', finishState)
-      this.dispatch('summaryKeyCount', state.keyCount)
       setTimeout(() => {
+        // TODO move to summary module
+        this.dispatch('summaryKeyCount', state.keyCount)
+        this.dispatch('summary/saveWordCount')
         const achievement = getters.achievement
         this.dispatch('addAchievements', achievement, { root: true })
         db.achievement.add(achievement)

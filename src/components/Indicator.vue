@@ -39,6 +39,18 @@
     </el-card>
     <el-card shadow="never">
       <div class="key-value">
+        <span>字数</span>
+        <span>{{ todayWords }} / {{ totalWords }}</span>
+      </div>
+      <div class="key-value">
+        <span>天数</span>
+        <span>{{ consecutiveDays }} / {{ totalDays }}</span>
+      </div>
+      <div class="key-value">
+        <span>退格</span>
+        <span>{{ backspace }}</span>
+      </div>
+      <div class="key-value">
         <span>退格</span>
         <span>{{ backspace }}</span>
       </div>
@@ -100,6 +112,7 @@ import { namespace } from 'vuex-class'
 
 const racing = namespace('racing')
 const setting = namespace('setting')
+const summary = namespace('summary')
 
 @Component
 export default class Indicator extends Vue {
@@ -171,6 +184,18 @@ export default class Indicator extends Vue {
 
   @setting.Mutation('toggleReplaceSpace')
   private toggleReplaceSpace!: Function
+
+  @summary.Getter('todayWords')
+  private todayWords!: number
+
+  @summary.Getter('totalWords')
+  private totalWords!: string
+
+  @summary.Getter('consecutiveDays')
+  private consecutiveDays!: number
+
+  @summary.Getter('totalDays')
+  private totalDays!: number
 
   private tempHint = false
 

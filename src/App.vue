@@ -78,6 +78,7 @@ import xcapi from './api/xc.cool'
 
 const setting = namespace('setting')
 const login = namespace('login')
+const summary = namespace('summary')
 
 @Component
 export default class Setting extends Vue {
@@ -105,6 +106,9 @@ export default class Setting extends Vue {
 
   @login.Action('logout')
   private logout!: Function
+
+  @summary.Action('loaded')
+  private wordCountLoaded!: Function
 
   @Mutation('updateAchievements')
   private updateAchievements!: Function
@@ -163,6 +167,13 @@ export default class Setting extends Vue {
         delete keyCount.id
         this.summaryKeyCount(keyCount as LooseObject<number>)
         console.log('Key count summary loaded')
+      }
+    })
+    // 读取字数统计
+    db.summary.get('wordCount').then(wordCount => {
+      if (wordCount) {
+        console.log('Word count loaded')
+        this.wordCountLoaded(wordCount)
       }
     })
     // 读取比赛成绩

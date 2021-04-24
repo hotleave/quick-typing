@@ -172,6 +172,33 @@ export class RacingState {
   keyCount: LooseObject<number> = emptyKeyCount();
 }
 
+export class SummaryState {
+  /**
+   * 当前日期
+   */
+  date = 0;
+  /**
+   * 保存记录的日期
+   */
+  saved = '';
+  /**
+   * 今日打字数
+   */
+  todayWords = 0;
+  /**
+   * 累计打字数
+   */
+  totalWords = 0;
+  /**
+   * 连续天数
+   */
+  consecutiveDays = 0;
+  /**
+   * 累计打字天数
+   */
+  totalDays = 0;
+}
+
 export class QuickTypingState {
   article!: ArticleState;
   racing!: RacingState;
@@ -187,6 +214,10 @@ export class QuickTypingState {
    * 登录状态
    */
   login!: LoginState;
+  /**
+   * 汇兑数据
+   */
+  summary = new SummaryState();
   /**
    * 总键数
    */

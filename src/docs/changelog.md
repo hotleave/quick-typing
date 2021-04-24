@@ -13,9 +13,19 @@
 - [ ] 速度练习
 - [ ] 成绩统计
 
+## [1.3.0] - 2021-04-24
+
+### Added
+
+- 增加字数统计功能，统计“今日打字数”，“累计打字数”，“连续打字天数”和“累计打字天数”
+
+### Changed
+
+- 禁用`F3`、`Enter`和`Esc`按键的默认行为
+
 ### Fixed
 
-- [x] 解决`ligature`导致的错误信息无法显示问题[#I3F3WE](https://gitee.com/hotleave/quick-typing/issues/I3F3WE)
+- 解决`ligature`导致的错误信息无法显示问题[#I3F3WE](https://gitee.com/hotleave/quick-typing/issues/I3F3WE)
 
 ## [1.2.2] - 2021-03-31
 
