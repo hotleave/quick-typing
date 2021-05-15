@@ -220,7 +220,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       phrase: state.phrase,
       phraseRate: parseFloat(getters.phraseRate),
       selective: state.selective,
-      replace: state.phrase,
+      replace: state.replace,
       keys: state.keys.length,
       backspace: getters.backspaceCount,
       enter: getters.enterCount
