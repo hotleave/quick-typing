@@ -5,7 +5,7 @@
       @blur="pause"
       @input="accept(input)"
       @compositionstart.native="compositionStart"
-      @compositionupdate.native="compositionupdate"
+      @compositionupdate.native="compositionUpdate"
       @compositionend.native="compositionEnd"
       :disabled="status !== 'typing' && status !== 'init'"
       placeholder="在这里输入赛文..."
@@ -42,6 +42,10 @@ export default class Racing extends Vue {
    * 输入的内容
    */
   private input = ''
+  /**
+   * 打字编码
+   */
+  private composition: Array<string> = []
 
   @Watch('status')
   statusUpdate (status: string) {
@@ -69,14 +73,23 @@ export default class Racing extends Vue {
 
   compositionStart (e: CompositionEvent) {
     console.log('compisition start', e)
+    this.composition = []
   }
 
-  compositionupdate (e: CompositionEvent) {
+  compositionUpdate (e: CompositionEvent) {
     console.log('compisition update', e)
+    this.composition.push(e.data)
   }
 
-  compositionEnd (e: CompositionEvent) {
-    console.log('compisition end', e)
+  compositionEnd ({ data }: CompositionEvent) {
+    const length = data.length
+    if (length === 0) {
+      // 未上屏
+      const code = this.composition[this.composition.length - 2]
+      console.log('clear', code)
+    } else if (length > 1) {
+      // 打词，也有可能是标点顶屏
+    }
   }
 
   /**
