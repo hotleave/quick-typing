@@ -116,7 +116,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   },
 
   rightHand ({ keys }): number {
-    return keys.map(v => keyboard.get(v)).filter(v => v && v.finger >= 4 && v.finger <= 7).length
+    return keys.map(v => keyboard.get(v)).filter(v => v && v.finger >= 5 && v.finger <= 8).length
   },
 
   // 键法
