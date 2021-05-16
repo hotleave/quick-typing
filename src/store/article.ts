@@ -136,8 +136,12 @@ const parseArticle = (content: string, setting: SettingState): ArticleState => {
     const id = parseIdentity(sign)
     if (id !== sign) {
       identity = id
-      title = lines[0]
-      content = lines.slice(1, totalLines - 1).join('')
+      if (totalLines === 2) {
+        content = lines[0]
+      } else {
+        title = lines[0]
+        content = lines.slice(1, totalLines - 1).join('')
+      }
 
       if (!xcapi.verify(content, sign)) {
         throw Error('赛文被篡改，请重新载文')
