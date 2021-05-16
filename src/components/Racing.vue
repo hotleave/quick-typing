@@ -4,6 +4,9 @@
       @keydown.native="typing"
       @blur="pause"
       @input="accept(input)"
+      @compositionstart.native="compositionStart"
+      @compositionupdate.native="compositionupdate"
+      @compositionend.native="compositionEnd"
       :disabled="status !== 'typing' && status !== 'init'"
       placeholder="在这里输入赛文..."
       v-model="input">
@@ -43,9 +46,13 @@ export default class Racing extends Vue {
   @Watch('status')
   statusUpdate (status: string) {
     switch (status) {
-      case 'init':
+      case 'init': {
         this.input = ''
-        // fall through
+        const textarea = document.getElementById('racing-textarea') as HTMLInputElement
+        textarea.value = ''
+        setTimeout(this.focus, 50)
+        break
+      }
       case 'typing':
         setTimeout(this.focus, 50)
         break
@@ -58,6 +65,18 @@ export default class Racing extends Vue {
         break
       }
     }
+  }
+
+  compositionStart (e: CompositionEvent) {
+    console.log('compisition start', e)
+  }
+
+  compositionupdate (e: CompositionEvent) {
+    console.log('compisition update', e)
+  }
+
+  compositionEnd (e: CompositionEvent) {
+    console.log('compisition end', e)
   }
 
   /**
