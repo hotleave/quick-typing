@@ -143,6 +143,10 @@ export class RacingState {
    */
   replace = 0;
   /**
+   * 清屏键数
+   */
+  cleared = 0;
+  /**
    * 选重
    */
   selective = 0;

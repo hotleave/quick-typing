@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-input id="racing-textarea" type="textarea" ref="textarea"
-      @keydown.native="typing"
+      @keydown.native="keydown"
       @blur="pause"
       @input="accept(input)"
       @compositionstart.native="compositionStart"
@@ -32,6 +32,9 @@ export default class Racing extends Vue {
   @racing.Action('typing')
   private typing!: Function
 
+  @racing.Mutation('cleared')
+  private cleared!: Function
+
   @racing.Action('accept')
   private accept!: Function
 
@@ -43,9 +46,9 @@ export default class Racing extends Vue {
    */
   private input = ''
   /**
-   * 打字编码
+   * 正在打字的编码长度
    */
-  private composition: Array<string> = []
+  private compositions = 0
 
   @Watch('status')
   statusUpdate (status: string) {
@@ -71,24 +74,32 @@ export default class Racing extends Vue {
     }
   }
 
-  compositionStart (e: CompositionEvent) {
-    console.log('compisition start', e)
-    this.composition = []
+  compositionStart () {
+    this.compositions = 0
   }
 
-  compositionUpdate (e: CompositionEvent) {
-    console.log('compisition update', e)
-    this.composition.push(e.data)
+  compositionUpdate () {
+    // 每次更新 +1
+    this.compositions += 1
   }
 
   compositionEnd ({ data }: CompositionEvent) {
     const length = data.length
-    if (length === 0) {
+    const { compositions } = this
+    if (length === 0 && compositions > 1) {
       // 未上屏
-      const code = this.composition[this.composition.length - 2]
-      console.log('clear', code)
+      this.cleared(compositions)
     } else if (length > 1) {
       // 打词，也有可能是标点顶屏
+    }
+  }
+
+  keydown (e: KeyboardEvent) {
+    this.typing(e)
+
+    if (e.isComposing && e.code === 'Backspace') {
+      // 每次删除 -2，因为删除也会触发 compositionupdate
+      this.compositions -= 2
     }
   }
 

@@ -102,12 +102,12 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   },
 
   // 键准
-  accuracy ({ keys, keyCount, replace }, getters): string {
+  accuracy ({ keys, keyCount, replace, cleared }, getters): string {
     // 总键数
     const total = keys.length
     // 有效键数 = 总数 - 退格数 - (回改数 * 码长)
     const backspace = keyCount.Backspace || 0
-    const correct = total - backspace - (replace * parseFloat(getters.codeLength))
+    const correct = total - backspace - cleared - (replace * parseFloat(getters.codeLength))
     return (correct / total * 100).toFixed(2)
   },
 
@@ -341,6 +341,10 @@ const mutations: MutationTree<RacingState> = {
 
   replace (state, count: number): void {
     state.replace += count
+  },
+
+  cleared (state, count: number): void {
+    state.cleared += count
   },
 
   phrase (state, count: number): void {
