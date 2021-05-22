@@ -10,6 +10,7 @@
             <el-select v-model="form.finishStrategy">
               <el-option value="NO_ERROR" label="无错字"/>
               <el-option value="LENGTH_MATCH" label="打完"/>
+              <el-option value="LAST_RIGHT" label="最后一次上屏无错"/>
             </el-select>
           </el-form-item>
           <el-form-item label="未打颜色">

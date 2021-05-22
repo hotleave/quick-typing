@@ -30,11 +30,21 @@ const padLeft = (input: string, length: number): string => {
   return input
 }
 
-const finished = (strategy: string, input: string, content: string): { finished: boolean; error: number } => {
+const finished = (strategy: string, input: string, content: string, last: string): { finished: boolean; error: number } => {
   let finished = false
   let error = 0
-  if (strategy === 'LENGTH_MATCH') {
+  if (strategy === 'NO_ERROR') {
+    finished = input === content
+  } else {
     finished = input.length === content.length
+    if (strategy === 'LAST_RIGHT') {
+      if (last.length > 0) {
+        finished = content.endsWith(last)
+      } else {
+        finished = content.charAt(content.length - 1) === input.charAt(input.length - 1)
+      }
+    }
+
     if (finished) {
       const inputs = input.split('')
       const targets = content.split('')
@@ -45,8 +55,6 @@ const finished = (strategy: string, input: string, content: string): { finished:
         }
       }
     }
-  } else {
-    finished = input === content
   }
 
   return { finished, error }
@@ -409,15 +417,14 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     commit('typing', { e, altSelectKey })
   },
 
-  accept ({ commit, state, rootState, getters }, content: string): void {
-    if (content.length === 0 && rootState.setting.retryWhenEmpty) {
+  accept ({ commit, state, rootState }, input: string): void {
+    if (input.length === 0 && rootState.setting.retryWhenEmpty) {
       this.dispatch('racing/retry')
       return
     }
 
-    const { article, setting } = rootState
-    if (state.input !== content) {
-      const delta = content.length - state.input.length
+    if (state.input !== input) {
+      const delta = input.length - state.input.length
       this.dispatch('summary/typeWords', delta, { root: true })
       if (delta < 0) {
         // 字数变少，回改
@@ -425,21 +432,7 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
       }
     }
 
-    commit('accept', content)
-
-    const finishState = finished(setting.finishStrategy, content, article.content)
-    if (finishState.finished) {
-      clearInterval(state.timer)
-      commit('finish', finishState)
-      setTimeout(() => {
-        // TODO move to summary module
-        this.dispatch('summaryKeyCount', state.keyCount)
-        this.dispatch('summary/saveWordCount')
-        const achievement = getters.achievement
-        this.dispatch('addAchievements', achievement, { root: true })
-        db.achievement.add(achievement)
-      })
-    }
+    commit('accept', input)
   },
 
   phrase ({ commit, rootState }, text: string) {
@@ -451,6 +444,25 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
     }
     if (length > 1) {
       commit('phrase', length)
+    }
+  },
+
+  checkFinished ({ commit, state, rootState, getters }, last) {
+    const { article, setting } = rootState
+    const { input } = state
+
+    const finishState = finished(setting.finishStrategy, input, article.content, last)
+    if (finishState.finished) {
+      clearInterval(state.timer)
+      commit('finish', finishState)
+      setTimeout(() => {
+        // TODO move to summary module
+        this.dispatch('summaryKeyCount', state.keyCount)
+        this.dispatch('summary/saveWordCount')
+        const achievement = getters.achievement
+        this.dispatch('addAchievements', achievement, { root: true })
+        db.achievement.add(achievement)
+      })
     }
   },
 

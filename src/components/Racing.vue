@@ -2,6 +2,7 @@
   <div>
     <el-input id="racing-textarea" type="textarea" ref="textarea"
       @keydown.native="keydown"
+      @keyup.native="keyup"
       @blur="pause"
       @input="accept(input)"
       @compositionstart.native="compositionStart"
@@ -44,6 +45,9 @@ export default class Racing extends Vue {
   @racing.Action('phrase')
   private phrase!: Function
 
+  @racing.Action('checkFinished')
+  private checkFinished!: Function
+
   /**
    * 输入的内容
    */
@@ -52,6 +56,10 @@ export default class Racing extends Vue {
    * 正在打字的编码长度
    */
   private compositions = 0
+  /**
+   * 最后一次键入的文字
+   */
+  private last = ''
 
   @Watch('status')
   statusUpdate (status: string) {
@@ -87,6 +95,7 @@ export default class Racing extends Vue {
   }
 
   compositionEnd ({ data }: CompositionEvent) {
+    this.last = data
     const length = data.length
     const { compositions } = this
     if (length === 0 && compositions > 1) {
@@ -100,10 +109,17 @@ export default class Racing extends Vue {
 
   keydown (e: KeyboardEvent) {
     this.typing(e)
+    this.last = ''
 
     if (e.isComposing && e.code === 'Backspace') {
       // 每次删除 -2，因为删除键也会触发 compositionupdate
       this.compositions -= 2
+    }
+  }
+
+  keyup (e: KeyboardEvent) {
+    if (!e.isComposing) {
+      this.checkFinished(this.last)
     }
   }
 

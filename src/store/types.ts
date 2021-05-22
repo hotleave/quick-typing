@@ -287,6 +287,7 @@ export class SettingState {
    *
    * NO_ERROR - 无错字
    * LENGTH_MATCH - 打完
+   * LAST_RIGHT - 最后一次上屏正确
    */
   finishStrategy = 'NO_ERROR'
 
