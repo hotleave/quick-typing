@@ -1,6 +1,6 @@
 <template>
   <div id="article-main">
-    <el-row ref="board" :class="articleStyle" :style="styles">
+    <el-row ref="board" :class="articleStyle">
       <Words v-for="word in words" :key="word.id" :word="word"/>
     </el-row>
     <el-divider class="article-info" content-position="right">
@@ -12,7 +12,7 @@
 </template>
 
 <script lang="ts">
-import { InterfaceStyle, Word } from '@/store/types'
+import { Word } from '@/store/types'
 import { Edge, ShortestPath } from '@/store/util/Graph'
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import { namespace } from 'vuex-class'
@@ -46,9 +46,6 @@ export default class Article extends Vue {
 
   @racing.Getter('progress')
   private progress!: number
-
-  @setting.Getter('styles')
-  private styles!: InterfaceStyle
 
   @setting.State('hint')
   private hint!: boolean

@@ -70,6 +70,7 @@
   font-family: "Noto Sans SC","Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
   font-variant-ligatures: none;
 
+  --racing-font: "Noto Sans SC","Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
   --background-color: #FFF;
   --level1-border-color: #DCDFE6;
   --level2-border-color: #E4E7ED;
@@ -282,6 +283,7 @@ html, body {
 
 #article-main {
   .article {
+    font-family: var(--racing-font);
     padding: 5px 15px;
     height: calc((var(--font-size) + 2rem + 5px) * var(--line-count));
     overflow: auto;
@@ -363,7 +365,7 @@ html, body {
 }
 
 #racing-textarea {
-  font-family: "Noto Sans SC","Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+  font-family: var(--racing-font);
   border: none;
   border-bottom: 1px solid var(--level3-border-color);
   font-size: var(--font-size);

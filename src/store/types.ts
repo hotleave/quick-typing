@@ -270,6 +270,10 @@ export interface InterfaceStyle {
    * 全码颜色
    */
   '--code4': string;
+  /**
+   * 字体
+   */
+  '--racing-font': string;
 }
 
 export class SettingState {
@@ -290,6 +294,11 @@ export class SettingState {
    * LAST_RIGHT - 最后一次上屏正确
    */
   finishStrategy = 'NO_ERROR'
+
+  /**
+   * 字体
+   */
+  fontFamily = '"Noto Sans SC","Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif'
 
   /**
    * 未打文字颜色

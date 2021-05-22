@@ -13,6 +13,9 @@
               <el-option value="LAST_RIGHT" label="最后一次上屏无错"/>
             </el-select>
           </el-form-item>
+          <el-form-item label="赛文字体">
+            <el-input v-model="form.fontFamily"/>
+          </el-form-item>
           <el-form-item label="未打颜色">
             <el-color-picker v-model="form.pending"></el-color-picker>
           </el-form-item>

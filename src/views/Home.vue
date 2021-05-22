@@ -4,7 +4,7 @@
       <el-aside>
         <Indicator/>
       </el-aside>
-      <el-main id="home-main">
+      <el-main id="home-main" :style="styles">
         <el-row id="toolbar">
           <el-col :span="9" id="groups">
             <el-select v-model="group" placeholder="请选择" @change="onGroupChange">
@@ -54,10 +54,12 @@ import Racing from '@/components/Racing.vue'
 import Achievements from '@/components/Achievements.vue'
 import { namespace } from 'vuex-class'
 import xcapi from '@/api/xc.cool'
+import { InterfaceStyle } from '@/store/types'
 
 const article = namespace('article')
 const racing = namespace('racing')
 const login = namespace('login')
+const setting = namespace('setting')
 
 @Component({
   components: {
@@ -88,6 +90,9 @@ export default class Home extends Vue {
 
   @login.State('authenticated')
   private authenticated!: boolean
+
+  @setting.Getter('styles')
+  private styles!: InterfaceStyle
 
   private groups: Array<{ value: number; label: string }> = []
   private group = ''
