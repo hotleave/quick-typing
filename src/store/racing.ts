@@ -422,9 +422,6 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
       if (delta < 0) {
         // 字数变少，回改
         commit('replace', -delta)
-      } else if (delta > 1) {
-        // 输入多个字，打词
-        commit('phrase', delta)
       }
     }
 
@@ -442,6 +439,18 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
         this.dispatch('addAchievements', achievement, { root: true })
         db.achievement.add(achievement)
       })
+    }
+  },
+
+  phrase ({ commit, rootState }, text: string) {
+    const { punctuations } = rootState.setting
+    let length = text.length
+    const last = text.charAt(length - 1)
+    if (punctuations.has(last)) {
+      length -= 1
+    }
+    if (length > 1) {
+      commit('phrase', length)
     }
   },
 

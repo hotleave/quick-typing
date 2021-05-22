@@ -41,6 +41,9 @@ export default class Racing extends Vue {
   @racing.Action('pause')
   private pause!: Function
 
+  @racing.Action('phrase')
+  private phrase!: Function
+
   /**
    * 输入的内容
    */
@@ -91,6 +94,7 @@ export default class Racing extends Vue {
       this.cleared(compositions)
     } else if (length > 1) {
       // 打词，也有可能是标点顶屏
+      this.phrase(data)
     }
   }
 
@@ -98,7 +102,7 @@ export default class Racing extends Vue {
     this.typing(e)
 
     if (e.isComposing && e.code === 'Backspace') {
-      // 每次删除 -2，因为删除也会触发 compositionupdate
+      // 每次删除 -2，因为删除键也会触发 compositionupdate
       this.compositions -= 2
     }
   }
