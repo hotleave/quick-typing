@@ -26,21 +26,30 @@ export default class Words extends Vue {
   @setting.State('hintOptions')
   private hintOptions!: Array<string>
 
+  @setting.State('disableSingleHint')
+  private disableSingleHint!: boolean
+
+  get single (): boolean {
+    const word = this.word
+    const length = word.text.length
+    return !this.disableSingleHint || length > (word.autoSelect ? 2 : 1)
+  }
+
   get hasColorHint (): boolean {
-    return this.hintOptions.indexOf('color') >= 0 || !this.word.type.startsWith('code')
+    return (this.hintOptions.indexOf('color') >= 0 && this.single) || !this.word.type.startsWith('code')
   }
 
   get hasSelectHint (): boolean {
-    return this.hintOptions.indexOf('select') >= 0 && !!this.word.select
+    return this.hintOptions.indexOf('select') >= 0 && !!this.word.select && this.single
   }
 
   get hasCodeHint (): boolean {
     const { codings } = this.word
-    return this.hintOptions.indexOf('code') >= 0 && codings && codings.length > 0 && !!codings[0].code
+    return this.hintOptions.indexOf('code') >= 0 && codings && codings.length > 0 && !!codings[0].code && this.single
   }
 
   get hasAutoSelectHint (): boolean {
-    return this.hintOptions.indexOf('autoSelect') >= 0 && this.word.autoSelect
+    return this.hintOptions.indexOf('autoSelect') >= 0 && this.word.autoSelect && this.single
   }
 
   get style (): Array<string> {

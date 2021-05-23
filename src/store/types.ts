@@ -359,6 +359,10 @@ export class SettingState {
    */
   hintOptions = ['phrase', 'color', 'select', 'autoSelect']
   /**
+   * 禁用单字提示
+   */
+  disableSingleHint = false
+  /**
    * 标点顶屏提示
    */
   punctuationAutoSelectHint = '顶'

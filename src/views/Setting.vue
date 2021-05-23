@@ -51,6 +51,9 @@
               <el-checkbox-button v-for="o in hintOptions" :label="o.value" :key="o.value" :disabled="o.disabled">{{ o.text }}</el-checkbox-button>
             </el-checkbox-group>
           </el-form-item>
+          <el-form-item label="禁用单字词语提示">
+            <el-switch v-model="form.disableSingleHint"/>
+          </el-form-item>
           <el-form-item v-if="selectHintEnabled" label="候选词条数" prop="pageSize">
             <el-input type="number" step="1" v-model.number="form.pageSize"/>
             <span class="el-upload__tip">输入法候选词条数量，需与输入法设置一致</span>

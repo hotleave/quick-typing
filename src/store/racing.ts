@@ -39,9 +39,9 @@ const finished = (strategy: string, input: string, content: string, last: string
     finished = input.length === content.length
     if (strategy === 'LAST_RIGHT') {
       if (last.length > 0) {
-        finished = content.endsWith(last)
+        finished = finished && content.endsWith(last)
       } else {
-        finished = content.charAt(content.length - 1) === input.charAt(input.length - 1)
+        finished = finished && content.charAt(content.length - 1) === input.charAt(input.length - 1)
       }
     }
 
