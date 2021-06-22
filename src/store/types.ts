@@ -274,6 +274,10 @@ export interface InterfaceStyle {
    * 字体
    */
   '--racing-font': string;
+  /**
+   * 字号
+   */
+  '--font-size': string;
 }
 
 export class SettingState {
@@ -299,6 +303,11 @@ export class SettingState {
    * 字体
    */
   fontFamily = '"Noto Sans SC","Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif'
+
+  /**
+   * 字号
+   */
+  fontSize = '2.4rem'
 
   /**
    * 未打文字颜色
