@@ -73,9 +73,10 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   },
 
   // 击键速度
-  hitSpeed ({ keys }, getters): string {
-    const used = getters.usedTime
-    if (used === 0) {
+  hitSpeed ({ keys }): string {
+    const { time, start } = state
+    const used = (start === 0 ? time : time + Date.now() - start) / 1000
+    if (used < 0.005) {
       return (0).toFixed(2)
     }
 
@@ -83,14 +84,17 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
   },
 
   // 打字速度
-  typeSpeed (state, getters): string {
-    const used = getters.usedTime
-    if (used === 0) {
+  typeSpeed (state): string {
+    const { time, start } = state
+    const used = (start === 0 ? time : time + Date.now() - start) / 1000
+    // const used = getters.usedTime
+    if (used < 0.005) {
       return (0).toFixed(2)
     }
 
     const { input, error } = state
     // 错一罚五
+    // TODO typing时未实时计算
     return (Math.max(input.length - error * 5, 0) / used * 60).toFixed(2)
   },
 
@@ -341,6 +345,9 @@ const mutations: MutationTree<RacingState> = {
     if (e.isComposing && altSelectKey.indexOf(e.key) >= 0) {
       state.selective++
     }
+
+    // 刷新时间
+    state.time += 0.000000001
   },
 
   accept (state, input: string): void {
@@ -375,7 +382,7 @@ const mutations: MutationTree<RacingState> = {
 
 const actions: ActionTree<RacingState, QuickTypingState> = {
   init ({ commit, state }): void {
-    if (state.status === 'typing') {
+    if (state.timer) {
       clearInterval(state.timer)
     }
 
@@ -383,8 +390,11 @@ const actions: ActionTree<RacingState, QuickTypingState> = {
   },
 
   retry ({ commit, state }) {
-    if (state.status !== 'init') {
+    if (state.timer) {
       clearInterval(state.timer)
+    }
+
+    if (state.status !== 'init') {
       commit('retry')
     }
   },
