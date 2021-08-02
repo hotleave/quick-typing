@@ -307,6 +307,7 @@ const mutations: MutationTree<RacingState> = {
     state.error = payload.error
     state.status = 'finished'
     state.time += Date.now() - state.start
+    state.start = 0
     state.timer = 0
   },
 
