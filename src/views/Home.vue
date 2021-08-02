@@ -17,6 +17,7 @@
           </el-col>
           <el-col :span="15">
             <el-button-group>
+              <el-button icon="el-icon-document" @click="showLoadDialog = true">手动载文</el-button>
               <el-button icon="el-icon-document" @click="loadFromClipboard">载文</el-button>
               <el-button :icon="triggerIcon" @click="trigger">{{ triggerText }}</el-button>
               <el-button icon="el-icon-refresh" @click="retry">重打</el-button>
@@ -43,6 +44,14 @@
         </div>
       </el-main>
     </el-container>
+
+    <el-dialog :visible.sync="showLoadDialog" title="手动载文">
+      <el-input type="textarea" v-model="articleText" :rows="5" placeholder="请输入内容"/>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="showLoadDialog = false">取 消</el-button>
+        <el-button type="primary" @click="manuallyLoadArticle">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -96,6 +105,8 @@ export default class Home extends Vue {
 
   private groups: Array<{ value: number; label: string }> = []
   private group = ''
+  private showLoadDialog = false
+  private articleText = ''
 
   get triggerText (): string {
     return this.status === 'pause' ? '继续' : '暂停'
@@ -117,6 +128,14 @@ export default class Home extends Vue {
       })
     } else {
       this.groups = []
+    }
+  }
+
+  manuallyLoadArticle () {
+    this.showLoadDialog = false
+    if (this.articleText) {
+      this.loadText(this.articleText)
+      this.articleText = ''
     }
   }
 
@@ -142,8 +161,12 @@ export default class Home extends Vue {
    * 粘贴监听
    */
   paste (e: ClipboardEvent) {
-    e.preventDefault()
+    if (this.showLoadDialog) {
+      // 手动载文时禁用
+      return
+    }
 
+    e.preventDefault()
     const { clipboardData } = e
     if (clipboardData) {
       const pasteContent = clipboardData.getData('text/plain')
