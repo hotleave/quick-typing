@@ -3,10 +3,10 @@
     <el-table :data="achievements" stripe="stripe" style="width:100%;">
       <el-table-column prop="title" type="expand" label="标题">
         <template slot-scope="props">
-          第{{ props.row.identity }}段 速度{{ props.row.typeSpeed }} 击键{{ props.row.hitSpeed }} 码长{{ props.row.codeLength }} 字数{{ props.row.contentLength }}
+          第{{ props.row.identity }}段 速度{{ props.row.typeSpeed }} 击键{{ props.row.hitSpeed }} 码长{{ props.row.codeLength }} 字数{{ props.row.contentLength }} 错字{{ props.row.error }}
           用时{{ formatTime(props.row.usedTime) }}秒 暂停{{ props.row.pauseCount }}次{{ formatTime(props.row.pauseTime) }}秒 键准{{ props.row.accuracy }}% 键法{{ props.row.balance }}% 左{{ props.row.leftHand }}
           右{{ props.row.rightHand }} 理论码长{{ props.row.idealCodeLength }} 打词{{ props.row.phrase }} 打词率{{ props.row.phraseRate }}% 选重{{ props.row.selective }} 回改{{ props.row.replace }}
-          键数{{ props.row.keys }} 退格{{ props.row.backspace }} 回车{{ props.row.enter }}
+          键数{{ props.row.keys }} 退格{{ props.row.backspace }} 回车{{ props.row.enter }} 第{{ props.row.retry }}次跟打
         </template>
       </el-table-column>
       <el-table-column prop="title" label="标题" :formatter="titleFormatter"/>

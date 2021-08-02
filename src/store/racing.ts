@@ -221,6 +221,7 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       hitSpeed: parseFloat(getters.hitSpeed),
       codeLength: parseFloat(getters.codeLength),
       contentLength: article.content.length,
+      error: state.error,
       usedTime: state.time,
       pauseCount: state.pauseCount,
       pauseTime: state.pauseTime,
@@ -235,7 +236,8 @@ const getters: GetterTree<RacingState, QuickTypingState> = {
       replace: state.replace,
       keys: state.keys.length,
       backspace: getters.backspaceCount,
-      enter: getters.enterCount
+      enter: getters.enterCount,
+      retry: state.retry
     })
 
     return result
