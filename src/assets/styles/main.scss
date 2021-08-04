@@ -366,6 +366,8 @@ html, body {
 }
 
 #racing-textarea {
+  overflow: auto;
+  padding: 5px 15px;
   font-family: var(--racing-font);
   border: none;
   border-bottom: 1px solid var(--level3-border-color);
