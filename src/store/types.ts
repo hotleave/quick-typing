@@ -278,6 +278,14 @@ export interface InterfaceStyle {
    * 字号
    */
   '--font-size': string;
+  /**
+   * 对照区行数
+   */
+  '--article-rows': number;
+  /**
+   * 输入区行数
+   */
+  '--input-rows': number;
 }
 
 export class SettingState {
@@ -308,6 +316,16 @@ export class SettingState {
    * 字号
    */
   fontSize = '2.4rem'
+
+  /**
+   * 对照区行数
+   */
+  articleRows = 6
+
+  /**
+   * 输入区行数
+   */
+  inputRows = 2
 
   /**
    * 未打文字颜色

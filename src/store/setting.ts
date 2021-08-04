@@ -17,7 +17,7 @@ const getters: GetterTree<SettingState, QuickTypingState> = {
   },
 
   styles (): InterfaceStyle {
-    const { pending, typed, correct, error, hintColor, code1, code2, code3, code4, fontFamily, fontSize } = state
+    const { pending, typed, correct, error, hintColor, code1, code2, code3, code4, fontFamily, fontSize, articleRows, inputRows } = state
     return {
       '--pending': pending,
       '--typed': typed,
@@ -29,7 +29,9 @@ const getters: GetterTree<SettingState, QuickTypingState> = {
       '--code3': code3,
       '--code4': code4,
       '--racing-font': fontFamily,
-      '--font-size': fontSize
+      '--font-size': fontSize,
+      '--article-rows': articleRows,
+      '--input-rows': inputRows
     }
   },
 

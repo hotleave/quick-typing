@@ -19,6 +19,12 @@
           <el-form-item label="赛文字号">
             <el-input v-model="form.fontSize"/>
           </el-form-item>
+          <el-form-item label="文章行数">
+            <el-input type="number" v-model="form.articleRows"/>
+          </el-form-item>
+          <el-form-item label="输入区行数">
+            <el-input type="number" v-model="form.inputRows"/>
+          </el-form-item>
           <el-form-item label="未打颜色">
             <el-color-picker v-model="form.pending"></el-color-picker>
           </el-form-item>
