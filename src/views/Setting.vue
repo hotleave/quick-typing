@@ -118,6 +118,9 @@
           </el-form-item>
           <el-form-item>
             <el-table ref="punctuationTable" :data="punctuations" border :height="punctuationTableHeight" size="mini">
+              <template slot="empty" slot-scope="scope">
+                  <el-button @click.native.prevent="addPunctuation(scope.$index)" type="text" size="small">添加</el-button>
+              </template>
               <el-table-column prop="key" label="标点"/>
               <el-table-column prop="value" label="编码" v-if="form.addPunctuationToCodings"/>
               <el-table-column label="操作">
